@@ -4,7 +4,7 @@ class_name GoCamera2DHost extends Node
 #region Private Variables
 var _camera : Camera2D = null
 
-var _camera_state := CameraStateResource.new()
+var _target_state := CameraStateResource.new()
 #endregion
 
 
@@ -34,6 +34,6 @@ func _set_camera() -> void:
 #region Public Methods (Accesser)
 func get_camera() -> Camera2D:
 	return _camera
-func get_camera_state() -> CameraStateResource:
-	return _camera_state
+func get_target_camera_state() -> CameraStateResource:
+	return _target_state
 #endregion
