@@ -5,8 +5,6 @@ class_name GoCamera2DEffect extends GoCamera2DLayer
 
 #region Private Variables
 var _group : GoCamera2DGroup
-
-var _registered : bool = false
 #endregion
 
 
@@ -48,17 +46,9 @@ func _update_register() -> void:
 	)
 	
 	if should_register:
-		if !_registered:
-			GoCamera2DManager.register_effect(self)
-	elif _registered:
-		GoCamera2DManager.unregister_effect(self)
-	_registered = should_register
-#endregion
-
-
-#region Abstract Methods
-@abstract
-func run_effect(state : CameraStateResource) -> void
+		GoCamera2DManager.register_effect(self)
+		return
+	GoCamera2DManager.unregister_effect(self)
 #endregion
 
 
@@ -66,23 +56,20 @@ func run_effect(state : CameraStateResource) -> void
 func set_active(val : bool) -> void:
 	if active == val:
 		return
-	active = val
-	
+	super(val)
 	_update_register()
-
 func set_disabled(val : bool) -> void:
 	if disabled == val:
 		return
-	disabled = val
-	
+	super(val)
 	_update_register()
 
 func set_top_level(val : bool) -> void:
 	if top_level == val:
 		return
 	top_level = val
-	notify_property_list_changed()
 	
+	notify_property_list_changed()
 	_update_register()
 #endregion
 
@@ -95,7 +82,4 @@ func is_in_layer_group() -> bool:
 	return _group != null
 func is_top_level() -> bool:
 	return top_level || !is_in_layer_group()
-
-func is_registered() -> bool:
-	return _registered
 #endregion

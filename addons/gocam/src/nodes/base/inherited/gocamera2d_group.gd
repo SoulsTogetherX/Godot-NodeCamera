@@ -53,14 +53,14 @@ func _update_layer_active() -> void:
 
 
 #region Abstract Methods
-func run_effect(state : CameraStateResource) -> void:
+func process_tick(state : CameraStateResource) -> void:
 	for effect : GoCamera2DEffect in _effects:
 		
 		# TODO: Make _effects dynamically add and remove nodes
 		# so these checks are not needed.
 		if effect.disabled || effect.top_level:
 			continue
-		effect.run_effect(state)
+		effect.process_tick(state)
 #endregion
 
 

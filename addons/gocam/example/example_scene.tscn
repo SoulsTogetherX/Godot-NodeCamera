@@ -20,6 +20,11 @@ script = ExtResource("1_ypfvr")
 follow_target = NodePath("../Marker2D2")
 active = true
 
+[node name="GoCamera2DFollow3" type="Node" parent="." unique_id=745750029 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("1_ypfvr")
+follow_target = NodePath("../Player")
+active = true
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
 ignore_rotation = false
 
@@ -27,6 +32,12 @@ ignore_rotation = false
 script = ExtResource("1_tjovn")
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
+
+[node name="Marker2D1" type="Marker2D" parent="." unique_id=1838267585]
+position = Vector2(-253, -100)
+
+[node name="Marker2D2" type="Marker2D" parent="." unique_id=37789107]
+position = Vector2(318, -101)
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1754714095]
 
@@ -38,9 +49,3 @@ texture = ExtResource("2_kx3cl")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1105704032]
 position = Vector2(0, 32)
 shape = SubResource("RectangleShape2D_tjovn")
-
-[node name="Marker2D1" type="Marker2D" parent="." unique_id=1838267585]
-position = Vector2(-253, -100)
-
-[node name="Marker2D2" type="Marker2D" parent="." unique_id=37789107]
-position = Vector2(318, -101)
