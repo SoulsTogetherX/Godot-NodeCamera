@@ -9,6 +9,9 @@ func process_tick(
 	current_state.position = lerp(
 		current_state.position, target_state.position, 0.5
 	)
+	
+	if (current_state.position - target_state.position).is_zero_approx():
+		active = false
 func process_tick_needed() -> bool:
 	return true
 #endregion

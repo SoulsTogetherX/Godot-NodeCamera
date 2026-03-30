@@ -8,19 +8,19 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 #endregion
 
 
+
 #region External Variables
 @export var top_level : bool = false:
 	set = set_top_level,
 	get = get_top_level
 
-@export var active : bool = false:
-	set = set_active,
-	get = get_active
-
 @export var disabled : bool = false:
 	set = set_disabled,
 	get = get_disabled
 
+@export var active : bool = false:
+	set = set_active,
+	get = get_active
 @export var priority : int = 0:
 	set = set_priority,
 	get = get_priority
@@ -48,11 +48,6 @@ func _validate_property(property: Dictionary) -> void:
 
 
 #region Public Virtual Methods
-func layer_start() -> void:
-	pass
-func layer_end() -> void:
-	pass
-
 func process_tick_needed() -> bool:
 	return false
 func notify_tick_request_changed() -> void:
@@ -66,7 +61,7 @@ func _update_registry_check() -> void:
 		return
 	
 	var should_register := (
-		is_top_level() && active && !disabled
+		active && !disabled
 	)
 	
 	if should_register:
@@ -107,13 +102,6 @@ func set_active(val : bool) -> void:
 		return
 	active = val
 	_update_registry_check()
-	
-	if disabled:
-		return
-	if active:
-		layer_start()
-		return
-	layer_end()
 func get_active() -> bool:
 	return active
 
@@ -122,13 +110,6 @@ func set_disabled(val : bool) -> void:
 		return
 	disabled = val
 	_update_registry_check()
-	
-	if !active:
-		return
-	if disabled:
-		layer_end()
-		return
-	layer_start()
 func get_disabled() -> bool:
 	return disabled
 
