@@ -9,6 +9,7 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 
 #region Private Variables
 var _running_effects : Array[GoCamera2DEffect] = []
+var _running_transitions : Array[GoCamera2DTransition] = []
 
 var _idle_hosts : Array[GoCamera2DHost] = []
 var _physics_hosts : Array[GoCamera2DHost] = []
@@ -20,10 +21,17 @@ var _manual_hosts : Array[GoCamera2DHost] = []
 #region Private Methods (Priority Update)
 func _effect_priority_changed(effect : GoCamera2DEffect) -> void:
 	_running_effects.erase(effect)
-	_sorted_effect_append(effect)
-func _sorted_effect_append(effect : GoCamera2DEffect) -> void:
-	var idx := _running_effects.bsearch_custom(effect, _priority_comparison, false)
-	_running_effects.insert(idx, effect)
+	_sorted_layer_append(effect, _running_effects)
+func _transition_priority_changed(effect : GoCamera2DEffect) -> void:
+	_running_transitions.erase(effect)
+	_sorted_layer_append(effect, _running_transitions)
+
+func _sorted_layer_append(layer : GoCamera2DLayer, cache : Array) -> void:
+	var idx := cache.bsearch_custom(layer, _priority_comparison, false)
+	cache.insert(idx, layer)
+
+func _priority_comparison(l1 : GoCamera2DLayer, l2 : GoCamera2DLayer) -> bool:
+	return l1.priority < l2.priority
 #endregion
 
 
@@ -57,25 +65,31 @@ func _update_process_modes() -> void:
 		if !tree_physics.is_connected(_on_physics_process):
 			tree_physics.connect(_on_physics_process, CONNECT_DEFERRED)
 
-func _update_effect_tick(effect : GoCamera2DEffect) -> void:
-	if effect.is_registered() && effect.process_tick_needed():
-		if !_running_effects.has(effect):
-			if !effect.is_connected(
-				CONSTANTS.INTERAL_PRIORITY_CHANGED, _effect_priority_changed
+func _refresh_effect_updating(layer : GoCamera2DEffect) -> void:
+	_refresh_layer_updating(layer, _effect_priority_changed, _running_effects)
+func _refresh_transition_updating(layer : GoCamera2DTransition) -> void:
+	_refresh_layer_updating(layer, _transition_priority_changed, _running_transitions)
+func _refresh_layer_updating(
+	layer : GoCamera2DLayer, priority_change : Callable, cache : Array
+) -> void:
+	if layer.is_registered() && layer.process_tick_needed():
+		if !cache.has(layer):
+			if !layer.is_connected(
+				CONSTANTS.INTERAL_PRIORITY_CHANGED, priority_change
 			):
-				effect.connect(
-					CONSTANTS.INTERAL_PRIORITY_CHANGED, _effect_priority_changed
+				layer.connect(
+					CONSTANTS.INTERAL_PRIORITY_CHANGED, priority_change
 				)
-			_sorted_effect_append(effect)
+			_sorted_layer_append(layer, cache)
 		return
 	
-	if effect.is_connected(
-		CONSTANTS.INTERAL_PRIORITY_CHANGED, _effect_priority_changed
+	if layer.is_connected(
+		CONSTANTS.INTERAL_PRIORITY_CHANGED, priority_change
 	):
-		effect.disconnect(
-			CONSTANTS.INTERAL_PRIORITY_CHANGED, _effect_priority_changed
+		layer.disconnect(
+			CONSTANTS.INTERAL_PRIORITY_CHANGED, priority_change
 		)
-	_running_effects.erase(effect)
+	cache.erase(layer)
 #endregion
 
 
@@ -89,60 +103,117 @@ func _get_cache(mode : CONSTANTS.PROCESS_CALLBACK) -> Array[GoCamera2DHost]:
 		CONSTANTS.PROCESS_CALLBACK.MANUAL:
 			return _manual_hosts
 	return []
-
-func _priority_comparison(l1 : GoCamera2DLayer, l2 : GoCamera2DLayer) -> bool:
-	return l1.priority < l2.priority
 #endregion
 
 
 #region Methods (Process Callbacks)
 func _on_idle() -> void:
 	for host : GoCamera2DHost in _idle_hosts:
-		_tick_host(host)
+		_tick_effect(host)
+	for host : GoCamera2DHost in _idle_hosts:
+		_tick_transition(host)
 func _on_physics_process() -> void:
 	for host : GoCamera2DHost in _physics_hosts:
-		_tick_host(host)
-
-func _tick_host(host : GoCamera2DHost) -> void:
-	var cam := host.get_camera()
-	var state := host.get_target_camera_state()
-	
-	for effect : GoCamera2DEffect in _running_effects:
-		effect.process_tick(state)
-	
-	cam.position = state.position
-	cam.offset = state.offset
-	cam.zoom = state.zoom
-	cam.rotation = state.rotation
-
+		_tick_effect(host)
+	for host : GoCamera2DHost in _physics_hosts:
+		_tick_transition(host)
 func tick_all_manual_hosts() -> void:
 	for host : GoCamera2DHost in _manual_hosts:
-		_tick_host(host)
+		_tick_effect(host)
+	for host : GoCamera2DHost in _manual_hosts:
+		_tick_transition(host)
+
+func _tick_effect(host : GoCamera2DHost) -> void:
+	var current_state := host.get_target_camera_state()
+	for effect : GoCamera2DEffect in _running_effects:
+		effect.process_tick(current_state)
+func _tick_transition(host : GoCamera2DHost) -> void:
+	var cam := host.get_camera()
+	var current_state := host.get_current_camera_state()
+	var target_state := host.get_target_camera_state()
+	
+	for transition : GoCamera2DTransition in _running_transitions:
+		transition.process_tick(current_state, target_state)
+	
+	cam.position = current_state.position
+	cam.offset = current_state.offset
+	cam.zoom = current_state.zoom
+	cam.rotation = current_state.rotation
 #endregion
 
 
-#region Public Methods (Layer Register)
-func register_effect(effect : GoCamera2DEffect) -> void:
-	if is_effect_registered(effect):
+#region Public Methods (Effect Register)
+func register_layer(layer : GoCamera2DLayer) -> void:
+	if is_layer_registered(layer):
 		return
-	effect.connect(
-		CONSTANTS.INTERAL_TICK_CHANGED, _update_effect_tick
+	var refresh_foo : Callable
+	var toggle_foo : Callable
+	
+	if layer is GoCamera2DEffect:
+		refresh_foo = _refresh_effect_updating
+		toggle_foo = _effect_toggle
+	elif layer is GoCamera2DTransition:
+		refresh_foo = _refresh_transition_updating
+		toggle_foo = _transition_toggle
+	
+	layer.connect(
+		CONSTANTS.INTERAL_TICK_CHANGED, refresh_foo
 	)
-	_update_effect_tick(effect)
-func unregister_effect(effect : GoCamera2DEffect) -> void:
-	if !is_effect_registered(effect):
+	toggle_foo.call(layer, true)
+	refresh_foo.call(layer)
+func unregister_layer(layer : GoCamera2DLayer) -> void:
+	if !is_layer_registered(layer):
 		return
-	effect.disconnect(
-		CONSTANTS.INTERAL_TICK_CHANGED, _update_effect_tick
+	var refresh_foo : Callable
+	var toggle_foo : Callable
+	
+	if layer is GoCamera2DEffect:
+		refresh_foo = _refresh_effect_updating
+		toggle_foo = _effect_toggle
+	elif layer is GoCamera2DTransition:
+		refresh_foo = _refresh_transition_updating
+		toggle_foo = _transition_toggle
+	
+	layer.disconnect(
+		CONSTANTS.INTERAL_TICK_CHANGED, refresh_foo
 	)
-	_update_effect_tick(effect)
+	toggle_foo.call(layer, false)
+	refresh_foo.call(layer)
 
-func is_effect_registered(effect : GoCamera2DEffect) -> bool:
-	return effect.is_connected(
-		CONSTANTS.INTERAL_TICK_CHANGED, _update_effect_tick
+func is_layer_registered(layer : GoCamera2DLayer) -> bool:
+	var refresh_foo : Callable
+	if layer is GoCamera2DEffect:
+		refresh_foo = _refresh_effect_updating
+	elif layer is GoCamera2DTransition:
+		refresh_foo = _refresh_transition_updating
+	
+	return layer.is_connected(
+		CONSTANTS.INTERAL_TICK_CHANGED, refresh_foo
 	)
+
+func _effect_toggle(effect : GoCamera2DEffect, start : bool) -> void:
+	if !is_layer_registered(effect):
+		return
+	var foo : Callable = effect.effect_start if start else effect.effect_end
+	
+	for host : GoCamera2DHost in _idle_hosts:
+		foo.call(host.get_current_camera_state())
+	for host : GoCamera2DHost in _physics_hosts:
+		foo.call(host.get_current_camera_state())
+	for host : GoCamera2DHost in _manual_hosts:
+		foo.call(host.get_current_camera_state())
+func _transition_toggle(transition : GoCamera2DTransition, start : bool) -> void:
+	if !is_layer_registered(transition):
+		return
+	var foo : Callable = transition.transition_start if start else transition.transition_end
+	
+	for host : GoCamera2DHost in _idle_hosts:
+		foo.call(host.get_current_camera_state(), host.get_target_camera_state())
+	for host : GoCamera2DHost in _physics_hosts:
+		foo.call(host.get_current_camera_state(), host.get_target_camera_state())
+	for host : GoCamera2DHost in _manual_hosts:
+		foo.call(host.get_current_camera_state(), host.get_target_camera_state())
 #endregion
-
 
 #region Public Methods (Host Registers)
 func register_host(host : GoCamera2DHost) -> void:

@@ -1,1 +1,0 @@
-class_name CameraTransitionResource extends Resource

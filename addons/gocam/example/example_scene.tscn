@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/gocam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/gocam/src/nodes/host/gocamera2d_host.gd" id="1_tjovn"]
+[ext_resource type="Script" uid="uid://btkjquw17r6y5" path="res://addons/gocam/example/default_layers/gocamera2d_layer_transition.gd" id="1_xykds"]
 [ext_resource type="Script" uid="uid://w8mlromh0mjr" path="res://addons/gocam/example/default_layers/gocamera2d_layer_follow.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://icon.svg" id="2_kx3cl"]
 
@@ -10,15 +11,17 @@ size = Vector2(12800, 64)
 
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
+[node name="GoCamera2DTransition" type="Node" parent="." unique_id=613086369]
+script = ExtResource("1_xykds")
+active = true
+
 [node name="GoCamera2DFollow1" type="Node" parent="." unique_id=633211609 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("1_ypfvr")
 follow_target = NodePath("../Marker2D1")
-active = true
 
 [node name="GoCamera2DFollow2" type="Node" parent="." unique_id=2045273445 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("1_ypfvr")
 follow_target = NodePath("../Marker2D2")
-active = true
 
 [node name="GoCamera2DFollow3" type="Node" parent="." unique_id=745750029 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("1_ypfvr")
@@ -26,6 +29,7 @@ follow_target = NodePath("../Player")
 active = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
+position = Vector2(1e-45, -1e-45)
 ignore_rotation = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1290821785]

@@ -31,23 +31,48 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 #region Virtual Methods
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_POST_ENTER_TREE:
+		NOTIFICATION_READY:
+			_update_registry_check()
+		NOTIFICATION_ENTER_TREE:
+			_update_registry_check()
 			_settup_private_signals()
+		NOTIFICATION_PREDELETE:
+			GoCamera2DManager.unregister_layer(self)
+
+func _validate_property(property: Dictionary) -> void:
+	match property.name:
+		&"active", &"priority":
+			if is_in_effect_group() && !top_level:
+				property.usage |= PROPERTY_USAGE_READ_ONLY
 #endregion
 
 
 #region Public Virtual Methods
-func start_tick() -> void:
+func layer_start() -> void:
 	pass
-func end_tick() -> void:
+func layer_end() -> void:
 	pass
 
-func process_tick(state : CameraStateResource) -> void:
-	pass
 func process_tick_needed() -> bool:
 	return false
 func notify_tick_request_changed() -> void:
 	emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
+#endregion
+
+
+#region Private Methods (Register)
+func _update_registry_check() -> void:
+	if !is_node_ready():
+		return
+	
+	var should_register := (
+		is_top_level() && active && !disabled
+	)
+	
+	if should_register:
+		GoCamera2DManager.register_layer(self)
+		return
+	GoCamera2DManager.unregister_layer(self)
 #endregion
 
 
@@ -56,12 +81,12 @@ func _settup_private_signals() -> void:
 	if !has_signal(CONSTANTS.INTERAL_PRIORITY_CHANGED):
 		add_user_signal(
 			CONSTANTS.INTERAL_PRIORITY_CHANGED,
-			[{"name": "layer", "type": TYPE_OBJECT}]
+			[{"name": "effect", "type": TYPE_OBJECT}]
 		)
 	if !has_signal(CONSTANTS.INTERAL_TICK_CHANGED):
 		add_user_signal(
 			CONSTANTS.INTERAL_TICK_CHANGED,
-			[{"name": "layer", "type": TYPE_OBJECT}]
+			[{"name": "effect", "type": TYPE_OBJECT}]
 		)
 #endregion
 
@@ -81,13 +106,14 @@ func set_active(val : bool) -> void:
 	if val == active:
 		return
 	active = val
+	_update_registry_check()
 	
 	if disabled:
 		return
 	if active:
-		start_tick()
+		layer_start()
 		return
-	end_tick()
+	layer_end()
 func get_active() -> bool:
 	return active
 
@@ -95,13 +121,14 @@ func set_disabled(val : bool) -> void:
 	if val == disabled:
 		return
 	disabled = val
+	_update_registry_check()
 	
 	if !active:
 		return
 	if disabled:
-		end_tick()
+		layer_end()
 		return
-	start_tick()
+	layer_start()
 func get_disabled() -> bool:
 	return disabled
 
@@ -109,9 +136,20 @@ func set_top_level(val : bool) -> void:
 	top_level = val
 func get_top_level() -> bool:
 	return top_level
+#endregion
+
+
+#region Public Methods (Helper)
+func get_effect_group() -> GoCamera2DGroup:
+	return get_parent() as GoCamera2DGroup
+func is_in_effect_group() -> bool:
+	return get_effect_group() != null
+
+func is_top_level() -> bool:
+	return top_level || !is_in_effect_group()
 
 func is_registered() -> bool:
-	return GoCamera2DManager.is_effect_registered(self)
+	return GoCamera2DManager.is_layer_registered(self)
 #endregion
 
 

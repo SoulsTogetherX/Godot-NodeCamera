@@ -18,6 +18,7 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 var _camera : Camera2D = null
 
 var _target_state := CameraStateResource.new()
+var _current_state := CameraStateResource.new()
 #endregion
 
 
@@ -85,6 +86,9 @@ func manual_tick() -> void:
 #region Public Methods (Private Accesser)
 func get_camera() -> Camera2D:
 	return _camera
+
 func get_target_camera_state() -> CameraStateResource:
 	return _target_state
+func get_current_camera_state() -> CameraStateResource:
+	return _current_state
 #endregion
