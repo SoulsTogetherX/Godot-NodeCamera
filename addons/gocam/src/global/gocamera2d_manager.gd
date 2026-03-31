@@ -60,13 +60,15 @@ func tick_all_manual_hosts() -> void:
 		tick_host(host)
 
 func tick_host(host : GoCamera2DHost) -> void:
-	_layer_manager.tick_effect(host.get_target_camera_state())
+	var target := host.get_target_camera_state()
+	_layer_manager.tick_effect(target)
 	
 	if _layer_manager.get_running_transitions().is_empty():
 		host.teleport_camera()
 		return
+	
 	_layer_manager.tick_transition(
-		host.get_target_camera_state(), host.get_current_camera_state()
+		target, host.get_current_camera_state()
 	)
 	host.update_camera()
 #endregion
@@ -87,6 +89,7 @@ func _toggle_layer(layer : GoCamera2DLayer, toggle : bool) -> void:
 	if !is_layer_registered(layer):
 		return
 	
+	var target : CameraStateResource
 	if layer is GoCamera2DEffect:
 		var foo : Callable = layer.layer_start if toggle else layer.layer_end
 		
@@ -141,10 +144,10 @@ func unregister_layer(layer : GoCamera2DLayer) -> void:
 	)
 
 
-func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
-	return _layer_manager.is_layer_subscribed(layer)
 func is_layer_registered(layer : GoCamera2DLayer) -> bool:
 	return _layer_manager.is_layer_registered(layer)
+func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
+	return _layer_manager.is_layer_subscribed(layer)
 #endregion
 
 

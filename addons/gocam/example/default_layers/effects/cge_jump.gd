@@ -1,10 +1,10 @@
 @tool
 extends GoCamera2DEffect
 
-@export var skip_target : Node2D
+@export var jump_target : Node2D
 
 
 #region Public Virtual Methods
 func layer_start(target_state : CameraStateResource) -> void:
-	target_state.position = skip_target.position
+	target_state.position = jump_target.position
 #endregion

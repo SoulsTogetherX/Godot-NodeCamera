@@ -33,11 +33,11 @@ func _init() -> void:
 	_settup_private_signals()
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_POST_ENTER_TREE:
+		NOTIFICATION_READY, NOTIFICATION_POST_ENTER_TREE:
 			_update_registry()
 			_update_subscription()
 		NOTIFICATION_PREDELETE:
-			GoCamera2DManager.unregister_layer(self)
+			get_manager().unregister_layer(self)
 
 func _validate_property(property: Dictionary) -> void:
 	match property.name:
@@ -52,7 +52,7 @@ func notify_tick_request_changed() -> void:
 #endregion
 
 
-#region Private Methods (Register)
+#region Private Methods (Registry)
 func _update_registry() -> void:
 	if !is_node_ready():
 		return
@@ -146,6 +146,15 @@ func get_top_level() -> bool:
 
 
 #region Public Methods (Helper)
+func get_manager() -> Node:
+	if top_level:
+		return GoCamera2DManager
+	
+	var parent := get_parent()
+	if parent is GoCamera2DGroup:
+		return parent
+	return GoCamera2DManager
+
 func get_effect_group() -> GoCamera2DGroup:
 	return get_parent() as GoCamera2DGroup
 func is_in_effect_group() -> bool:
@@ -157,10 +166,10 @@ func is_top_level() -> bool:
 func is_running() -> bool:
 	return active && !disabled
 
-func is_subscribed() -> bool:
-	return GoCamera2DManager.is_layer_subscribed(self)
 func is_registered() -> bool:
-	return GoCamera2DManager.is_layer_registered(self)
+	return get_manager().is_layer_registered(self)
+func is_subscribed() -> bool:
+	return get_manager().is_layer_subscribed(self)
 #endregion
 
 

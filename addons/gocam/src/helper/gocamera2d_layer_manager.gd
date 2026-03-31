@@ -2,11 +2,6 @@
 class_name GoCamera2DLayerManager
 
 
-#region Signals Variables
-signal layer_tick_changed
-#endregion
-
-
 #region Constants
 const CONSTANTS := preload("uid://b8t21yw0evfx")
 #endregion
@@ -61,19 +56,19 @@ func _unsubscribe_layer(layer : GoCamera2DLayer) -> void:
 #region Public Methods (Updaters)
 func _update_layer_running_mode(layer : GoCamera2DLayer) -> void:
 	if layer is GoCamera2DEffect:
-		if !(layer.process_tick_needed() && layer.is_subscribed()):
+		if !(layer.process_tick_needed() && is_layer_subscribed(layer)):
 			_running_effects.erase(layer)
 		elif !_running_effects.has(layer):
 			_sorted_layer_append(layer, _running_effects)
 	
 	elif layer is GoCamera2DTransition:
-		if !(layer.transition_tick_needed() && layer.is_subscribed()):
+		if !(layer.transition_tick_needed() && is_layer_subscribed(layer)):
 			_running_transitions.erase(layer)
 		elif !_running_transitions.has(layer):
 			_sorted_layer_append(layer, _running_transitions)
 	
 	elif layer is GoCamera2DGroup:
-		if !layer.is_subscribed():
+		if !is_layer_subscribed(layer):
 			_running_effects.erase(layer)
 			_running_transitions.erase(layer)
 		else:
@@ -86,21 +81,17 @@ func _update_layer_running_mode(layer : GoCamera2DLayer) -> void:
 				_running_transitions.erase(layer)
 			elif !_running_transitions.has(layer):
 				_sorted_layer_append(layer, _running_transitions)
-	
-	layer_tick_changed.emit()
 #endregion
 
 
 #region Public Methods (Layer Ticks)
 func tick_effect(target_state : CameraStateResource) -> void:
-	target_state._read_only = false
 	for layer : GoCamera2DLayer in _running_effects:
 		layer.process_tick(target_state)
 func tick_transition(
 	target_state : CameraStateResource,
 	current_state : CameraStateResource
 ) -> void:
-	target_state._read_only = true
 	for layer : GoCamera2DLayer in _running_transitions:
 		layer.transition_tick(target_state, current_state)
 #endregion
@@ -112,10 +103,10 @@ func register_layer(layer : GoCamera2DLayer) -> void:
 		return
 	
 	layer.connect(
-			CONSTANTS.INTERAL_SUBSCRIBE, _subscribe_layer
-		)
+		CONSTANTS.INTERAL_SUBSCRIBE, _subscribe_layer, CONNECT_DEFERRED
+	)
 	layer.connect(
-		CONSTANTS.INTERAL_UNSUBSCRIBE, _unsubscribe_layer
+		CONSTANTS.INTERAL_UNSUBSCRIBE, _unsubscribe_layer, CONNECT_DEFERRED
 	)
 func unregister_layer(layer : GoCamera2DLayer) -> void:
 	if !is_layer_registered(layer):
@@ -132,7 +123,7 @@ func unregister_layer(layer : GoCamera2DLayer) -> void:
 
 func is_layer_registered(layer : GoCamera2DLayer) -> bool:
 	return layer.is_connected(
-		CONSTANTS.INTERAL_TICK_CHANGED, _update_layer_running_mode
+		CONSTANTS.INTERAL_SUBSCRIBE, _subscribe_layer
 	)
 func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
 	return layer.is_connected(

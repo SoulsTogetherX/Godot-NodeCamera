@@ -6,22 +6,15 @@ class_name GoCamera2DGroup extends GoCamera2DLayer
 var _layers : Array[GoCamera2DLayer]
 var _layer_manager := GoCamera2DLayerManager.new()
 
-var _tick_request : int
-
 var _layer_register_lock : bool = false
-var _layer_mode_change_lock : bool = false
 #endregion
 
 
 
 #region Virtual Methods
 func _notification(what: int) -> void:
-	super(what)
 	match what:
-		NOTIFICATION_READY:
-			_layer_manager.layer_tick_changed.connect(_queue_layer_mode_change)
-			_queue_register_layers()
-		NOTIFICATION_CHILD_ORDER_CHANGED:
+		NOTIFICATION_READY, NOTIFICATION_CHILD_ORDER_CHANGED:
 			_queue_register_layers()
 #endregion
 
@@ -47,7 +40,6 @@ func process_tick(
 ) -> void:
 	_layer_manager.tick_effect(target_state)
 func process_tick_needed() -> bool:
-	prints("P-", _layer_manager.without_running_effects())
 	return !_layer_manager.without_running_effects()
 
 func transition_tick(
@@ -55,45 +47,21 @@ func transition_tick(
 ) -> void:
 	_layer_manager.tick_transition(target_state, current_state)
 func transition_tick_needed() -> bool:
-	prints("T-", _layer_manager.without_running_transitions())
 	return !_layer_manager.without_running_transitions()
 #endregion
 
 
 #region Private Methods (Queue)
-func _queue_layer_mode_change() -> void:
-	if _layer_mode_change_lock:
-		return
-	_layer_mode_change_lock = true
-	
-	_layer_mode_change.call_deferred()
-func _layer_mode_change() -> void:
-	var effect_tick := bool(_tick_request & 0b01)
-	var without_effects := _layer_manager.without_running_effects()
-	if effect_tick == without_effects:
-		_tick_request ^= 0b01
-		notify_tick_request_changed.call_deferred()
-		return
-	
-	var transition_tick := bool(_tick_request & 0b10)
-	var without_transition := _layer_manager.without_running_effects()
-	if effect_tick == without_transition:
-		_tick_request ^= 0b10
-		notify_tick_request_changed.call_deferred()
-		return
-
 func _queue_register_layers() -> void:
 	if _layer_register_lock:
 		return
 	_layer_register_lock = true
 	_register_layers.call_deferred()
 func _register_layers() -> void:
-	_layer_manager.clear_all()
 	_layers.clear()
 	
 	for node : Node in get_children():
 		if node is GoCamera2DLayer:
-			_layer_manager.register_layer(node)
 			_layers.append(node)
 	
 	_update_layers_active()
@@ -133,4 +101,9 @@ func has_effects() -> bool:
 	return !_layer_manager.without_running_effects()
 func has_transitions() -> bool:
 	return !_layer_manager.without_running_transitions()
+
+func is_layer_registered(layer : GoCamera2DLayer) -> bool:
+	return _layer_manager.is_layer_registered(layer)
+func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
+	return _layer_manager.is_layer_subscribed(layer)
 #endregion
