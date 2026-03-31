@@ -29,13 +29,13 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 
 
 #region Virtual Methods
+func _init() -> void:
+	_settup_private_signals()
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_READY:
-			_update_registry_check()
-		NOTIFICATION_ENTER_TREE:
-			_update_registry_check()
-			_settup_private_signals()
+		NOTIFICATION_POST_ENTER_TREE:
+			_update_registry()
+			_update_subscription()
 		NOTIFICATION_PREDELETE:
 			GoCamera2DManager.unregister_layer(self)
 
@@ -46,28 +46,38 @@ func _validate_property(property: Dictionary) -> void:
 				property.usage |= PROPERTY_USAGE_READ_ONLY
 #endregion
 
-
 #region Public Virtual Methods
-func process_tick_needed() -> bool:
-	return false
 func notify_tick_request_changed() -> void:
 	emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
 #endregion
 
 
 #region Private Methods (Register)
-func _update_registry_check() -> void:
+func _update_registry() -> void:
 	if !is_node_ready():
 		return
 	
-	var should_register := (
+	var group := get_effect_group()
+	if !is_top_level():
+		group.register_layer(self)
+		GoCamera2DManager.unregister_layer(self)
+		return
+	
+	if group:
+		group.unregister_layer(self)
+	GoCamera2DManager.register_layer(self)
+func _update_subscription() -> void:
+	if !is_node_ready():
+		return
+	
+	var should_subscribe := (
 		active && !disabled
 	)
 	
-	if should_register:
-		GoCamera2DManager.register_layer(self)
+	if should_subscribe:
+		emit_signal(CONSTANTS.INTERAL_SUBSCRIBE, self)
 		return
-	GoCamera2DManager.unregister_layer(self)
+	emit_signal(CONSTANTS.INTERAL_UNSUBSCRIBE, self)
 #endregion
 
 
@@ -81,6 +91,17 @@ func _settup_private_signals() -> void:
 	if !has_signal(CONSTANTS.INTERAL_TICK_CHANGED):
 		add_user_signal(
 			CONSTANTS.INTERAL_TICK_CHANGED,
+			[{"name": "effect", "type": TYPE_OBJECT}]
+		)
+	
+	if !has_signal(CONSTANTS.INTERAL_SUBSCRIBE):
+		add_user_signal(
+			CONSTANTS.INTERAL_SUBSCRIBE,
+			[{"name": "effect", "type": TYPE_OBJECT}]
+		)
+	if !has_signal(CONSTANTS.INTERAL_UNSUBSCRIBE):
+		add_user_signal(
+			CONSTANTS.INTERAL_UNSUBSCRIBE,
 			[{"name": "effect", "type": TYPE_OBJECT}]
 		)
 #endregion
@@ -101,7 +122,7 @@ func set_active(val : bool) -> void:
 	if val == active:
 		return
 	active = val
-	_update_registry_check()
+	_update_subscription()
 func get_active() -> bool:
 	return active
 
@@ -109,12 +130,16 @@ func set_disabled(val : bool) -> void:
 	if val == disabled:
 		return
 	disabled = val
-	_update_registry_check()
+	_update_subscription()
 func get_disabled() -> bool:
 	return disabled
 
+
 func set_top_level(val : bool) -> void:
+	if val == top_level:
+		return
 	top_level = val
+	_update_registry()
 func get_top_level() -> bool:
 	return top_level
 #endregion
@@ -129,6 +154,11 @@ func is_in_effect_group() -> bool:
 func is_top_level() -> bool:
 	return top_level || !is_in_effect_group()
 
+func is_running() -> bool:
+	return active && !disabled
+
+func is_subscribed() -> bool:
+	return GoCamera2DManager.is_layer_subscribed(self)
 func is_registered() -> bool:
 	return GoCamera2DManager.is_layer_registered(self)
 #endregion

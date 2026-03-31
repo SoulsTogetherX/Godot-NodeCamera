@@ -3,8 +3,8 @@ extends GoCamera2DTransition
 
 
 #region Public Virtual Methods
-func process_tick(
-	current_state : CameraStateResource, target_state : CameraStateResource
+func transition_tick(
+	target_state : CameraStateResource, current_state : CameraStateResource
 ) -> void:
 	current_state.position = lerp(
 		current_state.position, target_state.position, 0.5
@@ -12,6 +12,6 @@ func process_tick(
 	
 	if (current_state.position - target_state.position).is_zero_approx():
 		active = false
-func process_tick_needed() -> bool:
+func transition_tick_needed() -> bool:
 	return true
 #endregion

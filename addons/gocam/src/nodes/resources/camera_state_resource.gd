@@ -2,9 +2,15 @@ class_name CameraStateResource extends Resource
 
 
 #region External Variables
-@export var offset : Vector2
-@export var position : Vector2
-@export var zoom : Vector2 = Vector2.ONE
+@export var offset : Vector2:
+	set = set_offset,
+	get = get_offset
+@export var position : Vector2:
+	set = set_position,
+	get = get_position
+@export var zoom : Vector2 = Vector2.ONE:
+	set = set_zoom,
+	get = get_zoom
 
 @export_custom(
 	PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR
@@ -16,6 +22,8 @@ class_name CameraStateResource extends Resource
 
 #region Private Variables
 @export_storage var _rotation : float
+
+var _read_only : bool = false
 #endregion
 
 
@@ -27,14 +35,60 @@ var rotation_degrees : float:
 
 
 
-#region Private Methods (Helper)
+#region Private Methods (Accessors)
+func set_offset(val : Vector2) -> void:
+	if _read_only:
+		return
+	if val == offset:
+		return
+	
+	offset = val
+	emit_changed()
+func get_offset() -> Vector2:
+	return offset
+
+func set_position(val : Vector2) -> void:
+	if _read_only:
+		return
+	if val == position:
+		return
+	
+	position = val
+	emit_changed()
+func get_position() -> Vector2:
+	return position
+
+func set_zoom(val : Vector2) -> void:
+	if _read_only:
+		return
+	if val == zoom:
+		return
+	
+	zoom = val
+	emit_changed()
+func get_zoom() -> Vector2:
+	return zoom
+
 func set_rotation(val : float) -> void:
+	if _read_only:
+		return
+	if val == _rotation:
+		return
+	
 	_rotation = val
+	emit_changed()
 func get_rotation() -> float:
 	return _rotation
 
 func set_rotation_degrees(val : float) -> void:
-	_rotation = deg_to_rad(val)
+	if _read_only:
+		return
+	var rad := deg_to_rad(val)
+	if val == rad:
+		return
+	
+	_rotation = rad
+	emit_changed()
 func get_rotation_degrees() -> float:
 	return rad_to_deg(_rotation)
 #endregion

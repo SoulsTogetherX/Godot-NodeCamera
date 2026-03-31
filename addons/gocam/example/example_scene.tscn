@@ -1,55 +1,55 @@
 [gd_scene format=3 uid="uid://d0rr28mur8wkj"]
 
-[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/gocam/src/nodes/base/inherited/gocamera2d_group.gd" id="1_dd2xn"]
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/gocam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/gocam/src/nodes/host/gocamera2d_host.gd" id="1_tjovn"]
-[ext_resource type="Script" uid="uid://btkjquw17r6y5" path="res://addons/gocam/example/default_layers/gocamera2d_layer_transition.gd" id="1_xykds"]
-[ext_resource type="Script" uid="uid://w8mlromh0mjr" path="res://addons/gocam/example/default_layers/gocamera2d_layer_follow.gd" id="1_ypfvr"]
+[ext_resource type="Script" uid="uid://btkjquw17r6y5" path="res://addons/gocam/example/default_layers/transitions/gct_lerp.gd" id="2_61dxv"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://icon.svg" id="2_kx3cl"]
+[ext_resource type="Script" uid="uid://c2qvwoehqbvnc" path="res://addons/gocam/example/default_layers/effects/cge_jump.gd" id="3_ixkwi"]
+[ext_resource type="Script" uid="uid://w8mlromh0mjr" path="res://addons/gocam/example/default_layers/effects/cge_follow.gd" id="4_isma7"]
+[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/gocam/src/nodes/base/inherited/gocamera2d_group.gd" id="4_ypfvr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
 
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
-[node name="LeftMarkerFollow" type="Node" parent="." unique_id=432816877]
-script = ExtResource("1_dd2xn")
+[node name="LeftMarker" type="Node" parent="." unique_id=850967567]
+script = ExtResource("4_ypfvr")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="LerpTransiton" type="Node" parent="LeftMarker" unique_id=732448795]
+script = ExtResource("2_61dxv")
+
+[node name="JumpEffect" type="Node" parent="LeftMarker" unique_id=1745304897 node_paths=PackedStringArray("skip_target")]
+script = ExtResource("3_ixkwi")
+skip_target = NodePath("../../Marker2D1")
+
+[node name="RightMarker" type="Node" parent="." unique_id=1136297336]
+script = ExtResource("4_ypfvr")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="LerpTransiton" type="Node" parent="RightMarker" unique_id=1726035180]
+script = ExtResource("2_61dxv")
+
+[node name="JumpEffect" type="Node" parent="RightMarker" unique_id=326834188 node_paths=PackedStringArray("skip_target")]
+script = ExtResource("3_ixkwi")
+skip_target = NodePath("../../Marker2D2")
+
+[node name="Player2" type="Node" parent="." unique_id=456357364]
+script = ExtResource("4_ypfvr")
+active = true
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="LerpTransiton" type="Node" parent="Player2" unique_id=341982785]
+script = ExtResource("2_61dxv")
 active = true
 
-[node name="GoCamera2DTransition" type="Node" parent="LeftMarkerFollow" unique_id=613086369]
-script = ExtResource("1_xykds")
-
-[node name="GoCamera2DFollow1" type="Node" parent="LeftMarkerFollow" unique_id=633211609 node_paths=PackedStringArray("follow_target")]
-script = ExtResource("1_ypfvr")
-follow_target = NodePath("../../Marker2D1")
-active = true
-
-[node name="RightMarkerFollow" type="Node" parent="." unique_id=51710370]
-script = ExtResource("1_dd2xn")
-active = true
-
-[node name="GoCamera2DTransition" type="Node" parent="RightMarkerFollow" unique_id=2132199598]
-script = ExtResource("1_xykds")
-
-[node name="GoCamera2DFollow2" type="Node" parent="RightMarkerFollow" unique_id=2045273445 node_paths=PackedStringArray("follow_target")]
-script = ExtResource("1_ypfvr")
-follow_target = NodePath("../../Marker2D2")
-active = true
-
-[node name="PlayerFollow" type="Node" parent="." unique_id=857591471]
-script = ExtResource("1_dd2xn")
-active = true
-
-[node name="GoCamera2DTransition" type="Node" parent="PlayerFollow" unique_id=1186406093]
-script = ExtResource("1_xykds")
-
-[node name="GoCamera2DFollow3" type="Node" parent="PlayerFollow" unique_id=745750029 node_paths=PackedStringArray("follow_target")]
-script = ExtResource("1_ypfvr")
+[node name="FollowEffect" type="Node" parent="Player2" unique_id=1601809738 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("4_isma7")
 follow_target = NodePath("../../Player")
 active = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(9.4771385e-06, -3.0100346e-06)
 ignore_rotation = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1290821785]

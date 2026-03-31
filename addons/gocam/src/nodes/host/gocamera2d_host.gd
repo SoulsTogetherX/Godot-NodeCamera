@@ -11,6 +11,8 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 @export var process_callback := CONSTANTS.PROCESS_CALLBACK.PHYSICS:
 	set = set_process_callback,
 	get = get_process_callback
+
+#@export var disabled : bool = false
 #endregion
 
 
@@ -24,11 +26,11 @@ var _current_state := CameraStateResource.new()
 
 
 #region Virtual Methods
+func _init() -> void:
+	_settup_private_signals()
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:
-			_settup_private_signals()
-			
 			GoCamera2DManager.register_host(self)
 			_set_camera()
 		NOTIFICATION_EXIT_TREE:
@@ -59,6 +61,20 @@ func _set_camera() -> void:
 #endregion
 
 
+#region Public Methods (Status Manipulator)
+func update_camera() -> void:
+	_camera.offset   = _current_state.offset
+	_camera.position = _current_state.position
+	_camera.zoom     = _current_state.zoom
+	_camera.rotation = _current_state.rotation
+func teleport_camera() -> void:
+	_camera.offset   = _target_state.offset
+	_camera.position = _target_state.position
+	_camera.zoom     = _target_state.zoom
+	_camera.rotation = _target_state.rotation
+#endregion
+
+
 #region Public Methods (External Accesser)
 func set_process_callback(val : CONSTANTS.PROCESS_CALLBACK) -> void:
 	if val == process_callback:
@@ -79,7 +95,7 @@ func get_process_callback() -> CONSTANTS.PROCESS_CALLBACK:
 
 #region Public Methods (Manual Tick)
 func manual_tick() -> void:
-	GoCamera2DManager._tick_host(self)
+	GoCamera2DManager.tick_manual_host(self)
 #endregion
 
 
