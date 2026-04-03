@@ -8,190 +8,134 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 
 
 #region Private Variables
-var _layer_manager := GoCamera2DLayerManager.new()
+var _layer_manager := GoCamera2DLayerGlobalManager.new()
 
-var _idle_hosts : Array[GoCamera2DHost] = []
-var _physics_hosts : Array[GoCamera2DHost] = []
-var _manual_hosts : Array[GoCamera2DHost] = []
+var _idle_hosts : Array[GoCamera2DHost]
+var _physics_hosts : Array[GoCamera2DHost]
+var _manual_hosts : Array[GoCamera2DHost]
 #endregion
 
 
 
-#region Public Methods (Updaters)
-func _update_host_callback(
-	host : GoCamera2DHost, old : CONSTANTS.PROCESS_CALLBACK
+#region Virtual Methods
+func _init() -> void:
+	_layer_manager.layer_start.connect(_layer_tick_start)
+	_layer_manager.layer_end.connect(_layer_tick_end)
+#endregion
+
+
+#region Methods (Updaters)
+func _host_callback_changed(
+	host : GoCamera2DHost, old : CONSTANTS.CALLBACK_MODES
 ) -> void:
-	var old_cache := _get_cache(old)
-	var new_cache := _get_cache(host.process_callback)
-	
-	old_cache.erase(host)
-	new_cache.append(host)
-	_update_callback_modes()
-func _update_callback_modes() -> void:
-	var tree_process := get_tree().process_frame
-	var tree_physics := get_tree().physics_frame
+	_get_cache(old).erase(host)
+	_get_cache(host.callback).append(host)
+	_update_tick_callbacks()
+
+func _update_tick_callbacks() -> void:
+	var process_sig := get_tree().process_frame
+	var physics_sig := get_tree().physics_frame
 	
 	if _idle_hosts.is_empty():
-		if tree_process.is_connected(_on_idle):
-			tree_process.disconnect(_on_idle)
-	elif !tree_process.is_connected(_on_idle):
-		tree_process.connect(_on_idle, CONNECT_DEFERRED)
+		if process_sig.is_connected(_idle_tick):
+			process_sig.disconnect(_idle_tick)
+	elif !process_sig.is_connected(_idle_tick):
+		process_sig.connect(_idle_tick)
 	
 	if _physics_hosts.is_empty():
-		if tree_physics.is_connected(_on_physics_process):
-			tree_physics.disconnect(_on_physics_process)
-	elif !tree_physics.is_connected(_on_physics_process):
-		tree_physics.connect(_on_physics_process, CONNECT_DEFERRED)
+		if physics_sig.is_connected(_physics_tick):
+			physics_sig.disconnect(_physics_tick)
+	elif !physics_sig.is_connected(_physics_tick):
+		physics_sig.connect(_physics_tick)
 #endregion
 
 
-#region Private Methods (Callback Updates)
-func _on_idle() -> void:
+#region Methods (Tick Intermediates)
+func _layer_tick_start(layer : GoCamera2DLayer) -> void:
+	for host : GoCamera2DHost in _idle_hosts:
+		_layer_manager.layer_tick_start(layer, host)
+	for host : GoCamera2DHost in _physics_hosts:
+		_layer_manager.layer_tick_start(layer, host)
+	for host : GoCamera2DHost in _manual_hosts:
+		_layer_manager.layer_tick_start(layer, host)
+
+func _layer_tick_end(layer : GoCamera2DLayer) -> void:
+	for host : GoCamera2DHost in _idle_hosts:
+		_layer_manager.layer_tick_end(layer, host)
+	for host : GoCamera2DHost in _physics_hosts:
+		_layer_manager.layer_tick_end(layer, host)
+	for host : GoCamera2DHost in _manual_hosts:
+		_layer_manager.layer_tick_end(layer, host)
+#endregion
+
+
+#region Methods (Tick Callbacks)
+func _idle_tick() -> void:
 	for host : GoCamera2DHost in _idle_hosts:
 		tick_host(host)
-func _on_physics_process() -> void:
+func _physics_tick() -> void:
 	for host : GoCamera2DHost in _physics_hosts:
 		tick_host(host)
-#endregion
-
-#region Public Methods (Callback Updates)
-func tick_all_manual_hosts() -> void:
+func manually_tick_hosts() -> void:
 	for host : GoCamera2DHost in _manual_hosts:
 		tick_host(host)
 
 func tick_host(host : GoCamera2DHost) -> void:
-	var target := host.get_target_camera_state()
-	_layer_manager.tick_effect(target)
+	var cam := host.get_camera()
+	var target_status := host.get_target_status()
 	
-	if _layer_manager.get_running_transitions().is_empty():
-		host.teleport_camera()
+	_layer_manager.effect_tick(target_status)
+	if _layer_manager.without_queued_transitions():
+		target_status.apply_status(cam)
 		return
 	
-	_layer_manager.tick_transition(
-		target, host.get_current_camera_state()
-	)
-	host.update_camera()
+	var current_status := host.get_target_status()
+	_layer_manager.transition_tick(target_status, current_status)
+	current_status.apply_status(cam)
 #endregion
 
 
-#region Private Methods (Helper)
-func _get_cache(mode : CONSTANTS.PROCESS_CALLBACK) -> Array[GoCamera2DHost]:
-	match mode:
-		CONSTANTS.PROCESS_CALLBACK.IDLE:
-			return _idle_hosts
-		CONSTANTS.PROCESS_CALLBACK.PHYSICS:
-			return _physics_hosts
-		CONSTANTS.PROCESS_CALLBACK.MANUAL:
-			return _manual_hosts
-	return []
-
-func _toggle_layer(layer : GoCamera2DLayer, toggle : bool) -> void:
-	if !is_layer_registered(layer):
-		return
-	
-	var target : CameraStateResource
-	if layer is GoCamera2DEffect:
-		var foo : Callable = layer.layer_start if toggle else layer.layer_end
-		
-		for host : GoCamera2DHost in _idle_hosts:
-			foo.call(host.get_target_camera_state())
-		for host : GoCamera2DHost in _physics_hosts:
-			foo.call(host.get_target_camera_state())
-		for host : GoCamera2DHost in _manual_hosts:
-			foo.call(host.get_target_camera_state())
-	elif layer is GoCamera2DTransition || layer is GoCamera2DGroup:
-		var foo : Callable = layer.layer_start if toggle else layer.layer_end
-		
-		for host : GoCamera2DHost in _idle_hosts:
-			foo.call(host.get_target_camera_state(), host.get_current_camera_state())
-		for host : GoCamera2DHost in _physics_hosts:
-			foo.call(host.get_target_camera_state(), host.get_current_camera_state())
-		for host : GoCamera2DHost in _manual_hosts:
-			foo.call(host.get_target_camera_state(), host.get_current_camera_state())
-#endregion
-
-
-#region Private Methods (Layer Registers)
-func _subscribe_layer(layer : GoCamera2DLayer) -> void:
-	_toggle_layer(layer, false)
-func _unsubscribe_layer(layer : GoCamera2DLayer) -> void:
-	_toggle_layer(layer, true)
-#endregion
-
-
-#region Public Methods (Layer Registers)
-func register_layer(layer : GoCamera2DLayer) -> void:
-	if is_layer_registered(layer):
-		return
-	_layer_manager.register_layer(layer)
-	
-	layer.connect(
-		CONSTANTS.INTERAL_SUBSCRIBE, _subscribe_layer
-	)
-	layer.connect(
-		CONSTANTS.INTERAL_UNSUBSCRIBE, _unsubscribe_layer
-	)
-func unregister_layer(layer : GoCamera2DLayer) -> void:
-	if !is_layer_registered(layer):
-		return
-	_layer_manager.unregister_layer(layer)
-	
-	layer.disconnect(
-		CONSTANTS.INTERAL_SUBSCRIBE, _subscribe_layer
-	)
-	layer.disconnect(
-		CONSTANTS.INTERAL_UNSUBSCRIBE, _unsubscribe_layer
-	)
-
-
-func is_layer_registered(layer : GoCamera2DLayer) -> bool:
-	return _layer_manager.is_layer_registered(layer)
-func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
-	return _layer_manager.is_layer_subscribed(layer)
-#endregion
-
-
-#region Public Methods (Host Registers)
+#region Methods (Register Host)
 func register_host(host : GoCamera2DHost) -> void:
 	if is_host_registered(host):
 		return
 	host.connect(
 		CONSTANTS.INTERAL_CALLBACK_CHANGED,
-		_update_host_callback
+		_host_callback_changed
 	)
 	
-	var cache := _get_cache(host.process_callback)
-	cache.append(host)
-	_update_callback_modes()
+	_get_cache(host.callback).append(host)
+	_update_tick_callbacks()
 func unregister_host(host : GoCamera2DHost) -> void:
 	if !is_host_registered(host):
 		return
 	host.disconnect(
 		CONSTANTS.INTERAL_CALLBACK_CHANGED,
-		_update_host_callback
+		_host_callback_changed
 	)
 	
-	var cache := _get_cache(host.process_callback)
-	cache.erase(host)
-	_update_callback_modes()
-
+	_get_cache(host.callback).erase(host)
+	_update_tick_callbacks()
 
 func is_host_registered(host : GoCamera2DHost) -> bool:
 	return host.is_connected(
 		CONSTANTS.INTERAL_CALLBACK_CHANGED,
-		_update_host_callback
+		_host_callback_changed
 	)
 #endregion
 
 
-#region Public Methods (Accessors)
-func get_running_transitions() -> Array[GoCamera2DLayer]:
-	return _layer_manager.get_running_transitions()
-func get_running_effects() -> Array[GoCamera2DLayer]:
-	return _layer_manager.get_running_effects()
+#region Methods (Helpers)
+func _get_cache(callback : CONSTANTS.CALLBACK_MODES) -> Array[GoCamera2DHost]:
+	match callback:
+		CONSTANTS.CALLBACK_MODES.IDLE:
+			return _idle_hosts
+		CONSTANTS.CALLBACK_MODES.PHYSICS:
+			return _physics_hosts
+		CONSTANTS.CALLBACK_MODES.MANUAL:
+			return _manual_hosts
+	return []
 
-func get_all_hosts() -> Array[GoCamera2DHost]:
-	var ret := (_idle_hosts + _physics_hosts)
-	ret.append_array(_manual_hosts)
-	return ret
+func get_layer_manager() -> GoCamera2DLayerManager:
+	return _layer_manager
 #endregion

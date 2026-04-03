@@ -1,4 +1,3 @@
-@abstract
 @tool
 class_name GoCamera2DLayer extends Node
 
@@ -8,22 +7,29 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 #endregion
 
 
+#region Private
+var _master_manager := GoCamera2DLayerManager.new()
+
+var _is_top_level : bool = true
+var _is_ticking: bool = false
+#endregion
+
 
 #region External Variables
-@export var top_level : bool = false:
-	set = set_top_level,
-	get = get_top_level
-
+@export var priority : int = 0:
+	set = set_priority,
+	get = get_priority
 @export var disabled : bool = false:
 	set = set_disabled,
 	get = get_disabled
 
-@export var active : bool = false:
+@export_group("Top Level")
+@export var active : bool = true:
 	set = set_active,
 	get = get_active
-@export var priority : int = 0:
-	set = set_priority,
-	get = get_priority
+@export var camera_flag_mask : int = 1:
+	set = set_camera_flag_mask,
+	get = get_camera_flag_mask
 #endregion
 
 
@@ -34,50 +40,13 @@ func _init() -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_READY, NOTIFICATION_POST_ENTER_TREE:
-			_update_registry()
-			_update_subscription()
+			_settup_registry()
 		NOTIFICATION_PREDELETE:
-			get_manager().unregister_layer(self)
+			_master_manager.unregister_layer(self)
 
 func _validate_property(property: Dictionary) -> void:
-	match property.name:
-		&"active", &"priority":
-			if is_in_effect_group() && !top_level:
-				property.usage |= PROPERTY_USAGE_READ_ONLY
-#endregion
-
-#region Public Virtual Methods
-func notify_tick_request_changed() -> void:
-	emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
-#endregion
-
-
-#region Private Methods (Registry)
-func _update_registry() -> void:
-	if !is_node_ready():
-		return
-	
-	var group := get_effect_group()
-	if !is_top_level():
-		group.register_layer(self)
-		GoCamera2DManager.unregister_layer(self)
-		return
-	
-	if group:
-		group.unregister_layer(self)
-	GoCamera2DManager.register_layer(self)
-func _update_subscription() -> void:
-	if !is_node_ready():
-		return
-	
-	var should_subscribe := (
-		active && !disabled
-	)
-	
-	if should_subscribe:
-		emit_signal(CONSTANTS.INTERAL_SUBSCRIBE, self)
-		return
-	emit_signal(CONSTANTS.INTERAL_UNSUBSCRIBE, self)
+	if !_is_top_level && property.name in [&"active", &"camera_flag_mask"]:
+		property.usage |= PROPERTY_USAGE_READ_ONLY
 #endregion
 
 
@@ -93,28 +62,45 @@ func _settup_private_signals() -> void:
 			CONSTANTS.INTERAL_TICK_CHANGED,
 			[{"name": "effect", "type": TYPE_OBJECT}]
 		)
+
+func _settup_registry() -> void:
+	if !is_node_ready():
+		return
+	_master_manager.unregister_layer(self)
 	
-	if !has_signal(CONSTANTS.INTERAL_SUBSCRIBE):
-		add_user_signal(
-			CONSTANTS.INTERAL_SUBSCRIBE,
-			[{"name": "effect", "type": TYPE_OBJECT}]
-		)
-	if !has_signal(CONSTANTS.INTERAL_UNSUBSCRIBE):
-		add_user_signal(
-			CONSTANTS.INTERAL_UNSUBSCRIBE,
-			[{"name": "effect", "type": TYPE_OBJECT}]
-		)
+	var parent := get_parent()
+	if parent is GoCamera2DGroup:
+		_is_top_level = false
+		notify_property_list_changed()
+		
+		_master_manager = parent.get_layer_manager()
+		_master_manager.register_layer(self)
+		return
+	
+	_is_top_level = true
+	notify_property_list_changed()
+	
+	_master_manager = GoCamera2DManager.get_layer_manager()
+	_master_manager.register_layer(self)
 #endregion
 
 
 #region Public Methods (Accessor)
+func set_disabled(val : bool) -> void:
+	if val == disabled:
+		return
+	disabled = val
+	
+	if active:
+		emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
+func get_disabled() -> bool:
+	return disabled
+
 func set_priority(val : int) -> void:
-	if priority == val:
+	if val == priority:
 		return
 	priority = val
-	
-	if is_node_ready():
-		emit_signal(CONSTANTS.INTERAL_PRIORITY_CHANGED, self)
+	emit_signal(CONSTANTS.INTERAL_PRIORITY_CHANGED, self)
 func get_priority() -> int:
 	return priority
 
@@ -122,60 +108,33 @@ func set_active(val : bool) -> void:
 	if val == active:
 		return
 	active = val
-	_update_subscription()
+	
+	if !disabled:
+		emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
 func get_active() -> bool:
 	return active
 
-func set_disabled(val : bool) -> void:
-	if val == disabled:
+func set_camera_flag_mask(val : int) -> void:
+	if val == camera_flag_mask:
 		return
-	disabled = val
-	_update_subscription()
-func get_disabled() -> bool:
-	return disabled
-
-
-func set_top_level(val : bool) -> void:
-	if val == top_level:
-		return
-	top_level = val
-	_update_registry()
-func get_top_level() -> bool:
-	return top_level
+	camera_flag_mask = val
+func get_camera_flag_mask() -> int:
+	return camera_flag_mask
 #endregion
 
 
-#region Public Methods (Helper)
-func get_manager() -> Node:
-	if top_level:
-		return GoCamera2DManager
-	
-	var parent := get_parent()
-	if parent is GoCamera2DGroup:
-		return parent
-	return GoCamera2DManager
+#region Public Methods (Notify)
+func notify_tick_changed() -> void:
+	emit_signal(CONSTANTS.INTERAL_TICK_CHANGED, self)
+#endregion
 
-func get_effect_group() -> GoCamera2DGroup:
-	return get_parent() as GoCamera2DGroup
-func is_in_effect_group() -> bool:
-	return get_effect_group() != null
 
-func is_top_level() -> bool:
-	return top_level || !is_in_effect_group()
-
+#region Public Methods (State Checkers)
 func is_running() -> bool:
 	return active && !disabled
+func is_top_level() -> bool:
+	return _is_top_level
 
-func is_registered() -> bool:
-	return get_manager().is_layer_registered(self)
 func is_subscribed() -> bool:
-	return get_manager().is_layer_subscribed(self)
-#endregion
-
-
-#region Public Methods (Helper)
-func activate() -> void:
-	active = true
-func deactivate() -> void:
-	active = false
+	return _master_manager.is_layer_subscribed(self)
 #endregion

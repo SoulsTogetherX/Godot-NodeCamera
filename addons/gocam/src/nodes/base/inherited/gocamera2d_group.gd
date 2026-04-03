@@ -6,104 +6,104 @@ class_name GoCamera2DGroup extends GoCamera2DLayer
 var _layers : Array[GoCamera2DLayer]
 var _layer_manager := GoCamera2DLayerManager.new()
 
-var _layer_register_lock : bool = false
+var _tick_state : int
 #endregion
 
 
 
-#region Virtual Methods
-func _notification(what: int) -> void:
-	match what:
-		NOTIFICATION_READY, NOTIFICATION_CHILD_ORDER_CHANGED:
-			_queue_register_layers()
-#endregion
-
-
-#region Public Virtual Methods
-func layer_start(
-	target_state : CameraStateResource, current_state : CameraStateResource
-) -> void:
-	for layer : GoCamera2DLayer in _layer_manager.get_running_effects():
-		layer.layer_start(target_state)
-	for layer : GoCamera2DLayer in _layer_manager.get_running_transitions():
-		layer.layer_start(target_state, current_state)
-func layer_end(
-	target_state : CameraStateResource, current_state : CameraStateResource
-) -> void:
-	for layer : GoCamera2DLayer in _layer_manager.get_running_effects():
-		layer.layer_end(target_state)
-	for layer : GoCamera2DLayer in _layer_manager.get_running_transitions():
-		layer.layer_end(target_state, current_state)
-
-func process_tick(
-	target_state : CameraStateResource
-) -> void:
-	_layer_manager.tick_effect(target_state)
-func process_tick_needed() -> bool:
-	return !_layer_manager.without_running_effects()
-
-func transition_tick(
-	target_state : CameraStateResource, current_state : CameraStateResource
-) -> void:
-	_layer_manager.tick_transition(target_state, current_state)
-func transition_tick_needed() -> bool:
-	return !_layer_manager.without_running_transitions()
-#endregion
-
-
-#region Private Methods (Queue)
-func _queue_register_layers() -> void:
-	if _layer_register_lock:
-		return
-	_layer_register_lock = true
-	_register_layers.call_deferred()
-func _register_layers() -> void:
-	_layers.clear()
+#region Private Virtual Methods
+func _init() -> void:
+	super()
+	_settup_private_signals()
 	
-	for node : Node in get_children():
-		if node is GoCamera2DLayer:
-			_layers.append(node)
-	
-	_update_layers_active()
-	_layer_register_lock = false
+	child_entered_tree.connect(_child_entered)
+	child_exiting_tree.connect(_child_exited)
+	_layer_manager.queues_changed.connect(_confirm_tick_changed)
+	_confirm_tick_changed()
 #endregion
 
 
-#region Private Methods (Update)
-func _update_layers_active() -> void:
+#region Private Methods (Helper)
+func _child_entered(child : Node) -> void:
+	if child is GoCamera2DLayer:
+		child.active = active
+		child.camera_flag_mask = camera_flag_mask
+		_layers.append(child)
+func _child_exited(child : Node) -> void:
+	if child is GoCamera2DLayer:
+		_layers.erase(child)
+
+func _confirm_tick_changed() -> void:
+	var new_state := (
+		int(_layer_manager.without_queued_effects()) |
+		(int(_layer_manager.without_queued_transitions()) << 1)
+	)
+	
+	if new_state != _tick_state:
+		notify_tick_changed()
+	_tick_state = new_state
+#endregion
+
+
+#region Public Virtual Methods (Toggle)
+func start_group(
+	target : GoCameraStateResource, current : GoCameraStateResource
+) -> void:
 	for layer : GoCamera2DLayer in _layers:
-		layer.active = active
+		_layer_manager.force_start_layer(
+			layer, target, current
+		)
+func end_group(
+	target : GoCameraStateResource, current : GoCameraStateResource
+) -> void:
+	for layer : GoCamera2DLayer in _layers:
+		_layer_manager.force_end_layer(
+			layer, target, current
+		)
 #endregion
 
 
-#region Public Methods (Layer Register)
-func register_layer(layer : GoCamera2DLayer) -> void:
-	_layer_manager.register_layer(layer)
-func unregister_layer(layer : GoCamera2DLayer) -> void:
-	_layer_manager.unregister_layer(layer)
+#region Public Virtual Methods (Effect)
+func effect_tick(target : GoCameraStateResource) -> void:
+	_layer_manager.effect_tick(target)
+func effect_tick_needed() -> bool:
+	return !_layer_manager.without_queued_effects()
+#endregion
+
+
+#region Public Virtual Methods (Transition)
+func transition_tick(
+	target : GoCameraStateResource, current : GoCameraStateResource
+) -> void:
+	_layer_manager.transition_tick(target, current)
+func transition_tick_needed() -> bool:
+	return !_layer_manager.without_queued_transitions()
+#endregion
+
+
+#region Public Methods (Accessor)
+func get_layer_manager() -> GoCamera2DLayerManager:
+	return _layer_manager
 #endregion
 
 
 #region Public Methods (Accessor)
 func set_active(val : bool) -> void:
-	if active == val:
+	if val == active:
 		return
 	super(val)
-	_update_layers_active()
-#endregion
+	
+	get_children().map(
+		func(layer : GoCamera2DLayer): layer.active = active
+	)
 
-
-#region Public Methods (Accessor Checks)
-func is_empty() -> bool:
-	return false
-
-func has_effects() -> bool:
-	return !_layer_manager.without_running_effects()
-func has_transitions() -> bool:
-	return !_layer_manager.without_running_transitions()
-
-func is_layer_registered(layer : GoCamera2DLayer) -> bool:
-	return _layer_manager.is_layer_registered(layer)
-func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
-	return _layer_manager.is_layer_subscribed(layer)
+func set_camera_flag_mask(val : int) -> void:
+	if val == camera_flag_mask:
+		return
+	super(val)
+	
+	_layer_manager.camera_flag_mask = camera_flag_mask
+	get_children().map(
+		func(layer : GoCamera2DLayer): layer.camera_flag_mask = camera_flag_mask
+	)
 #endregion

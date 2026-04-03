@@ -1,0 +1,18 @@
+#region Enums
+enum CALLBACK_MODES {
+	NONE,
+	IDLE,
+	PHYSICS,
+	MANUAL
+}
+#endregion
+
+
+#region Signal Names
+# Layer Management
+const INTERAL_PRIORITY_CHANGED := &"INTERAL_PRIORITY_CHANGED"
+const INTERAL_TICK_CHANGED := &"INTERAL_TICK_CHANGED"
+
+# Host
+const INTERAL_CALLBACK_CHANGED := &"INTERAL_CALLBACK_CHANGED"
+#endregion

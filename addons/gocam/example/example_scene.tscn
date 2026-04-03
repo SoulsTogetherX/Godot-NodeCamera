@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://d0rr28mur8wkj"]
 
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/gocam/example/player/player.tscn" id="1_eypdw"]
-[ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/gocam/src/nodes/host/gocamera2d_host.gd" id="1_tjovn"]
+[ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/gocam/src/nodes/host/gocamera2d_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://w8mlromh0mjr" path="res://addons/gocam/example/default_layers/effects/cge_follow.gd" id="4_isma7"]
-[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/gocam/src/nodes/base/inherited/gocamera2d_group.gd" id="4_ypfvr"]
+[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/gocam/src/nodes/base/inherited/gocamera2d_group.gd" id="4_dd2xn"]
+[ext_resource type="Script" uid="uid://cbbli5f6lw7mx" path="res://addons/gocam/example/test_effect.gd" id="5_dd2xn"]
+[ext_resource type="Script" uid="uid://d0vj0yuemgr0d" path="res://addons/gocam/example/test_transition.gd" id="6_61dxv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -14,8 +15,9 @@ size = Vector2(12800, 64)
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
 ignore_rotation = false
 
-[node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1290821785]
-script = ExtResource("1_tjovn")
+[node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1049895323]
+script = ExtResource("1_ypfvr")
+metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
 
@@ -36,10 +38,12 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, 32)
 shape = SubResource("RectangleShape2D_tjovn")
 
-[node name="PlayerFollow" type="Node" parent="." unique_id=787425633]
-script = ExtResource("4_ypfvr")
+[node name="GoCamera2DGroup" type="Node" parent="." unique_id=1154099973]
+script = ExtResource("4_dd2xn")
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="Follow" type="Node" parent="PlayerFollow" unique_id=1626188016 node_paths=PackedStringArray("follow_target")]
-script = ExtResource("4_isma7")
-follow_target = NodePath("../../Player")
+[node name="Trans" type="Node" parent="GoCamera2DGroup" unique_id=419975291]
+script = ExtResource("6_61dxv")
+
+[node name="EFX" type="Node" parent="GoCamera2DGroup" unique_id=256746676]
+script = ExtResource("5_dd2xn")

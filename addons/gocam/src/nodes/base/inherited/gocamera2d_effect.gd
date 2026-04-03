@@ -1,16 +1,15 @@
-@abstract
 @tool
 class_name GoCamera2DEffect extends GoCamera2DLayer
 
 
 #region Public Virtual Methods
-func layer_start(target_state : CameraStateResource) -> void:
+func start_effect(target : GoCameraStateResource) -> void:
 	pass
-func layer_end(target_state : CameraStateResource) -> void:
+func end_effect(target : GoCameraStateResource) -> void:
 	pass
 
-func process_tick(target_state : CameraStateResource) -> void:
+func effect_tick(target : GoCameraStateResource) -> void:
 	pass
-func process_tick_needed() -> bool:
+func effect_tick_needed() -> bool:
 	return false
 #endregion
