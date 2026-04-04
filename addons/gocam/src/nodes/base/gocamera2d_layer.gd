@@ -10,8 +10,8 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 #region Private
 var _master_manager := GoCamera2DLayerManager.new()
 
-var _is_top_level : bool = true
-var _is_ticking: bool = false
+var _is_in_group : bool = false
+var _is_top_level : bool = false
 #endregion
 
 
@@ -22,6 +22,9 @@ var _is_ticking: bool = false
 @export var disabled : bool = false:
 	set = set_disabled,
 	get = get_disabled
+@export var top_level : bool = false:
+	set = set_top_level,
+	get = get_top_level
 
 @export_group("Top Level")
 @export var active : bool = true:
@@ -40,12 +43,13 @@ func _init() -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_READY, NOTIFICATION_POST_ENTER_TREE:
+			_settup_group()
 			_settup_registry()
 		NOTIFICATION_PREDELETE:
 			_master_manager.unregister_layer(self)
 
 func _validate_property(property: Dictionary) -> void:
-	if !_is_top_level && property.name in [&"active", &"camera_flag_mask"]:
+	if _is_in_group && property.name in [&"active", &"camera_flag_mask"]:
 		property.usage |= PROPERTY_USAGE_READ_ONLY
 #endregion
 
@@ -63,19 +67,22 @@ func _settup_private_signals() -> void:
 			[{"name": "effect", "type": TYPE_OBJECT}]
 		)
 
+func _settup_group() -> void:
+	_is_in_group = (get_parent() is GoCamera2DGroup)
 func _settup_registry() -> void:
 	if !is_node_ready():
 		return
 	_master_manager.unregister_layer(self)
 	
-	var parent := get_parent()
-	if parent is GoCamera2DGroup:
-		_is_top_level = false
-		notify_property_list_changed()
-		
-		_master_manager = parent.get_layer_manager()
-		_master_manager.register_layer(self)
-		return
+	if !top_level:
+		var parent := get_parent()
+		if parent is GoCamera2DGroup:
+			_is_top_level = false
+			notify_property_list_changed()
+			
+			_master_manager = parent.get_layer_manager()
+			_master_manager.register_layer(self)
+			return
 	
 	_is_top_level = true
 	notify_property_list_changed()
@@ -104,6 +111,14 @@ func set_priority(val : int) -> void:
 func get_priority() -> int:
 	return priority
 
+func set_top_level(val : bool) -> void:
+	if val == top_level:
+		return
+	top_level = val
+	_settup_registry()
+func get_top_level() -> bool:
+	return top_level
+
 func set_active(val : bool) -> void:
 	if val == active:
 		return
@@ -130,10 +145,13 @@ func notify_tick_changed() -> void:
 
 
 #region Public Methods (State Checkers)
-func is_running() -> bool:
-	return active && !disabled
+func is_in_layer_group() -> bool:
+	return _is_in_group
 func is_top_level() -> bool:
 	return _is_top_level
+
+func is_running() -> bool:
+	return active && !disabled
 
 func is_subscribed() -> bool:
 	return _master_manager.is_layer_subscribed(self)

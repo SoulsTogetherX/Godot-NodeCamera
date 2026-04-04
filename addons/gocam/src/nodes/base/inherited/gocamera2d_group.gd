@@ -26,6 +26,12 @@ func _init() -> void:
 #region Private Methods (Helper)
 func _child_entered(child : Node) -> void:
 	if child is GoCamera2DLayer:
+		if child.active != active:
+			if active:
+				GoCamera2DManager.layer_tick_start(child)
+			else:
+				GoCamera2DManager.layer_tick_end(child)
+		
 		child.active = active
 		child.camera_flag_mask = camera_flag_mask
 		_layers.append(child)
@@ -49,6 +55,7 @@ func _confirm_tick_changed() -> void:
 func start_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
+	print("GROUP START")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_start_layer(
 			layer, target, current
@@ -56,6 +63,7 @@ func start_group(
 func end_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
+	print("GROUP END")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_end_layer(
 			layer, target, current

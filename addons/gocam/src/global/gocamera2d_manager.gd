@@ -19,8 +19,8 @@ var _manual_hosts : Array[GoCamera2DHost]
 
 #region Virtual Methods
 func _init() -> void:
-	_layer_manager.layer_start.connect(_layer_tick_start)
-	_layer_manager.layer_end.connect(_layer_tick_end)
+	_layer_manager.layer_start.connect(layer_tick_start)
+	_layer_manager.layer_end.connect(layer_tick_end)
 #endregion
 
 
@@ -51,7 +51,7 @@ func _update_tick_callbacks() -> void:
 
 
 #region Methods (Tick Intermediates)
-func _layer_tick_start(layer : GoCamera2DLayer) -> void:
+func layer_tick_start(layer : GoCamera2DLayer) -> void:
 	for host : GoCamera2DHost in _idle_hosts:
 		_layer_manager.layer_tick_start(layer, host)
 	for host : GoCamera2DHost in _physics_hosts:
@@ -59,7 +59,7 @@ func _layer_tick_start(layer : GoCamera2DLayer) -> void:
 	for host : GoCamera2DHost in _manual_hosts:
 		_layer_manager.layer_tick_start(layer, host)
 
-func _layer_tick_end(layer : GoCamera2DLayer) -> void:
+func layer_tick_end(layer : GoCamera2DLayer) -> void:
 	for host : GoCamera2DHost in _idle_hosts:
 		_layer_manager.layer_tick_end(layer, host)
 	for host : GoCamera2DHost in _physics_hosts:

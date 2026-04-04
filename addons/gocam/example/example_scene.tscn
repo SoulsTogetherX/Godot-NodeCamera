@@ -40,10 +40,15 @@ shape = SubResource("RectangleShape2D_tjovn")
 
 [node name="GoCamera2DGroup" type="Node" parent="." unique_id=1154099973]
 script = ExtResource("4_dd2xn")
+priority = 1
+active = false
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
-
-[node name="Trans" type="Node" parent="GoCamera2DGroup" unique_id=419975291]
-script = ExtResource("6_61dxv")
+metadata/META_DATA_HAS_STARTED = false
 
 [node name="EFX" type="Node" parent="GoCamera2DGroup" unique_id=256746676]
 script = ExtResource("5_dd2xn")
+active = false
+
+[node name="Trans" type="Node" parent="GoCamera2DGroup" unique_id=419975291]
+script = ExtResource("6_61dxv")
+active = false
