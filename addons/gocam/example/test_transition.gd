@@ -1,19 +1,18 @@
 @tool
 extends GoCamera2DTransition
 
-func start_transition(
+func _start_transition(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("TRANS START")
-func end_transition(
+	pass
+func _end_transition(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("TRANS END")
+	pass
 
-func transition_tick(
+func _transition_tick(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("TRANS TICK")
-func transition_tick_needed() -> bool:
-	print("TRANS TICK NEEDED CHECK")
+	pass
+func _transition_tick_needed() -> bool:
 	return false

@@ -2,13 +2,12 @@
 extends GoCamera2DEffect
 
 
-func start_effect(target : GoCameraStateResource) -> void:
-	print("EFX START")
-func end_effect(target : GoCameraStateResource) -> void:
-	print("EFX END")
+func _start_effect(target : GoCameraStateResource) -> void:
+	pass
+func _end_effect(target : GoCameraStateResource) -> void:
+	pass
 
-func effect_tick(target : GoCameraStateResource) -> void:
-	print("EFX TICK")
-func effect_tick_needed() -> bool:
-	print("EFX TICK NEEDED CHECK")
-	return false
+func _effect_tick(target : GoCameraStateResource) -> void:
+	print(2)
+func _effect_tick_needed() -> bool:
+	return true

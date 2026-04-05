@@ -1,10 +1,11 @@
 @tool
 class_name GoCamera2DGroup extends GoCamera2DLayer
-
+## The [GoCamera2DLayer] node used to help sync the activation and filter of
+## children [GoCamera2DLayer], while also boosting performance.
 
 #region Private Variables
 var _layers : Array[GoCamera2DLayer]
-var _layer_manager := GoCamera2DLayerManager.new()
+var _layer_manager := GoCamera2DLayerGroupManager.new()
 
 var _tick_state : int
 #endregion
@@ -13,12 +14,8 @@ var _tick_state : int
 
 #region Private Virtual Methods
 func _init() -> void:
-	super()
-	_settup_private_signals()
-	
 	child_entered_tree.connect(_child_entered)
 	child_exiting_tree.connect(_child_exited)
-	_layer_manager.queues_changed.connect(_confirm_tick_changed)
 	_confirm_tick_changed()
 #endregion
 
@@ -41,8 +38,8 @@ func _child_exited(child : Node) -> void:
 
 func _confirm_tick_changed() -> void:
 	var new_state := (
-		int(_layer_manager.without_queued_effects()) |
-		(int(_layer_manager.without_queued_transitions()) << 1)
+		int(_layer_manager.get_queued_effects().is_empty()) |
+		(int(_layer_manager.get_queued_transitions().is_empty()) << 1)
 	)
 	
 	if new_state != _tick_state:
@@ -51,67 +48,75 @@ func _confirm_tick_changed() -> void:
 #endregion
 
 
-#region Public Virtual Methods (Toggle)
-func start_group(
+#region Private Virtual Methods (Toggle)
+func _start_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("GROUP START")
+	print("START GROUP")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_start_layer(
 			layer, target, current
 		)
-func end_group(
+	_layer_manager.subscriptions_changed.connect(_confirm_tick_changed)
+func _end_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("GROUP END")
+	print("END GROUP")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_end_layer(
 			layer, target, current
 		)
+	_layer_manager.subscriptions_changed.disconnect(_confirm_tick_changed)
 #endregion
 
 
-#region Public Virtual Methods (Effect)
-func effect_tick(target : GoCameraStateResource) -> void:
-	_layer_manager.effect_tick(target)
-func effect_tick_needed() -> bool:
-	return !_layer_manager.without_queued_effects()
+#region Private Virtual Methods (Effect)
+func _effect_tick(target : GoCameraStateResource) -> void:
+	_layer_manager._effect_tick(target)
+func _effect_tick_needed() -> bool:
+	return !_layer_manager.get_queued_effects().is_empty()
 #endregion
 
 
-#region Public Virtual Methods (Transition)
-func transition_tick(
+#region Private Virtual Methods (Transition)
+func _transition_tick(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	_layer_manager.transition_tick(target, current)
-func transition_tick_needed() -> bool:
-	return !_layer_manager.without_queued_transitions()
+	_layer_manager._transition_tick(target, current)
+func _transition_tick_needed() -> bool:
+	return !_layer_manager.get_queued_transitions().is_empty()
 #endregion
 
 
 #region Public Methods (Accessor)
+## Gets the current [GoCamera2DLayerManager] being used.
+## [br][br]
+## [b]NOTE[/b]: Freeing this object will cause errors.
 func get_layer_manager() -> GoCamera2DLayerManager:
 	return _layer_manager
 #endregion
 
 
 #region Public Methods (Accessor)
+## Sets the [member active] property of this layer.
 func set_active(val : bool) -> void:
 	if val == active:
 		return
-	super(val)
-	
 	get_children().map(
-		func(layer : GoCamera2DLayer): layer.active = active
+		func(layer : Node):
+			if layer is GoCamera2DLayer:
+				layer.active = val
 	)
+	super(val)
 
+## Sets the [member set_camera_flag_mask] property of this layer.
 func set_camera_flag_mask(val : int) -> void:
 	if val == camera_flag_mask:
 		return
-	super(val)
-	
-	_layer_manager.camera_flag_mask = camera_flag_mask
 	get_children().map(
-		func(layer : GoCamera2DLayer): layer.camera_flag_mask = camera_flag_mask
+		func(layer : Node):
+			if layer is GoCamera2DLayer:
+				layer.camera_flag_mask = val
 	)
+	super(val)
 #endregion

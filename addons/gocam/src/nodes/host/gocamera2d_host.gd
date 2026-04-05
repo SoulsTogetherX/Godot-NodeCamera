@@ -1,17 +1,32 @@
 @tool
 class_name GoCamera2DHost extends Node
+## The main node that controls the camera for the GoCamera2D addon.
+
+
+#region Signals
+## This signal is emited when [member callback] is changed.
+signal callback_changed(old : CONSTANTS.CALLBACK_MODES)
+## This signal is emited when [member camera_flag_mask] is changed.
+signal camera_mask_changed(old : int)
+#endregion
 
 
 #region Constants
+## The script containing all shared constants used by the GoCamera2D addon.
 const CONSTANTS := preload("uid://b8t21yw0evfx")
 #endregion
 
 
 #region External Variables
+## Controls when this host's camera should be processed.
 @export var callback : CONSTANTS.CALLBACK_MODES = CONSTANTS.CALLBACK_MODES.PHYSICS:
 	set = set_callback,
 	get = get_callback
-@export var camera_flag_mask : int = 1
+## A bitmask used to filter out what top-level [GoCamera2DLayer] should
+## affect this host.
+@export var camera_flag_mask : int = 1:
+	set = set_camera_flag_mask,
+	get = get_camera_flag_mask
 #endregion
 
 
@@ -25,8 +40,6 @@ var _current_status := GoCameraStateResource.new()
 
 
 #region Virtual Methods
-func _init() -> void:
-	_settup_private_signals()
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_READY, NOTIFICATION_POST_ENTER_TREE:
@@ -37,14 +50,6 @@ func _notification(what: int) -> void:
 
 
 #region Private Methods
-func _settup_private_signals() -> void:
-	if !has_signal(CONSTANTS.INTERAL_CALLBACK_CHANGED):
-		add_user_signal(
-			CONSTANTS.INTERAL_CALLBACK_CHANGED,
-			[{"name": "effect", "type": TYPE_OBJECT},
-			{"name": "old", "type": TYPE_INT}]
-		)
-
 func _settup_camera() -> void:
 	if !is_node_ready():
 		return
@@ -61,17 +66,55 @@ func _clear_camera() -> void:
 #endregion
 
 
+#region Public Methods (Tick)
+## Manually ticks this camera forward one tick.
+## [br][br]
+## [b]NOTE[/b]: This will tick the camera regardless of [member callback].
+func manual_tick() -> void:
+	GoCamera2DManager.tick_host(self)
+#endregion
+
+
 #region Public Methods (Accessors)
+## Returns the current [Camera2D] this [GoCamera2DHost] is attached to.
+## Returns [code]null[/code] if not a child of any [Camera2D] node.
 func get_camera() -> Camera2D:
 	return _camera
 
+## Sets the [member callback] value.
 func set_callback(val : CONSTANTS.CALLBACK_MODES) -> void:
+	if val == callback:
+		return
+	
+	var old := callback
 	callback = val
+	callback_changed.emit(old)
+## Gets the [member callback] value.
 func get_callback() -> CONSTANTS.CALLBACK_MODES:
 	return callback
 
+## Sets the [member camera_flag_mask] value.
+func set_camera_flag_mask(val : int) -> void:
+	if val == camera_flag_mask:
+		return
+	
+	var old := camera_flag_mask
+	camera_flag_mask = val
+	camera_mask_changed.emit(old)
+## Sets the [member camera_flag_mask] value.
+func get_camera_flag_mask() -> int:
+	return camera_flag_mask
+
+## Returns the target camera status this host is transitioning to.
+## [br][br]
+## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
+## then this is treated as the current state.
 func get_target_status() -> GoCameraStateResource:
 	return _target_status
+## Returns the current camera status this host's camera.
+## [br][br]
+## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
+## then this is ignored.
 func get_current_status() -> GoCameraStateResource:
 	return _current_status
 #endregion

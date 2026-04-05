@@ -1,18 +1,11 @@
+## The script containing all shared constants used by the GoCamera2D addon.
+
 #region Enums
+## An enum used to denote at what times layers will run for
+## each [GoCamera2DHost].
 enum CALLBACK_MODES {
-	NONE,
-	IDLE,
-	PHYSICS,
-	MANUAL
+	IDLE, ## Layers will run on process frames.
+	PHYSICS, ## Layers will run on physics frames.
+	MANUAL ## Layers will run when manually requested to run. See [method GoCamera2DHost.manual_tick]
 }
-#endregion
-
-
-#region Signal Names
-# Layer Management
-const INTERAL_PRIORITY_CHANGED := &"INTERAL_PRIORITY_CHANGED"
-const INTERAL_TICK_CHANGED := &"INTERAL_TICK_CHANGED"
-
-# Host
-const INTERAL_CALLBACK_CHANGED := &"INTERAL_CALLBACK_CHANGED"
 #endregion

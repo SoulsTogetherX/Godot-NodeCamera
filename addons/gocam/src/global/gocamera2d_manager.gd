@@ -1,8 +1,11 @@
 @tool
 extends Node
+## The primary singleton for the GoCamera2D addon, used to manage all top-level
+## [GoCamera2DLayer]s. 
 
 
 #region Constants
+## The script containing all shared constants used by the GoCamera2D addon.
 const CONSTANTS := preload("uid://b8t21yw0evfx")
 #endregion
 
@@ -21,12 +24,43 @@ var _manual_hosts : Array[GoCamera2DHost]
 func _init() -> void:
 	_layer_manager.layer_start.connect(layer_tick_start)
 	_layer_manager.layer_end.connect(layer_tick_end)
+	_layer_manager.layer_mask_changed.connect(_layer_camera_mask_changed)
 #endregion
 
 
 #region Methods (Updaters)
+func _layer_camera_mask_changed(
+	old : int, layer : GoCamera2DLayer
+) -> void:
+	var new := layer.get_camera_flag_mask()
+	var helper := func(host : GoCamera2DHost):
+		if (host.camera_flag_mask & old) && !(host.camera_flag_mask & new):
+			_layer_manager.force_end_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+		elif (host.camera_flag_mask & new) && !(host.camera_flag_mask & old):
+			_layer_manager.force_start_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+	
+	_call_on_all_hosts(helper)
+func _host_camera_mask_changed(
+	old : int, host : GoCamera2DHost
+) -> void:
+	var new := host.get_camera_flag_mask()
+	
+	for layer : GoCamera2DLayer in _layer_manager.get_active_layers():
+		if (layer.camera_flag_mask & old) && !(layer.camera_flag_mask & new):
+			_layer_manager.force_end_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+		elif (layer.camera_flag_mask & new) && !(layer.camera_flag_mask & old):
+			_layer_manager.force_start_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+
 func _host_callback_changed(
-	host : GoCamera2DHost, old : CONSTANTS.CALLBACK_MODES
+	old : CONSTANTS.CALLBACK_MODES, host : GoCamera2DHost
 ) -> void:
 	_get_cache(old).erase(host)
 	_get_cache(host.callback).append(host)
@@ -51,21 +85,32 @@ func _update_tick_callbacks() -> void:
 
 
 #region Methods (Tick Intermediates)
+## Calls the appropriate 'layer_start' method ([method GoCamera2DEffect.start_effect],
+## [method GoCamera2DTransition.start_transition], or
+## [method GoCamera2DGroup.start_group]), in the given [param layer],
+## across all currently registered hosts. 
 func layer_tick_start(layer : GoCamera2DLayer) -> void:
-	for host : GoCamera2DHost in _idle_hosts:
-		_layer_manager.layer_tick_start(layer, host)
-	for host : GoCamera2DHost in _physics_hosts:
-		_layer_manager.layer_tick_start(layer, host)
-	for host : GoCamera2DHost in _manual_hosts:
-		_layer_manager.layer_tick_start(layer, host)
+	var helper := func(host : GoCamera2DHost):
+		if host.camera_flag_mask & layer.camera_flag_mask:
+			_layer_manager.force_start_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+	
+	_call_on_all_hosts(helper)
 
+
+## Calls the appropriate 'layer_start' method ([method GoCamera2DEffect.end_effect],
+## [method GoCamera2DTransition.end_transition], or
+## [method GoCamera2DGroup.end_group]), in the given [param layer],
+## across all currently registered hosts.
 func layer_tick_end(layer : GoCamera2DLayer) -> void:
-	for host : GoCamera2DHost in _idle_hosts:
-		_layer_manager.layer_tick_end(layer, host)
-	for host : GoCamera2DHost in _physics_hosts:
-		_layer_manager.layer_tick_end(layer, host)
-	for host : GoCamera2DHost in _manual_hosts:
-		_layer_manager.layer_tick_end(layer, host)
+	var helper := func(host : GoCamera2DHost):
+		if host.camera_flag_mask & layer.camera_flag_mask:
+			_layer_manager.force_end_layer(
+				layer, host.get_target_status(), host.get_current_status()
+			)
+	
+	_call_on_all_hosts(helper)
 #endregion
 
 
@@ -76,50 +121,78 @@ func _idle_tick() -> void:
 func _physics_tick() -> void:
 	for host : GoCamera2DHost in _physics_hosts:
 		tick_host(host)
+
+## Ticks all relevant layers with the information of all hosts,
+## whose [member GoCamera2DHost.callback] is set to
+## [constant GoCamera2DHost.CONSTANTS.CALLBACK_MODES.MANUAL].
 func manually_tick_hosts() -> void:
 	for host : GoCamera2DHost in _manual_hosts:
 		tick_host(host)
 
+## Ticks all relevant layers with the information of the given
+## [param hosts].
 func tick_host(host : GoCamera2DHost) -> void:
 	var cam := host.get_camera()
 	var target_status := host.get_target_status()
 	
-	_layer_manager.effect_tick(target_status)
-	if _layer_manager.without_queued_transitions():
+	_layer_manager._effect_tick(target_status, host.camera_flag_mask)
+	if _layer_manager.get_queued_transitions().is_empty():
 		target_status.apply_status(cam)
 		return
 	
 	var current_status := host.get_target_status()
-	_layer_manager.transition_tick(target_status, current_status)
+	_layer_manager._transition_tick(
+		target_status, current_status, host.camera_flag_mask
+	)
 	current_status.apply_status(cam)
 #endregion
 
 
 #region Methods (Register Host)
+## Registers the given [param host] into management.
+## [br][br]
+## [b]NOTE[/b]: Registering a host while a relevant [GoCamera2DLayer]
+## is running will not call the [GoCamera2DLayer]'s relevant
+## 'layer_start' method ([method GoCamera2DEffect.end_effect],
+## [method GoCamera2DTransition.end_transition], or
+## [method GoCamera2DGroup.end_group]).
 func register_host(host : GoCamera2DHost) -> void:
 	if is_host_registered(host):
 		return
-	host.connect(
-		CONSTANTS.INTERAL_CALLBACK_CHANGED,
-		_host_callback_changed
+	host.camera_mask_changed.connect(
+		_host_camera_mask_changed,
+		CONNECT_APPEND_SOURCE_OBJECT
+	)
+	host.callback_changed.connect(
+		_host_callback_changed,
+		CONNECT_APPEND_SOURCE_OBJECT
 	)
 	
 	_get_cache(host.callback).append(host)
 	_update_tick_callbacks()
+## Unregisters the given [param host] into management.
+## [br][br]
+## [b]NOTE[/b]: Registering a host while a relevant [GoCamera2DLayer]
+## is running will not call the [GoCamera2DLayer]'s relevant
+## 'layer_end' method ([method GoCamera2DEffect.end_effect],
+## [method GoCamera2DTransition.end_transition], or
+## [method GoCamera2DGroup.end_group]).
 func unregister_host(host : GoCamera2DHost) -> void:
 	if !is_host_registered(host):
 		return
-	host.disconnect(
-		CONSTANTS.INTERAL_CALLBACK_CHANGED,
+	host.camera_mask_changed.disconnect(
+		_host_camera_mask_changed
+	)
+	host.callback_changed.disconnect(
 		_host_callback_changed
 	)
 	
 	_get_cache(host.callback).erase(host)
 	_update_tick_callbacks()
 
+## Returns if the given [param host] has been registered.
 func is_host_registered(host : GoCamera2DHost) -> bool:
-	return host.is_connected(
-		CONSTANTS.INTERAL_CALLBACK_CHANGED,
+	return host.callback_changed.is_connected(
 		_host_callback_changed
 	)
 #endregion
@@ -136,6 +209,17 @@ func _get_cache(callback : CONSTANTS.CALLBACK_MODES) -> Array[GoCamera2DHost]:
 			return _manual_hosts
 	return []
 
+func _call_on_all_hosts(foo : Callable) -> void:
+	for host : GoCamera2DHost in _idle_hosts:
+		foo.call(host)
+	for host : GoCamera2DHost in _physics_hosts:
+		foo.call(host)
+	for host : GoCamera2DHost in _manual_hosts:
+		foo.call(host)
+
+## Gets the current [GoCamera2DLayerManager] being used.
+## [br][br]
+## [b]NOTE[/b]: Freeing this object will cause errors.
 func get_layer_manager() -> GoCamera2DLayerManager:
 	return _layer_manager
 #endregion
