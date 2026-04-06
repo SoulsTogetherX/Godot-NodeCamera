@@ -1,5 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
-extends NodeCamera2DEffect
+@tool
+class_name NodeCamera2DLerpTransition extends NodeCamera2DEffect
 
 
 

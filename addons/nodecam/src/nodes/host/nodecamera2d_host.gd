@@ -67,6 +67,11 @@ func _settup_camera() -> void:
 		_target_status.overwrite_status(_camera)
 		_current_status.overwrite_status(_camera)
 		
+		_camera.anchor_mode = Camera2D.ANCHOR_MODE_DRAG_CENTER
+		_camera.limit_enabled = false
+		_camera.position_smoothing_enabled = false
+		_camera.rotation_smoothing_enabled = false
+		
 		if !disabled:
 			NodeCamera2DManager.register_host(self)
 		return

@@ -1,5 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
-extends NodeCamera2DTransition
+@tool
+class_name NodeCamera2DShakeEffect extends NodeCamera2DTransition
 
 
 

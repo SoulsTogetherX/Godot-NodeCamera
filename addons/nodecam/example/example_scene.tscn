@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera2d_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera2d_group.gd" id="4_dd2xn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -16,10 +15,10 @@ size = Vector2(41, 488)
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
 position = Vector2(78, -150)
 ignore_rotation = false
+limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1049895323]
 script = ExtResource("1_ypfvr")
-disabled = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
@@ -65,8 +64,3 @@ texture = ExtResource("2_kx3cl")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=24809213]
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
-
-[node name="GoCamera2DGroup" type="Node" parent="." unique_id=1154099973]
-script = ExtResource("4_dd2xn")
-active = false
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"

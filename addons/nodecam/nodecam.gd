@@ -5,7 +5,7 @@ extends EditorPlugin
 
 #region Constants
 const GO_CAMERA_AUTOLOAD_NAME := "GoCamera2DManager"
-const GO_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/autoloads/nodecamera2d_manager.gd"
+const GO_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/global/nodecamera2d_manager.gd"
 
 const SRC_DIR = "res://addons/nodecam/src/"
 #endregion
@@ -17,7 +17,6 @@ func _enable_plugin() -> void:
 	add_autoload_singleton(
 		GO_CAMERA_AUTOLOAD_NAME, GO_CAMERA_AUTOLOAD_PATH
 	)
-	EditorInterface.restart_editor()
 func _disable_plugin() -> void:
 	remove_autoload_singleton(GO_CAMERA_AUTOLOAD_NAME)
 #endregion
