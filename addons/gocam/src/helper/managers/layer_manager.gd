@@ -26,17 +26,6 @@ func _update_layer_priority(layer : GoCamera2DLayer) -> void:
 		_transitions_queue.erase(layer)
 		if layer._transition_tick_needed() && is_layer_subscribed(layer):
 			_insert_layer_in_queue(layer, _transitions_queue)
-func _insert_layer_priority(layer : GoCamera2DLayer) -> void:
-	if layer is GoCamera2DEffect || layer is GoCamera2DGroup:
-		_insert_layer_in_queue(layer, _effects_queue)
-	if layer is GoCamera2DTransition || layer is GoCamera2DGroup:
-		_insert_layer_in_queue(layer, _transitions_queue)
-func _remove_layer_priority(layer : GoCamera2DLayer) -> void:
-	if layer is GoCamera2DEffect || layer is GoCamera2DGroup:
-		_effects_queue.erase(layer)
-	if layer is GoCamera2DTransition || layer is GoCamera2DGroup:
-		_transitions_queue.erase(layer)
-
 
 func _insert_layer_in_queue(layer : GoCamera2DLayer, queue : Array[GoCamera2DLayer]) -> void:
 	queue.insert(
@@ -54,12 +43,17 @@ func _subscription_changed(layer : GoCamera2DLayer) -> void:
 		_unsubscribe_layer(layer)
 		return
 	
-	if layer is GoCamera2DEffect || layer is GoCamera2DGroup:
+	if layer is GoCamera2DGroup:
+		if layer._effect_tick_needed() || layer._transition_tick_needed():
+			_subscribe_layer(layer)
+		else:
+			_unsubscribe_layer(layer)
+	elif layer is GoCamera2DEffect:
 		if layer._effect_tick_needed():
 			_subscribe_layer(layer)
 		else:
 			_unsubscribe_layer(layer)
-	if layer is GoCamera2DTransition || layer is GoCamera2DGroup:
+	elif layer is GoCamera2DTransition:
 		if layer._transition_tick_needed():
 			_subscribe_layer(layer)
 		else:
@@ -73,7 +67,7 @@ func _subscribe_layer(layer : GoCamera2DLayer) -> void:
 		_update_layer_priority,
 		CONNECT_APPEND_SOURCE_OBJECT
 	)
-	_insert_layer_priority(layer)
+	_update_layer_priority(layer)
 func _unsubscribe_layer(layer : GoCamera2DLayer) -> void:
 	if !is_layer_subscribed(layer):
 		return
@@ -81,7 +75,7 @@ func _unsubscribe_layer(layer : GoCamera2DLayer) -> void:
 	layer.priority_changed.disconnect(
 		_update_layer_priority
 	)
-	_remove_layer_priority(layer)
+	_update_layer_priority(layer)
 
 ## Returns if the given [param layer] is subscribed to tick updates or not.
 func is_layer_subscribed(layer : GoCamera2DLayer) -> bool:
@@ -120,18 +114,6 @@ func is_layer_registered(layer : GoCamera2DLayer) -> bool:
 #endregion
 
 
-#region Methods (Accessor)
-## Returns all effect layers that are registered and subscribed
-## in this object, sorted  by priority.
-func get_queued_effects() -> Array[GoCamera2DLayer]:
-	return _effects_queue
-## Returns all transition layers that are registered and subscribed
-## in this object, sorted  by priority.
-func get_queued_transitions() -> Array[GoCamera2DLayer]:
-	return _transitions_queue
-#endregion
-
-
 #region Public Methods (Force Layer)
 ## Calls the appropriate 'layer_start' method ([method GoCamera2DEffect.start_effect],
 ## [method GoCamera2DTransition.start_transition], or
@@ -167,4 +149,16 @@ func force_end_layer(
 	if layer is GoCamera2DTransition:
 		layer._end_transition(target, current)
 		return
+#endregion
+
+
+#region Methods (Accessor)
+## Returns all effect layers that are registered and subscribed
+## in this object, sorted  by priority.
+func get_queued_effects() -> Array[GoCamera2DLayer]:
+	return _effects_queue
+## Returns all transition layers that are registered and subscribed
+## in this object, sorted  by priority.
+func get_queued_transitions() -> Array[GoCamera2DLayer]:
+	return _transitions_queue
 #endregion

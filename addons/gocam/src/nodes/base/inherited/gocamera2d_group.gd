@@ -4,8 +4,8 @@ class_name GoCamera2DGroup extends GoCamera2DLayer
 ## The [GoCamera2DLayer] node used to help sync the activation and filter of
 ## children [GoCamera2DLayer], while also boosting performance.
 
+
 #region Private Variables
-var _layers : Array[GoCamera2DLayer]
 var _layer_manager := GoCamera2DLayerGroupManager.new()
 
 var _tick_state : int
@@ -32,17 +32,16 @@ func _child_entered(child : Node) -> void:
 		
 		child.active = active
 		child.camera_flag_mask = camera_flag_mask
-		_layers.append(child)
+		_confirm_tick_changed()
 func _child_exited(child : Node) -> void:
 	if child is GoCamera2DLayer:
-		_layers.erase(child)
+		_confirm_tick_changed()
 
 func _confirm_tick_changed() -> void:
 	var new_state := (
 		int(_layer_manager.get_queued_effects().is_empty()) |
 		(int(_layer_manager.get_queued_transitions().is_empty()) << 1)
 	)
-	
 	if new_state != _tick_state:
 		notify_tick_changed()
 	_tick_state = new_state
@@ -53,7 +52,7 @@ func _confirm_tick_changed() -> void:
 func _start_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	for layer : GoCamera2DLayer in _layers:
+	for layer : GoCamera2DLayer in _layer_manager.get_registered_layers():
 		_layer_manager.force_start_layer(
 			layer, target, current
 		)
@@ -61,7 +60,7 @@ func _start_group(
 func _end_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	for layer : GoCamera2DLayer in _layers:
+	for layer : GoCamera2DLayer in _layer_manager.get_registered_layers():
 		_layer_manager.force_end_layer(
 			layer, target, current
 		)
@@ -101,7 +100,7 @@ func get_layer_manager() -> GoCamera2DLayerManager:
 func set_active(val : bool) -> void:
 	if val == active:
 		return
-	get_children().map(
+	_layer_manager.get_registered_layers().map(
 		func(layer : Node):
 			if layer is GoCamera2DLayer:
 				layer.active = val
@@ -112,7 +111,7 @@ func set_active(val : bool) -> void:
 func set_camera_flag_mask(val : int) -> void:
 	if val == camera_flag_mask:
 		return
-	get_children().map(
+	_layer_manager.get_registered_layers().map(
 		func(layer : Node):
 			if layer is GoCamera2DLayer:
 				layer.camera_flag_mask = val

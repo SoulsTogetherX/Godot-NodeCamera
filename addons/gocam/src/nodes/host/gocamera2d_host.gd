@@ -19,6 +19,12 @@ const CONSTANTS := preload("uid://b8t21yw0evfx")
 
 
 #region External Variables
+## If [code]true[/code], this property disabled the processing of this host.
+@export var disabled : bool = false:
+	set = set_disabled,
+	get = get_disabled
+
+@export_group("Camera Settings")
 ## Controls when this host's camera should be processed.
 @export var callback : CONSTANTS.CALLBACK_MODES = CONSTANTS.CALLBACK_MODES.PHYSICS:
 	set = set_callback,
@@ -59,6 +65,8 @@ func _settup_camera() -> void:
 	if _camera:
 		_target_status.overwrite_status(_camera)
 		_current_status.overwrite_status(_camera)
+		
+		#if !disabled:
 		GoCamera2DManager.register_host(self)
 		return
 func _clear_camera() -> void:
@@ -73,6 +81,37 @@ func _clear_camera() -> void:
 ## [b]NOTE[/b]: This will tick the camera regardless of [member callback].
 func manual_tick() -> void:
 	GoCamera2DManager.tick_host(self)
+#endregion
+
+
+#region Public Methods (Status Access)
+## Returns the target camera status this host is transitioning to.
+## [br][br]
+## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
+## then this is treated as the current state.
+func get_target_status() -> GoCameraStateResource:
+	return _target_status
+## Returns the current camera status this host's camera.
+## [br][br]
+## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
+## then this is ignored.
+func get_current_status() -> GoCameraStateResource:
+	return _current_status
+#endregion
+
+
+#region Public Methods (Status Manipulation)
+## 
+func teleport_cam() -> void:
+	_target_status.apply_status(_camera)
+## 
+func update_cam() -> void:
+	_current_status.apply_status(_camera)
+
+## 
+func reset_cam() -> void:
+	_target_status.overwrite_status(_camera)
+	_current_status.overwrite_status(_camera)
 #endregion
 
 
@@ -106,16 +145,18 @@ func set_camera_flag_mask(val : int) -> void:
 func get_camera_flag_mask() -> int:
 	return camera_flag_mask
 
-## Returns the target camera status this host is transitioning to.
-## [br][br]
-## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
-## then this is treated as the current state.
-func get_target_status() -> GoCameraStateResource:
-	return _target_status
-## Returns the current camera status this host's camera.
-## [br][br]
-## [b]NOTE[/b]: If there are no running [GoCamera2DTransition] nodes,
-## then this is ignored.
-func get_current_status() -> GoCameraStateResource:
-	return _current_status
+## Sets the [member camera_flag_mask] value.
+func set_disabled(val : bool) -> void:
+	if val == disabled:
+		return
+	disabled = val
+	
+	#if _camera:
+	#	if disabled:
+	#		GoCamera2DManager.unregister_host(self)
+	#		return
+	#	GoCamera2DManager.register_host(self)
+## Sets the [member camera_flag_mask] value.
+func get_disabled() -> bool:
+	return disabled
 #endregion

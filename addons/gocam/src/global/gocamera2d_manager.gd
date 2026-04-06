@@ -24,6 +24,7 @@ var _manual_hosts : Array[GoCamera2DHost]
 func _init() -> void:
 	_layer_manager.layer_start.connect(layer_tick_start)
 	_layer_manager.layer_end.connect(layer_tick_end)
+	
 	_layer_manager.layer_mask_changed.connect(_layer_camera_mask_changed)
 #endregion
 
@@ -32,6 +33,9 @@ func _init() -> void:
 func _layer_camera_mask_changed(
 	old : int, layer : GoCamera2DLayer
 ) -> void:
+	if !layer.is_running():
+		return
+	
 	var new := layer.get_camera_flag_mask()
 	var helper := func(host : GoCamera2DHost):
 		if (host.camera_flag_mask & old) && !(host.camera_flag_mask & new):
@@ -95,7 +99,6 @@ func layer_tick_start(layer : GoCamera2DLayer) -> void:
 			_layer_manager.force_start_layer(
 				layer, host.get_target_status(), host.get_current_status()
 			)
-	
 	_call_on_all_hosts(helper)
 
 
@@ -109,7 +112,6 @@ func layer_tick_end(layer : GoCamera2DLayer) -> void:
 			_layer_manager.force_end_layer(
 				layer, host.get_target_status(), host.get_current_status()
 			)
-	
 	_call_on_all_hosts(helper)
 #endregion
 
@@ -159,6 +161,7 @@ func tick_host(host : GoCamera2DHost) -> void:
 func register_host(host : GoCamera2DHost) -> void:
 	if is_host_registered(host):
 		return
+	host.reset_cam()
 	host.camera_mask_changed.connect(
 		_host_camera_mask_changed,
 		CONNECT_APPEND_SOURCE_OBJECT

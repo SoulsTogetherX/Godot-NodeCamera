@@ -11,10 +11,40 @@ signal subscriptions_changed
 #endregion
 
 
+#region Private Variables
+var _registered_layers : Array[GoCamera2DLayer]
+#endregion
+
+
+
+#region Methods (Queue)
+func _update_layer_priority(layer : GoCamera2DLayer) -> void:
+	_registered_layers.erase(layer)
+	_insert_layer_in_queue(layer, _registered_layers)
+	super(layer)
+#endregion
+
+
 #region Methods (Subscribe Layer)
 func _subscription_changed(layer : GoCamera2DLayer) -> void:
 	subscriptions_changed.emit()
 	super(layer)
+#endregion
+
+
+#region Methods (Register Layer)
+## Registers the given [param layer] into this object.
+## [br][br]
+## Overloaded only to ensure unneeded metadata is cleared upon register.
+func register_layer(layer : GoCamera2DLayer) -> void:
+	super(layer)
+	_insert_layer_in_queue(layer, _registered_layers)
+## Unregisters the given [param layer] from this object.
+## [br][br]
+## Overloaded only to ensure unneeded metadata is cleared upon unregister.
+func unregister_layer(layer : GoCamera2DLayer) -> void:
+	super(layer)
+	_registered_layers.erase(layer)
 #endregion
 
 
@@ -32,4 +62,12 @@ func _transition_tick(
 ) -> void:
 	for transition : GoCamera2DLayer in _transitions_queue:
 		transition._transition_tick(target_status, current_status)
+#endregion
+
+
+#region Methods (Accessor)
+## Returns all registered layers within this object, sorted 
+## by priority.
+func get_registered_layers() -> Array[GoCamera2DLayer]:
+	return _registered_layers
 #endregion
