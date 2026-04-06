@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://y3x5fmg8ygou"]
 
 [ext_resource type="Script" uid="uid://qyglgh2q180d" path="res://addons/gocam/example/player/player.gd" id="1_1wdfc"]
-[ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://icon.svg" id="2_v0say"]
+[ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/gocam/example/assets/icon.svg" id="2_v0say"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_d48m6"]
 size = Vector2(26, 26)

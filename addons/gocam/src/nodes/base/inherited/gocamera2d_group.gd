@@ -1,4 +1,5 @@
 @tool
+@icon("uid://dl0jprapnu02l")
 class_name GoCamera2DGroup extends GoCamera2DLayer
 ## The [GoCamera2DLayer] node used to help sync the activation and filter of
 ## children [GoCamera2DLayer], while also boosting performance.
@@ -52,7 +53,6 @@ func _confirm_tick_changed() -> void:
 func _start_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("START GROUP")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_start_layer(
 			layer, target, current
@@ -61,7 +61,6 @@ func _start_group(
 func _end_group(
 	target : GoCameraStateResource, current : GoCameraStateResource
 ) -> void:
-	print("END GROUP")
 	for layer : GoCamera2DLayer in _layers:
 		_layer_manager.force_end_layer(
 			layer, target, current

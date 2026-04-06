@@ -1,4 +1,5 @@
 @tool
+@icon("uid://dcxauqphisp2y")
 class_name GoCamera2DTransition extends GoCamera2DLayer
 ## The base [GoCamera2DLayer] node for all camera effects, reliant on
 ## easing the current [GoCameraStateResource] resource into the target

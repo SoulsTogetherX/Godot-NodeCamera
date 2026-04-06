@@ -1,4 +1,5 @@
 @tool
+@icon("uid://82l5l3rm2fkd")
 class_name GoCamera2DEffect extends GoCamera2DLayer
 ## The base [GoCamera2DLayer] node for all camera effects, reliant on
 ## manipulating the target [GoCameraStateResource] resource of hosts.

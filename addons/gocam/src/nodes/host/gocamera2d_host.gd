@@ -1,4 +1,5 @@
 @tool
+@icon("uid://kq0ubmkoup4y")
 class_name GoCamera2DHost extends Node
 ## The main node that controls the camera for the GoCamera2D addon.
 

@@ -1,4 +1,5 @@
 @tool
+@icon("uid://dssbc6kgt43an")
 class_name GoCamera2DLayer extends Node
 ## The base layer for all camera manipulation.
 
