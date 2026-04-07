@@ -1,3 +1,5 @@
+class_name NodeCamera2DConstants
+
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 ## The script containing all shared constants used by the NodeCamera2D addon.
 
@@ -8,6 +10,15 @@ enum CALLBACK_MODES {
 	IDLE, ## Layers will run on process frames.
 	PHYSICS, ## Layers will run on physics frames.
 	MANUAL ## Layers will run when manually requested to run. See [method NodeCamera2DHost.manual_tick]
+}
+
+
+
+enum LAYER_STAGES {
+	NONE,
+	STARTING,
+	RUNNING,
+	ENDING
 }
 #endregion
 
