@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DGroupEffect extends NodeCamera2DEffect
+## A basic effect that constantly updates the target camera status to view
+## the provided [member follows] nodes.
 
 
 #region External Variables

@@ -17,7 +17,7 @@ position = Vector2(78, -150)
 ignore_rotation = false
 limit_enabled = false
 
-[node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1049895323]
+[node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 

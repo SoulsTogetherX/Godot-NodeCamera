@@ -66,7 +66,7 @@ func _subscribe_layer(layer : NodeCamera2DLayer) -> void:
 	
 	layer.priority_changed.connect(
 		_update_layer_priority,
-		CONNECT_APPEND_SOURCE_OBJECT
+		CONNECT_APPEND_SOURCE_OBJECT | CONNECT_DEFERRED
 	)
 	_update_layer_priority(layer)
 func _unsubscribe_layer(layer : NodeCamera2DLayer) -> void:
@@ -96,7 +96,7 @@ func register_layer(layer : NodeCamera2DLayer) -> void:
 		_subscription_changed,
 		CONNECT_DEFERRED | CONNECT_APPEND_SOURCE_OBJECT
 	)
-	_subscription_changed(layer)
+	_subscription_changed.call_deferred(layer)
 ## Unregisters the given [param layer] from this object.
 func unregister_layer(layer : NodeCamera2DLayer) -> void:
 	if !is_layer_registered(layer):

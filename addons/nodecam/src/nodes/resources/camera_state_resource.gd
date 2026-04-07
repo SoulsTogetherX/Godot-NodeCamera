@@ -33,6 +33,8 @@ var rotation_degrees : float:
 
 #region Private Variables
 var _rotation : float
+
+var _cached_delta : float
 #endregion
 
 
@@ -92,7 +94,19 @@ func get_rotation_degrees() -> float:
 #endregion
 
 
-#region Methods (Helper)
+#region Methods (Delta)
+## Returns a last cached delta. The delta given is either the process or the physics
+## delta, depending on the attached [NodeCamera2DHost]'s
+## [member NodeCamera2DHost.callback].
+## [br][br]
+## [b]NOTE[/b]: This value will be zero if [NodeCamera2DHost]'s
+## [member NodeCamera2DHost.callback] is MANUAL.
+func get_delta() -> float:
+	return _cached_delta
+#endregion
+
+
+#region Public Methods (Helper)
 ## Overwrite's the given [param cam]'s variables with this resources's state.
 func overwrite_status(cam : Camera2D) -> void:
 	offset = cam.offset

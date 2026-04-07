@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DFollowEffect extends NodeCamera2DEffect
+## A basic effect that constantly updates the target camera status to
+## the provided [member follow] node.
 
 
 #region External Variables

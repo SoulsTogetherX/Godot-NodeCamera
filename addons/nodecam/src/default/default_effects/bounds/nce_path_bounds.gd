@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DPathBoundEffect extends NodeCamera2DEffect
+## A basic effect that constantly updates the target camera's position status
+## to be on the closest point on the provided [member path].
 
 
 #endregion External Variables

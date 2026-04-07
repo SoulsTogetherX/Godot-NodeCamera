@@ -23,8 +23,8 @@ var _manual_hosts : Array[NodeCamera2DHost]
 
 #region Virtual Methods
 func _init() -> void:
-	_layer_manager.layer_start.connect(layer_tick_start)
-	_layer_manager.layer_end.connect(layer_tick_end)
+	_layer_manager.layer_activated.connect(layer_tick_start)
+	_layer_manager.layer_deactivated.connect(layer_tick_end)
 	
 	_layer_manager.layer_mask_changed.connect(_layer_camera_mask_changed)
 #endregion
@@ -132,24 +132,27 @@ func layer_tick_end(layer : NodeCamera2DLayer) -> void:
 
 #region Methods (Tick Callbacks)
 func _idle_tick() -> void:
+	var delta := get_process_delta_time()
 	for host : NodeCamera2DHost in _idle_hosts:
-		tick_host(host)
+		tick_host(host, delta)
 func _physics_tick() -> void:
+	var delta := get_physics_process_delta_time()
 	for host : NodeCamera2DHost in _physics_hosts:
-		tick_host(host)
+		tick_host(host, delta)
 
 ## Ticks all relevant layers with the information of all hosts,
 ## whose [member NodeCamera2DHost.callback] is set to
 ## [constant NodeCamera2DHost.CONSTANTS.CALLBACK_MODES.MANUAL].
 func manually_tick_hosts() -> void:
 	for host : NodeCamera2DHost in _manual_hosts:
-		tick_host(host)
+		tick_host(host, 0.0)
 
 ## Ticks all relevant layers with the information of the given
 ## [param hosts].
-func tick_host(host : NodeCamera2DHost) -> void:
+func tick_host(host : NodeCamera2DHost, delta : float) -> void:
 	var cam := host.get_camera()
 	var target_status := host.get_target_status()
+	target_status._cached_delta = delta
 	
 	_layer_manager._effect_tick(target_status, host.camera_flag_mask)
 	if _layer_manager.get_queued_transitions().is_empty():
@@ -157,6 +160,7 @@ func tick_host(host : NodeCamera2DHost) -> void:
 		return
 	
 	var current_status := host.get_target_status()
+	current_status._cached_delta = delta
 	_layer_manager._transition_tick(
 		target_status, current_status, host.camera_flag_mask
 	)

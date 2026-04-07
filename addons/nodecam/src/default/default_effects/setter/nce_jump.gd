@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DJumpEffect extends NodeCamera2DEffect
+## A basic effect that updates the target camera status, to the
+## provided [member follow] node, once when activated.
 
 
 #region External Variables

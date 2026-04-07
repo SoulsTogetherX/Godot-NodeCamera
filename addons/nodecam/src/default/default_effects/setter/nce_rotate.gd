@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DRotateEffect extends NodeCamera2DEffect
+## A basic effect that rotates the target camera status, by a certain amount,
+## once when activated.
 
 #endregion Enums
 enum MATH_METHOD {

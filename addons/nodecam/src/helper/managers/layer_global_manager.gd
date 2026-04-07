@@ -12,12 +12,12 @@ class_name NodeCamera2DLayerGlobalManager extends NodeCamera2DLayerManager
 ## 'layer_start' method ([method NodeCamera2DEffect.start_effect],
 ## [method NodeCamera2DTransition.start_transition], or
 ## [method NodeCamera2DGroup.start_group]) called.
-signal layer_start(layer : NodeCamera2DLayer)
+signal layer_activated(layer : NodeCamera2DLayer)
 ## This signal emits, requesting the provided layer to have it's appropriate
 ## 'layer_end' method ([method NodeCamera2DEffect.end_effect],
 ## [method NodeCamera2DTransition.end_transition], or
 ## [method NodeCamera2DGroup.end_group]) called.
-signal layer_end(layer : NodeCamera2DLayer)
+signal layer_deactivated(layer : NodeCamera2DLayer)
 
 ## This signal emits, requesting the provided layer to have it's appropriate
 ## 'layer_start' and 'layer_end' methods to be called when it's mask is changed.
@@ -43,11 +43,11 @@ func _update_layer_priority(layer : NodeCamera2DLayer) -> void:
 	_insert_layer_in_queue(layer, _active_layers)
 	super(layer)
 func _activate_layer(layer : NodeCamera2DLayer) -> void:
+	layer_activated.emit(layer)
 	_insert_layer_in_queue(layer, _active_layers)
-	layer_start.emit(layer)
 func _deactivate_layer(layer : NodeCamera2DLayer) -> void:
 	_active_layers.erase(layer)
-	layer_end.emit(layer)
+	layer_deactivated.emit(layer)
 #endregion
 
 
@@ -58,13 +58,13 @@ func _deactivate_layer(layer : NodeCamera2DLayer) -> void:
 func register_layer(layer : NodeCamera2DLayer) -> void:
 	super(layer)
 	layer.activated.connect(
-		_activate_layer, CONNECT_APPEND_SOURCE_OBJECT
+		_activate_layer, CONNECT_APPEND_SOURCE_OBJECT | CONNECT_DEFERRED
 	)
 	layer.deactivated.connect(
-		_deactivate_layer, CONNECT_APPEND_SOURCE_OBJECT
+		_deactivate_layer, CONNECT_APPEND_SOURCE_OBJECT | CONNECT_DEFERRED
 	)
 	layer.camera_mask_changed.connect(
-		layer_mask_changed.emit, CONNECT_APPEND_SOURCE_OBJECT
+		layer_mask_changed.emit, CONNECT_APPEND_SOURCE_OBJECT | CONNECT_DEFERRED
 	)
 	
 	if layer.is_running():

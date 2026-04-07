@@ -68,6 +68,7 @@ func _settup_camera() -> void:
 		_current_status.overwrite_status(_camera)
 		
 		_camera.anchor_mode = Camera2D.ANCHOR_MODE_DRAG_CENTER
+		_camera.ignore_rotation = false
 		_camera.limit_enabled = false
 		_camera.position_smoothing_enabled = false
 		_camera.rotation_smoothing_enabled = false
@@ -86,7 +87,7 @@ func _clear_camera() -> void:
 ## [br][br]
 ## [b]NOTE[/b]: This will tick the camera regardless of [member callback].
 func manual_tick() -> void:
-	NodeCamera2DManager.tick_host(self)
+	NodeCamera2DManager.tick_host(self, 0.0)
 #endregion
 
 
@@ -107,14 +108,15 @@ func get_current_status() -> GoCameraStateResource:
 
 
 #region Public Methods (Status Manipulation)
-## 
+## Sets the attached camera to align with the target camera status.
+## This bypasses any transitions.
 func teleport_cam() -> void:
 	_target_status.apply_status(_camera)
-## 
+## Sets the attached camera to align with the current camera status.
 func update_cam() -> void:
 	_current_status.apply_status(_camera)
 
-## 
+## Returns both the target and current status to align with the attached camera.
 func reset_cam() -> void:
 	_target_status.overwrite_status(_camera)
 	_current_status.overwrite_status(_camera)

@@ -1,6 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DBoundEffect extends NodeCamera2DEffect
+## A basic effect that constantly updates the target camera status to be with
+## the provided [Rect2] bounaries of [member bounary].
 
 
 #endregion External Variables
