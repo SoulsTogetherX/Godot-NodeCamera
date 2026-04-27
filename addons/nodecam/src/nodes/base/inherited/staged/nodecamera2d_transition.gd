@@ -7,25 +7,19 @@ class_name NodeCamera2DTransition extends NodeCamera2DStaged
 ## [GoCameraStateResource] resource of hosts.
 
 
-#region Private Virtual Methods
-func start_layer(
-	target : GoCameraStateResource, current : GoCameraStateResource
-) -> void:
-	pass
-func end_layer(
-	target : GoCameraStateResource, current : GoCameraStateResource
+#region Virtual Methods (User Overwrite)
+func transition_stage_changed(
+	target : NodeCameraState, current : NodeCameraState,
+	stage : NodeCamera2DConstants.LAYER_STAGES
 ) -> void:
 	pass
 
-func process_tick(
-	target : GoCameraStateResource, current : GoCameraStateResource
+func process_transition(
+	target : NodeCameraState, current : NodeCameraState,
+	stage : NodeCamera2DConstants.LAYER_STAGES
 ) -> void:
 	pass
-
-func advance_stage() -> void:
-	pass
-func get_needed_stages() -> PackedInt32Array:
-	return []
 #endregion
+
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

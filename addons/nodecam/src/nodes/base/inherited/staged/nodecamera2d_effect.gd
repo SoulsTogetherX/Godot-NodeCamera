@@ -6,14 +6,17 @@ class_name NodeCamera2DEffect extends NodeCamera2DStaged
 ## manipulating the target [GoCameraStateResource] resource of hosts.
 
 
-#region Private Virtual Methods
-func start_layer(target : GoCameraStateResource) -> void:
-	pass
-func end_layer(target : GoCameraStateResource) -> void:
+#region Virtual Methods (User Overwrite)
+func effect_stage_changed(
+	target : NodeCameraState, stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void:
 	pass
 
-func process_tick(target : GoCameraStateResource) -> void:
+func process_effect(
+	target : NodeCameraState, stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void:
 	pass
 #endregion
+
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
