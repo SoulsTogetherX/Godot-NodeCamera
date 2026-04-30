@@ -35,13 +35,31 @@ signal tick_requirement_changed
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:
-			NodeCamera2DManager.register_layer(self)
+			_register()
 		NOTIFICATION_EXIT_TREE:
-			NodeCamera2DManager.unregister_layer(self)
+			_unregister()
 #endregion
 
 
-#region Public Accessor Methods
+#region Private Methods (Register)
+func _unregister() -> void:
+	var parent := get_parent()
+	
+	if parent is NodeCamera2DMulti:
+		parent.unregister_layer(self)
+		return
+	NodeCamera2DManager.unregister_layer(self)
+func _register() -> void:
+	var parent := get_parent()
+	
+	if parent is NodeCamera2DMulti:
+		parent.register_layer(self)
+		return
+	NodeCamera2DManager.register_layer(self)
+#endregion
+
+
+#region Public Methods (Accessors)
 func set_disabled(val : bool) -> void:
 	if val == disabled:
 		return
@@ -49,9 +67,9 @@ func set_disabled(val : bool) -> void:
 	
 	if is_inside_tree():
 		if val:
-			NodeCamera2DManager.unregister_layer(self)
+			_unregister()
 			return
-		NodeCamera2DManager.register_layer(self)
+		_register()
 func get_disabled() -> bool:
 	return disabled
 
@@ -70,6 +88,12 @@ func set_camera_mask(val : int) -> void:
 	camera_mask_changed.emit()
 func get_camera_mask() -> int:
 	return camera_mask
+#endregion
+
+
+#region Public Methods (Check)
+func is_top_level() -> bool:
+	return false
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

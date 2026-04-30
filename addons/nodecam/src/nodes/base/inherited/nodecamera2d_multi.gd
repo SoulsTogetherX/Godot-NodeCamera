@@ -3,24 +3,26 @@
 @abstract
 class_name NodeCamera2DMulti extends NodeCamera2DLayer
 
+#region Virtual Methods (Overwritable)
+@abstract
+func process_effect(
+	target : NodeCameraState, stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void
 
-#region Public Virtual Methods (Abstract)
 @abstract
-func ticks_on_transition() -> bool
-@abstract
-func ticks_on_effect() -> bool
-@abstract
-func needs_tick() -> bool
+func process_transition(
+	target : NodeCameraState, current : NodeCameraState,
+	stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void
 #endregion
 
 
-#region Virtual Methods (User Overwrite)
-func process_effect_stage(target : NodeCameraState) -> void:
-	pass
-func process_translation_stage(
-	target : NodeCameraState, current : NodeCameraState
-) -> void:
-	pass
+#region Virtual Methods (Register)
+@abstract
+func register_layer(layer : NodeCamera2DLayer) -> void
+
+@abstract
+func unregister_layer(layer : NodeCamera2DLayer) -> void
 #endregion
 
 

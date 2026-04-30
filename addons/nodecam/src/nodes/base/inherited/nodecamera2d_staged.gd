@@ -3,6 +3,10 @@
 @abstract
 class_name NodeCamera2DStaged extends NodeCamera2DLayer
 
+#region Enums
+const LAYER_STAGES = NodeCamera2DConstants.LAYER_STAGES
+#endregion
+
 
 #region Private Variables
 var _host_context : NodeCamera2DHostContext
@@ -38,8 +42,8 @@ func get_needed_process_stages() -> PackedInt32Array:
 	return []
 func get_needed_change_stages() -> PackedInt32Array:
 	return [
-		NodeCamera2DConstants.LAYER_STAGES.STARTING,
-		NodeCamera2DConstants.LAYER_STAGES.HAULTED
+		LAYER_STAGES.STARTING,
+		LAYER_STAGES.HAULTED
 	]
 #endregion
 

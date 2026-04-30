@@ -65,8 +65,6 @@ func _update_structures_with_mask(mask : int) -> void:
 
 
 #region Private Methods (Updating Layers)
-func _layer_changed_tick(layer : NodeCamera2DLayer) -> void:
-	pass
 func _layer_changed_mask(layer : NodeCamera2DLayer) -> void:
 	var old_mask := _mask_by_layer[layer]
 	var new_mask := layer.camera_mask

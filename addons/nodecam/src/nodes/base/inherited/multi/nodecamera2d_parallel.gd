@@ -6,14 +6,26 @@ class_name NodeCamera2DParallel extends NodeCamera2DMulti
 ## children [NodeCamera2DLayer], while also boosting performance.
 
 
-#region Public Virtual Methods (Abstract)
-func ticks_on_transition() -> bool:
-	return false
-func ticks_on_effect() -> bool:
-	return false
-func needs_tick() -> bool:
-	return false
+#region Virtual Methods (Overwritable)
+func process_effect(
+	target : NodeCameraState, stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void:
+	pass
+
+func process_transition(
+	target : NodeCameraState, current : NodeCameraState,
+	stage : NodeCamera2DConstants.LAYER_STAGES
+) -> void:
+	pass
 #endregion
 
+
+#region Virtual Methods (Register)
+func register_layer(layer : NodeCamera2DLayer) -> void:
+	pass
+
+func unregister_layer(layer : NodeCamera2DLayer) -> void:
+	pass
+#endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
