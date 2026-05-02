@@ -55,12 +55,7 @@ func _host_update_callback(host : NodeCamera2DHost) -> void:
 		_context_array_by_host[host].erase(host._context)
 	_insert_host_callback(host)
 func _host_update_mask(host : NodeCamera2DHost) -> void:
-	host._context.flag_structure_changed()
-
-func _update_structures_with_mask(mask : int) -> void:
-	for host : NodeCamera2DHost in get_hosts():
-		if host.camera_mask & mask:
-			host._context.flag_structure_changed()
+	host.get_scope().flag_structure_changed()
 #endregion
 
 
@@ -74,22 +69,22 @@ func _layer_changed_mask(layer : NodeCamera2DLayer) -> void:
 	for host : NodeCamera2DHost in _context_array_by_host.keys():
 		if mask_diff & host.camera_mask:
 			if new_mask & host.camera_mask:
-				host._context.flag_layer_add(layer)
+				host.get_scope().flag_layer_add(layer)
 				continue
-			host._context.flag_layer_remove(layer)
+			host.get_scope().flag_layer_remove(layer)
 
 func _layer_changed_add(layer : NodeCamera2DLayer) -> void:
 	for host : NodeCamera2DHost in _context_array_by_host.keys():
 		if layer.camera_mask & host.camera_mask:
-			host._context.flag_layer_add(layer)
+			host.get_scope().flag_layer_add(layer)
 func _layer_changed_remove(layer : NodeCamera2DLayer) -> void:
 	for host : NodeCamera2DHost in _context_array_by_host.keys():
 		if layer.camera_mask & host.camera_mask:
-			host._context.flag_layer_remove(layer)
+			host.get_scope().flag_layer_remove(layer)
 func _layer_changed_priority(layer : NodeCamera2DLayer) -> void:
 	for host : NodeCamera2DHost in _context_array_by_host.keys():
 		if layer.camera_mask & host.camera_mask:
-			host._context.flag_layer_reorder(layer)
+			host.get_scope().flag_layer_reorder(layer)
 #endregion
 
 
@@ -151,7 +146,7 @@ func register_host(host : NodeCamera2DHost) -> void:
 	)
 	_insert_host_callback(host)
 	
-	host._context.flag_structure_changed()
+	host.get_scope().flag_structure_changed()
 	_update_ticks()
 	host.activate.emit()
 func unregister_host(host : NodeCamera2DHost) -> void:
@@ -168,7 +163,7 @@ func unregister_host(host : NodeCamera2DHost) -> void:
 		_context_array_by_host[host].erase(host._context)
 		_context_array_by_host.erase(host)
 	
-	host._context.flag_host_unregistered()
+	host.get_scope().flag_clear_layers()
 	_update_ticks()
 	host.deactivate.emit()
 

@@ -3,6 +3,7 @@
 @abstract
 class_name NodeCamera2DMulti extends NodeCamera2DLayer
 
+
 #region Virtual Methods (Overwritable)
 @abstract
 func process_effect(

@@ -29,6 +29,7 @@ signal camera_mask_changed
 
 #region Private Variables
 var _camera : Camera2D
+
 var _context : NodeCamera2DHostContext = NodeCamera2DHostContext.new(self)
 #endregion
 
@@ -54,6 +55,11 @@ func _notification(what: int) -> void:
 #region Public Methods (Helper)
 func teleport_position() -> void:
 	_context.teleport_overwrite()
+
+func get_scope() -> NodeCamera2DExecutionScope:
+	return _context.get_scope()
+func get_camera() -> Camera2D:
+	return _camera
 #endregion
 
 

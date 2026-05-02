@@ -3,28 +3,29 @@
 @abstract
 class_name NodeCamera2DStaged extends NodeCamera2DLayer
 
+
 #region Enums
 const LAYER_STAGES = NodeCamera2DConstants.LAYER_STAGES
 #endregion
 
 
 #region Private Variables
-var _host_context : NodeCamera2DHostContext
+var _scope : NodeCamera2DExecutionScope
 #endregion
 
 
 
 #region Public Methods (During-Layer Helper)
 func advance_stage() -> void:
-	_host_context.flag_layer_stage_advance(self)
+	_scope.flag_layer_stage_advance(self)
 func set_stage(stage : NodeCamera2DConstants.LAYER_STAGES) -> void:
-	_host_context.flag_layer_direct_stage_change(self, stage)
+	_scope.flag_layer_direct_stage_change(self, stage)
 #endregion
 
 
 #region Public Methods (Force-Layer Helper)
 func force_advance_stage(host : NodeCamera2DHost) -> void:
-	host._host_context.flag_layer_stage_advance(self)
+	host._host_content.flag_layer_stage_advance(self)
 
 func force_start(host : NodeCamera2DHost) -> void:
 	force_stage(host, NodeCamera2DConstants.LAYER_STAGES.STARTING)

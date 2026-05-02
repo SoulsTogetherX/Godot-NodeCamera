@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d0rr28mur8wkj"]
 
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
-[ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera2d_multiplexer.gd" id="1_gnvb1"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera2d_host.gd" id="1_ypfvr"]
+[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera2d_parallel.gd" id="2_e6yeu"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
 [ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera2d_effect.gd" id="4_4bahi"]
 
@@ -14,13 +14,13 @@ size = Vector2(41, 488)
 
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
-[node name="NodeCamera2DMultiplexer" type="Node" parent="." unique_id=780167388]
-script = ExtResource("1_gnvb1")
-metadata/_custom_type_script = "uid://nqu2162c3ade"
-
-[node name="NodeCamera2DEffect" type="Node" parent="NodeCamera2DMultiplexer" unique_id=1816015336]
+[node name="NodeCamera2DEffect" type="Node" parent="." unique_id=1816015336]
 script = ExtResource("4_4bahi")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="NodeCamera2DParallel" type="Node" parent="." unique_id=115322734]
+script = ExtResource("2_e6yeu")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
 position = Vector2(78, -150)
