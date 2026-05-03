@@ -69,6 +69,8 @@ func _notification(what: int) -> void:
 #region Public Methods (Helper)
 func teleport_position() -> void:
 	_scope.teleport_overwrite()
+func process_tick() -> void:
+	NodeCamera2DManager.tick_host_scope(_scope)
 
 func get_scope() -> NodeCamera2DHostExecutionScope:
 	return _scope

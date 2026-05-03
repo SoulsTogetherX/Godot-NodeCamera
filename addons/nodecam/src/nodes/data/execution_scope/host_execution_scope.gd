@@ -19,7 +19,7 @@ func _init(
 	_host = host
 	_host_scope = self
 	_parent_record = null
-	_layer_storage = layer_storage
+	_set_layer_storage(layer_storage)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:

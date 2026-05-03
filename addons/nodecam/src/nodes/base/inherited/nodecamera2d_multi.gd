@@ -4,12 +4,14 @@
 class_name NodeCamera2DMulti extends NodeCamera2DLayer
 
 #region Private Variables
-var _layer_storage := NodeCamera2DLayerStorage.new()
+var _layer_storage : NodeCamera2DLayerStorage
 #endregion
 
 
 
 #region Virtual Methods (Engine)
+func _init() -> void:
+	_layer_storage = NodeCamera2DLayerStorage.new()
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_layer_storage.free()

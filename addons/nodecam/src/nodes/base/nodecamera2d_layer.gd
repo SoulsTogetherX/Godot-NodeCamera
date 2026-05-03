@@ -44,6 +44,7 @@ var _scope : NodeCamera2DExecutionScope
 func _notification(what: int) -> void:
 	if disabled:
 		return
+	
 	match what:
 		NOTIFICATION_ENTER_TREE:
 			_register()

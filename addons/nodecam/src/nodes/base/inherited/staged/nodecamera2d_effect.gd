@@ -9,12 +9,14 @@ class_name NodeCamera2DEffect extends NodeCamera2DStaged
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	prints(1, target, stage)
+	pass
+	#prints(1, target, stage)
 
 func process_effect(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	prints(2, target, stage)
+	pass
+	#prints(2, target, stage)
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

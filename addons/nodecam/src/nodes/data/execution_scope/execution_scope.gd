@@ -53,7 +53,7 @@ func _init(
 ) -> void:
 	_host_scope = host_scope
 	_parent_record = parent_record
-	_layer_storage = layer_storage
+	_set_layer_storage(layer_storage)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
@@ -64,7 +64,7 @@ func _notification(what: int) -> void:
 
 
 #region Layer Storage Methods
-func set_layer_storage(storage : NodeCamera2DLayerStorage) -> void:
+func _set_layer_storage(storage : NodeCamera2DLayerStorage) -> void:
 	if _layer_storage == storage:
 		return
 	if _layer_storage != null:
@@ -89,14 +89,20 @@ func flag_clear_scope() -> void:
 	_flag_request(DIRTY_FLAGS.STRUCTURE_CLEARED)
 
 func _flag_remove_layer(layer : NodeCamera2DLayer) -> void:
-	_layer_to_dirty_op[layer] |= DIRTY_FLAGS.REMOVE_LAYER
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.REMOVE_LAYER
 	_flag_request(DIRTY_FLAGS.REMOVE_LAYER)
 func _flag_reorder_layer(layer : NodeCamera2DLayer, old_priority : int) -> void:
 	_layer_to_old_priority[layer] = old_priority
-	_layer_to_dirty_op[layer] |= DIRTY_FLAGS.REORDER_LAYER
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.REORDER_LAYER
 	_flag_request(DIRTY_FLAGS.REORDER_LAYER)
 func _flag_add_layer(layer : NodeCamera2DLayer) -> void:
-	_layer_to_dirty_op[layer] |= DIRTY_FLAGS.ADD_LAYER
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.ADD_LAYER
 	_flag_request(DIRTY_FLAGS.ADD_LAYER)
 func _flag_mask_changed(layer : NodeCamera2DLayer, old_mask : int) -> void:
 	var host_mask := _host_scope.get_mask()
@@ -110,7 +116,11 @@ func _flag_mask_changed(layer : NodeCamera2DLayer, old_mask : int) -> void:
 		_flag_remove_layer(layer)
 
 func _flag_stage_advance(layer : NodeCamera2DStaged) -> void:
-	_layer_to_dirty_op[layer as NodeCamera2DLayer] |= DIRTY_FLAGS.STAGE_CHANGED
+	_layer_to_dirty_op[layer as NodeCamera2DLayer] = (
+		_layer_to_dirty_op.get(
+			layer as NodeCamera2DLayer, 0
+		) | DIRTY_FLAGS.STAGE_CHANGED
+	)
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
 func _flag_stage_overwrite(
 	layer : NodeCamera2DStaged, stage : LAYER_STAGES
@@ -129,14 +139,17 @@ func _flag_request(op : DIRTY_FLAGS) -> void:
 func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CLEARED:
 		_clear_scope()
+		_dirty_mask = 0
 		return
 	if _host_scope.is_disabled():
 		_layer_to_dirty_op.clear()
 		_layer_to_old_priority.clear()
 		_layer_to_force_stage.clear()
+		_dirty_mask = 0
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
 		_construct_scope(_layer_storage.get_registered_layers())
+		_dirty_mask = 0
 		return
 	
 	var rebuild_flags : int = TICK_TYPE.NONE
@@ -173,6 +186,7 @@ func _handle_dirty_layers() -> void:
 	_layer_to_dirty_op.clear()
 	_layer_to_old_priority.clear()
 	_layer_to_force_stage.clear()
+	_dirty_mask = 0
 
 
 func force_construct_scope() -> void:
@@ -285,12 +299,8 @@ func _construct_record(layer : NodeCamera2DLayer) -> LayerRecord:
 		)
 		record.scope.force_construct_scope()
 		
-		record.tick_mask = get_tick_mask(record.scope)
-		if record.tick_mask == TICK_TYPE.NONE:
-			record.free()
-			return
-		
 		record.layer = layer
+		record.tick_mask = get_tick_mask(record.scope)
 		record.request_tick_mask_update.connect(
 			_group_tick_update, CONNECT_APPEND_SOURCE_OBJECT
 		)
@@ -319,10 +329,12 @@ func run_transitions(
 
 static func get_tick_mask(scope : NodeCamera2DExecutionScope) -> int:
 	var mask := TICK_TYPE.NONE
+	
 	if scope.has_effects():
 		mask |= TICK_TYPE.EFFECTS
 	if scope.has_transitions():
 		mask |= TICK_TYPE.TRANSITIONS
+	
 	return mask
 #endregion
 

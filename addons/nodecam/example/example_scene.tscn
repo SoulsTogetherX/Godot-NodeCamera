@@ -14,11 +14,11 @@ size = Vector2(41, 488)
 
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
-[node name="NodeCamera2DParallel" type="Node" parent="." unique_id=115322734]
+[node name="Node1" type="Node" parent="." unique_id=13194005]
 script = ExtResource("2_e6yeu")
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="NodeCamera2DEffect" type="Node" parent="NodeCamera2DParallel" unique_id=1633200836]
+[node name="Node3" type="Node" parent="Node1" unique_id=1319441535]
 script = ExtResource("4_4bahi")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
