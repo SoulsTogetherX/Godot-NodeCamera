@@ -13,8 +13,20 @@ signal camera_mask_changed
 #endregion
 
 
+#region Enums
+## An enum used to denote at what times layers will run for
+## each [NodeCamera2DHost].
+enum CALLBACK_MODES {
+	AUTO,
+	IDLE, ## Layers will run on process frames.
+	PHYSICS, ## Layers will run on physics frames.
+	MANUAL ## Layers will run when manually requested to run. See [method NodeCamera2DHost.manual_tick]
+}
+#endregion
+
+
 #region External Variables
-@export var callback_mode : NodeCamera2DConstants.CALLBACK_MODES = NodeCamera2DConstants.CALLBACK_MODES.PHYSICS:
+@export var callback_mode : CALLBACK_MODES = CALLBACK_MODES.PHYSICS:
 	set = set_callback_mode,
 	get = get_callback_mode
 @export var camera_mask : int = 1:
@@ -30,7 +42,9 @@ signal camera_mask_changed
 #region Private Variables
 var _camera : Camera2D
 
-var _context : NodeCamera2DHostContext = NodeCamera2DHostContext.new(self)
+var _scope : NodeCamera2DHostExecutionScope = NodeCamera2DHostExecutionScope.new(
+	self, NodeCamera2DManager.get_layer_storage()
+)
 #endregion
 
 
@@ -42,35 +56,35 @@ func _notification(what: int) -> void:
 			_camera = get_parent() as Camera2D
 			
 			if !disabled && _camera:
-				_context.overwrite_status()
+				_scope.overwrite_status()
 				NodeCamera2DManager.register_host(self)
 		NOTIFICATION_EXIT_TREE:
 			NodeCamera2DManager.unregister_host(self)
 		NOTIFICATION_PREDELETE:
-			_context.free()
+			_scope.free()
 #endregion
 
 
 
 #region Public Methods (Helper)
 func teleport_position() -> void:
-	_context.teleport_overwrite()
+	_scope.teleport_overwrite()
 
-func get_scope() -> NodeCamera2DExecutionScope:
-	return _context.get_scope()
+func get_scope() -> NodeCamera2DHostExecutionScope:
+	return _scope
 func get_camera() -> Camera2D:
 	return _camera
 #endregion
 
 
 #region Public Accessor Methods
-func set_callback_mode(val : NodeCamera2DConstants.CALLBACK_MODES) -> void:
+func set_callback_mode(val : CALLBACK_MODES) -> void:
 	if val == callback_mode:
 		return
 	
 	callback_mode = val
 	callback_mode_changed.emit()
-func get_callback_mode() -> NodeCamera2DConstants.CALLBACK_MODES:
+func get_callback_mode() -> CALLBACK_MODES:
 	return callback_mode
 
 func set_camera_mask(val : int) -> void:
@@ -87,7 +101,7 @@ func set_disabled(val : bool) -> void:
 	
 	if !disabled && _camera:
 		NodeCamera2DManager.register_host(self)
-		_context.overwrite_status()
+		_scope.overwrite_status()
 		return
 	NodeCamera2DManager.unregister_host(self)
 func get_disabled() -> bool:

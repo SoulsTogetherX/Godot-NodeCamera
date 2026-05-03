@@ -1,34 +1,34 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCamera2DHostContext extends Object
+class_name NodeCamera2DHostExecutionScope extends NodeCamera2DExecutionScope
 
-
-#region Private Variables (Camera Status)
+#region Private Variables
 var _host : NodeCamera2DHost
 
 var _current_state := NodeCameraState.new()
 var _target_state := NodeCameraState.new()
-
-var _main_scope := NodeCamera2DExecutionScope.new(self)
 #endregion
 
 
 
-#region Virtual Methods (Engine)
-func _init(host : NodeCamera2DHost) -> void:
+#region Virtual Methods
+func _init(
+	host : NodeCamera2DHost, 
+	layer_storage : NodeCamera2DLayerStorage
+) -> void:
 	_host = host
+	_host_scope = self
+	_layer_storage = layer_storage
 
 func _notification(what: int) -> void:
-	match what:
-		NOTIFICATION_PREDELETE:
-			_current_state.free()
-			_target_state.free()
-			_main_scope.free()
+	if what == NOTIFICATION_PREDELETE:
+		_current_state.free()
+		_target_state.free()
 #endregion
 
 
-#region Layer Management Methods
-func sync_stage(
+#region Layer State Methods
+func _sync_layer_stage(
 	layer: NodeCamera2DStaged, record : StagedLayerRecord,
 	scope : NodeCamera2DExecutionScope,
 	update_start : bool = false, allow_remove : bool = true
@@ -41,7 +41,7 @@ func sync_stage(
 			layer.transition_stage_changed(_target_state, _current_state, record.stage)
 	
 	if record.stage & record.stage_process_mask == 0:
-		while record.stage > NodeCamera2DConstants.LAYER_STAGES.HAULTED:
+		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
 			if record.stage & record.stage_changed_mask > 0:
 				if layer is NodeCamera2DEffect:
@@ -51,19 +51,25 @@ func sync_stage(
 			
 			if record.stage & record.stage_process_mask > 0:
 				break
-	if record.stage == NodeCamera2DConstants.LAYER_STAGES.HAULTED && allow_remove:
+	if record.stage == LAYER_STAGES.HAULTED && allow_remove:
 		scope._remove_layer(layer)
 
-func set_layer_to_stage(
+func _set_layer_stage(
 	layer : NodeCamera2DStaged, record : StagedLayerRecord,
 	scope : NodeCamera2DExecutionScope,
-	stage : NodeCamera2DConstants.LAYER_STAGES
+	stage : LAYER_STAGES
 ) -> void:
 	if record.stage == stage:
 		return
 	record.stage = stage
 	
-	sync_stage(layer, record, scope, true, true)
+	_sync_layer_stage(layer, record, scope, true, true)
+func _advance_layer_stage(
+	layer : NodeCamera2DStaged, record : StagedLayerRecord,
+	scope : NodeCamera2DExecutionScope
+) -> void:
+	record.stage >>= 1
+	_sync_layer_stage(layer, record, scope, false, true)
 #endregion
 
 
@@ -86,27 +92,25 @@ func teleport_overwrite() -> void:
 
 #region Tick Methods
 func run_tick() -> void:
-	if _main_scope.effects_empty():
+	if _effect_storage.is_empty():
 		return
 	
-	_main_scope.run_effects(_target_state)
-	if _main_scope.transitions_empty():
+	run_effects(_target_state)
+	if _transition_storage.is_empty():
 		teleport_position()
 		return
 	
-	_main_scope.run_transitions(_target_state, _current_state)
+	run_transitions(_target_state, _current_state)
 	align_position()
 #endregion
 
 
-#region Accessor Methods
-func get_mask() -> int:
-	return _host.camera_mask
-func get_scope() -> NodeCamera2DExecutionScope:
-	return _main_scope
-
+#region Host Accessor Methods
 func is_disabled() -> bool:
 	return _host.disabled
+
+func get_mask() -> int:
+	return _host.camera_mask
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

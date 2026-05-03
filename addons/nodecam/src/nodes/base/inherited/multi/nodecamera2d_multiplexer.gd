@@ -3,16 +3,15 @@
 @icon("uid://cax3r21pd3net")
 class_name NodeCamera2DMultiplexer extends NodeCamera2DMulti
 
-
 #region Virtual Methods (Overwritable)
 func process_effect(
-	target : NodeCameraState, stage : NodeCamera2DConstants.LAYER_STAGES
+	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	pass
 
 func process_transition(
 	target : NodeCameraState, current : NodeCameraState,
-	stage : NodeCamera2DConstants.LAYER_STAGES
+	stage : LAYER_STAGES
 ) -> void:
 	pass
 #endregion

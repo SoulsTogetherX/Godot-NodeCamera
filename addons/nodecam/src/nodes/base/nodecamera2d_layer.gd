@@ -5,7 +5,6 @@
 class_name NodeCamera2DLayer extends Node
 ## The base layer for all camera manipulation.
 
-
 #region Signals
 signal activated
 signal deactivated
@@ -14,6 +13,11 @@ signal priority_changed
 signal camera_mask_changed
 
 signal tick_requirement_changed
+#endregion
+
+
+#region Enums
+const LAYER_STAGES = NodeCamera2DExecutionScope.LAYER_STAGES
 #endregion
 
 
@@ -95,6 +99,5 @@ func get_camera_mask() -> int:
 func is_top_level() -> bool:
 	return false
 #endregion
-
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

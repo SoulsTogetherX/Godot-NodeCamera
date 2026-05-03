@@ -1,8 +1,11 @@
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 class_name StagedLayerRecord extends LayerRecord
 
-var layer : NodeCamera2DStaged
-var stage : NodeCamera2DConstants.LAYER_STAGES
-var queue_kind : NodeCamera2DExecutionScope.QUEUE_TYPE
+#region Public Variables
+var stage : NodeCamera2DExecutionScope.LAYER_STAGES
 
 var stage_changed_mask : int
 var stage_process_mask : int
+#endregion
+
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

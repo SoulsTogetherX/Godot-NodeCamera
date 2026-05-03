@@ -3,7 +3,6 @@
 class_name NodeCameraState extends Object
 ## A basic [Resource] used to hold, store, and manipulate the status of a camera.
 
-
 #region External Variables
 @export var position : Vector2:
 	set = set_position,
@@ -66,6 +65,5 @@ func apply_status(cam : Camera2D) -> void:
 	cam.zoom = zoom
 	cam.rotation = _rotation
 #endregion
-
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
