@@ -4,7 +4,15 @@
 class_name NodeCamera2DMulti extends NodeCamera2DLayer
 
 #region Private Variables
-var _layer_storage : NodeCamera2DLayerStorage
+var _layer_storage := NodeCamera2DLayerStorage.new()
+#endregion
+
+
+
+#region Virtual Methods (Engine)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_layer_storage.free()
 #endregion
 
 
@@ -28,6 +36,12 @@ func register_layer(layer : NodeCamera2DLayer) -> void
 
 @abstract
 func unregister_layer(layer : NodeCamera2DLayer) -> void
+#endregion
+
+
+#region Public Methods (Accessor)
+func get_layer_storage() -> NodeCamera2DLayerStorage:
+	return _layer_storage
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

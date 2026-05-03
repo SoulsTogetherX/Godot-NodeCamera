@@ -9,13 +9,13 @@ class_name NodeCamera2DParallel extends NodeCamera2DMulti
 func process_effect(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	pass
+	_scope.run_effects(target)
 
 func process_transition(
 	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
-	pass
+	_scope.run_transitions(target, current)
 #endregion
 
 

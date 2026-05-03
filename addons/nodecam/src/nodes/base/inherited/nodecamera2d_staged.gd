@@ -4,12 +4,6 @@
 class_name NodeCamera2DStaged extends NodeCamera2DLayer
 
 
-#region Private Variables
-var _scope : NodeCamera2DExecutionScope
-#endregion
-
-
-
 #region Public Methods (During-Layer Helper)
 func advance_stage() -> void:
 	_scope.flag_layer_stage_advance(self)

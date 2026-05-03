@@ -18,6 +18,7 @@ func _init(
 ) -> void:
 	_host = host
 	_host_scope = self
+	_parent_record = null
 	_layer_storage = layer_storage
 
 func _notification(what: int) -> void:

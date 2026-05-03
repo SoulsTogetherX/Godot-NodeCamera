@@ -34,9 +34,16 @@ const LAYER_STAGES = NodeCamera2DExecutionScope.LAYER_STAGES
 #endregion
 
 
+#region Private Variables
+var _scope : NodeCamera2DExecutionScope
+#endregion
+
+
 
 #region Virtual Methods
 func _notification(what: int) -> void:
+	if disabled:
+		return
 	match what:
 		NOTIFICATION_ENTER_TREE:
 			_register()

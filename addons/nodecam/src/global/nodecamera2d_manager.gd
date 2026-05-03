@@ -14,6 +14,13 @@ var _scope_array_by_host : Dictionary[NodeCamera2DHost, Array]
 
 
 
+#region Virtual Methods (Engine)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_top_level_storage.free()
+#endregion
+
+
 #region Private Methods (Tick Hosts)
 func _process_tick() -> void:
 	for scope : NodeCamera2DHostExecutionScope in _process_hosts:
@@ -72,7 +79,7 @@ func register_host(host : NodeCamera2DHost) -> void:
 	)
 	_insert_host_callback(host)
 	
-	host.get_scope().flag_reconstruct_scope()
+	host.get_scope().flag_construct_scope()
 	_update_ticks()
 	host.activate.emit()
 func unregister_host(host : NodeCamera2DHost) -> void:
