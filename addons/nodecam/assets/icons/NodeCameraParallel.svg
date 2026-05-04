@@ -4,7 +4,7 @@
    height="16"
    version="1.1"
    id="svg1"
-   sodipodi:docname="NodeCamera2DParallel.svg"
+   sodipodi:docname="NodeCameraParallel.svg"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -24,7 +24,7 @@
      showgrid="false"
      inkscape:zoom="45.254834"
      inkscape:cx="2.7068931"
-     inkscape:cy="8.6510095"
+     inkscape:cy="8.6289124"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
      inkscape:window-x="-9"
@@ -51,7 +51,7 @@
            sodipodi:nodetypes="cccccccccccccc" />
         <path
            id="path1-8"
-           style="fill:#8da5f3;fill-opacity:1;stroke:none;stroke-width:0.44274;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+           style="fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:0.44274;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
            d="M 1.4965568 -2.8199513 C 1.4535807 -2.62649 1.3593811 -2.4397926 1.2087687 -2.280451 L 1.2087687 -2.2000999 L 1.8097622 -2.6002156 L 1.4965568 -2.8199513 z M -2.3775143 -2.3698211 L -3.2498977 -1.7532494 L -1.7224068 -0.68080813 C -1.7417658 -0.73535263 -1.7506875 -0.79390472 -1.7519235 -0.85462889 L -1.7634023 -1.4244658 C -2.1264318 -1.6308853 -2.3537508 -1.9920076 -2.3775143 -2.3698211 z M 2.1598634 -2.353423 L 2.1598634 -1.1530758 L 3.0142088 -1.7532494 L 2.1598634 -2.353423 z M -2.9867068 -1.1776731 L -3.2662959 -0.97597546 L -0.11784444 1.2312202 L 3.030607 -0.97597546 L 2.7510179 -1.1776731 L -0.11784444 0.84258321 L -2.9867068 -1.1776731 z M 1.1866311 -0.7931357 C 1.1506961 -0.5380512 0.94572121 -0.32660725 0.68156706 -0.32660735 L -1.2181626 -0.32660735 L -0.11784444 0.44574714 L 1.422765 -0.63571313 L 1.1866311 -0.7931357 z M -2.9867068 -0.42253673 L -3.2662959 -0.22083906 L -0.11784444 1.9863566 L 3.030607 -0.22083906 L 2.7510179 -0.42253673 L -0.11784444 1.5977196 L -2.9867068 -0.42253673 z " />
       </g>
       <g

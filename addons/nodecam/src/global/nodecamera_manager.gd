@@ -3,13 +3,13 @@
 extends Node
 
 #region Private Variables
-var _top_level_storage := NodeCamera2DLayerStorage.new()
+var _top_level_storage := NodeCameraLayerStorage.new()
 
-var _process_hosts : Array[NodeCamera2DHostExecutionScope]
-var _physics_hosts : Array[NodeCamera2DHostExecutionScope]
+var _process_hosts : Array[NodeCameraHostExecutionScope]
+var _physics_hosts : Array[NodeCameraHostExecutionScope]
 
-#		Dictionary[NodeCamera2DHost, Array[NodeCamera2DHostExecutionScope]
-var _scope_array_by_host : Dictionary[NodeCamera2DHost, Array]
+#		Dictionary[NodeCameraHost, Array[NodeCamera2DstExecutionScope]
+var _scope_array_by_host : Dictionary[NodeCameraHost, Array]
 #endregion
 
 
@@ -23,10 +23,10 @@ func _notification(what: int) -> void:
 
 #region Private Methods (Tick Hosts)
 func _process_tick() -> void:
-	for scope : NodeCamera2DHostExecutionScope in _process_hosts:
+	for scope : NodeCameraHostExecutionScope in _process_hosts:
 		scope.run_tick()
 func _physics_tick() -> void:
-	for scope : NodeCamera2DHostExecutionScope in _physics_hosts:
+	for scope : NodeCameraHostExecutionScope in _physics_hosts:
 		scope.run_tick()
 
 func _update_ticks() -> void:
@@ -48,37 +48,41 @@ func _update_ticks() -> void:
 
 
 #region Private Methods (Updating Hosts)
-func _insert_host_callback(host : NodeCamera2DHost) -> void:
-	if host.callback_mode == NodeCamera2DHost.CALLBACK_MODES.MANUAL:
+func _insert_host_callback(host : NodeCameraHost) -> void:
+	if host.callback_mode == NodeCameraHost.CALLBACK_MODES.MANUAL:
 		return
 	
-	var queue : Array[NodeCamera2DHostExecutionScope]
+	var queue : Array[NodeCameraHostExecutionScope]
 	match host.callback_mode:
-		NodeCamera2DHost.CALLBACK_MODES.PHYSICS:
+		NodeCameraHost.CALLBACK_MODES.PHYSICS:
 			queue = _physics_hosts
-		NodeCamera2DHost.CALLBACK_MODES.IDLE:
+		NodeCameraHost.CALLBACK_MODES.IDLE:
 			queue = _process_hosts
-		NodeCamera2DHost.CALLBACK_MODES.MANUAL:
-			match host.get_camera().process_callback:
-				Camera2D.Camera2DProcessCallback.CAMERA2D_PROCESS_PHYSICS:
-					queue = _physics_hosts
-				Camera2D.Camera2DProcessCallback.CAMERA2D_PROCESS_IDLE:
-					queue = _process_hosts
+		NodeCameraHost.CALLBACK_MODES.MANUAL:
+			var cam := host.get_camera()
+			if cam is Camera2D:
+				match (cam as Camera2D).process_callback:
+					Camera2D.Camera2DProcessCallback.CAMERA2D_PROCESS_PHYSICS:
+						queue = _physics_hosts
+					Camera2D.Camera2DProcessCallback.CAMERA2D_PROCESS_IDLE:
+						queue = _process_hosts
+			else:
+				queue = _physics_hosts
 	
 	_scope_array_by_host[host] = queue
 	queue.append(host._scope)
 
-func _host_update_callback(host : NodeCamera2DHost) -> void:
+func _host_update_callback(host : NodeCameraHost) -> void:
 	if host._scope in _scope_array_by_host:
 		_scope_array_by_host[host].erase(host._scope)
 	_insert_host_callback(host)
-func _host_update_mask(host : NodeCamera2DHost) -> void:
+func _host_update_mask(host : NodeCameraHost) -> void:
 	host.get_scope().flag_structure_changed()
 #endregion
 
 
 #region Public Methods (Register Host)
-func register_host(host : NodeCamera2DHost) -> void:
+func register_host(host : NodeCameraHost) -> void:
 	if is_host_registered(host):
 		return
 	
@@ -93,7 +97,7 @@ func register_host(host : NodeCamera2DHost) -> void:
 	host.get_scope().flag_construct_scope()
 	_update_ticks()
 	host.activate.emit()
-func unregister_host(host : NodeCamera2DHost) -> void:
+func unregister_host(host : NodeCameraHost) -> void:
 	if !is_host_registered(host):
 		return
 	
@@ -111,7 +115,7 @@ func unregister_host(host : NodeCamera2DHost) -> void:
 	_update_ticks()
 	host.deactivate.emit()
 
-func is_host_registered(host : NodeCamera2DHost) -> bool:
+func is_host_registered(host : NodeCameraHost) -> bool:
 	return host.callback_mode_changed.is_connected(
 		_host_update_callback
 	)
@@ -119,23 +123,23 @@ func is_host_registered(host : NodeCamera2DHost) -> bool:
 
 
 #region Public Methods (Register Host)
-func register_layer(layer : NodeCamera2DLayer) -> void:
+func register_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.register_layer(layer)
-func unregister_layer(layer : NodeCamera2DLayer) -> void:
+func unregister_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.unregister_layer(layer)
 #endregion
 
 
 #region Public Methods (Tick Host)
-func tick_host_scope(scope : NodeCamera2DHostExecutionScope) -> void:
+func tick_host_scope(scope : NodeCameraHostExecutionScope) -> void:
 	scope.run_tick()
 #endregion
 
 
 #region Public Methods (Accessor)
-func get_hosts() -> Array[NodeCamera2DHost]:
+func get_hosts() -> Array[NodeCameraHost]:
 	return _scope_array_by_host.keys()
-func get_layer_storage() -> NodeCamera2DLayerStorage:
+func get_layer_storage() -> NodeCameraLayerStorage:
 	return _top_level_storage
 #endregion
 

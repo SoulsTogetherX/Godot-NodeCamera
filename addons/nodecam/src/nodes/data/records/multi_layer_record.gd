@@ -7,7 +7,7 @@ signal request_tick_mask_update
 
 
 #region Public Variables
-var scope : NodeCamera2DExecutionScope
+var scope : NodeCameraExecutionScope
 #endregion
 
 

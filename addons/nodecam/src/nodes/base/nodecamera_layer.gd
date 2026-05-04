@@ -2,7 +2,7 @@
 @tool
 @abstract
 @icon("uid://dssbc6kgt43an")
-class_name NodeCamera2DLayer extends Node
+class_name NodeCameraLayer extends Node
 ## The base layer for all camera manipulation.
 
 #region Signals
@@ -17,7 +17,8 @@ signal tick_requirement_changed
 
 
 #region Enums
-const LAYER_STAGES = NodeCamera2DExecutionScope.LAYER_STAGES
+const LAYER_STAGES	= NodeCameraExecutionScope.LAYER_STAGES
+const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
 #endregion
 
 
@@ -35,7 +36,7 @@ const LAYER_STAGES = NodeCamera2DExecutionScope.LAYER_STAGES
 
 
 #region Private Variables
-var _scope : NodeCamera2DExecutionScope
+var _scope : NodeCameraExecutionScope
 #endregion
 
 
@@ -53,21 +54,27 @@ func _notification(what: int) -> void:
 #endregion
 
 
+#region Tick Methods
+func get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
+	return TICK_TYPE.NONE
+#endregion
+
+
 #region Private Methods (Register)
 func _unregister() -> void:
 	var parent := get_parent()
 	
-	if parent is NodeCamera2DMulti:
+	if parent is NodeCameraMulti:
 		parent.unregister_layer(self)
 		return
-	NodeCamera2DManager.unregister_layer(self)
+	NodeCameraManager.unregister_layer(self)
 func _register() -> void:
 	var parent := get_parent()
 	
-	if parent is NodeCamera2DMulti:
+	if parent is NodeCameraMulti:
 		parent.register_layer(self)
 		return
-	NodeCamera2DManager.register_layer(self)
+	NodeCameraManager.register_layer(self)
 #endregion
 
 

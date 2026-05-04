@@ -1,17 +1,17 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @abstract
-class_name NodeCamera2DMulti extends NodeCamera2DLayer
+class_name NodeCameraMulti extends NodeCameraLayer
 
 #region Private Variables
-var _layer_storage : NodeCamera2DLayerStorage
+var _layer_storage : NodeCameraLayerStorage
 #endregion
 
 
 
 #region Virtual Methods (Engine)
 func _init() -> void:
-	_layer_storage = NodeCamera2DLayerStorage.new()
+	_layer_storage = NodeCameraLayerStorage.new()
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_layer_storage.free()
@@ -19,30 +19,29 @@ func _notification(what: int) -> void:
 
 
 #region Virtual Methods (Overwritable)
-@abstract
 func process_effect(
-	target : NodeCameraState, stage : LAYER_STAGES
-) -> void
+	target : NodeCameraState, _stage : LAYER_STAGES
+) -> void:
+	_scope.run_effects(target)
 
-@abstract
 func process_transition(
 	target : NodeCameraState, current : NodeCameraState,
-	stage : LAYER_STAGES
-) -> void
+	_stage : LAYER_STAGES
+) -> void:
+	_scope.run_transitions(target, current)
 #endregion
 
 
 #region Virtual Methods (Register)
-@abstract
-func register_layer(layer : NodeCamera2DLayer) -> void
-
-@abstract
-func unregister_layer(layer : NodeCamera2DLayer) -> void
+func register_layer(layer : NodeCameraLayer) -> void:
+	_layer_storage.register_layer(layer)
+func unregister_layer(layer : NodeCameraLayer) -> void:
+	_layer_storage.unregister_layer(layer)
 #endregion
 
 
 #region Public Methods (Accessor)
-func get_layer_storage() -> NodeCamera2DLayerStorage:
+func get_layer_storage() -> NodeCameraLayerStorage:
 	return _layer_storage
 #endregion
 

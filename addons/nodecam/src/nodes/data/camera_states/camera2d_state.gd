@@ -1,7 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraState extends Object
-## A basic [Resource] used to hold, store, and manipulate the status of a camera.
+class_name NodeCamera2DState extends NodeCameraState
 
 #region External Variables
 @export var position : Vector2:
@@ -10,7 +9,7 @@ class_name NodeCameraState extends Object
 @export var offset : Vector2:
 	set = set_offset,
 	get = get_position
-@export var zoom : Vector2:
+@export var zoom : Vector2 = Vector2.ONE:
 	set = set_zoom,
 	get = get_zoom
 @export var rotation : float:
@@ -54,12 +53,16 @@ func get_rotation_degrees() -> float:
 
 
 #region Public Helper Methods
-func overwrite_status(cam : Camera2D) -> void:
+func overwrite_status(cam : Node) -> void:
+	if !(cam is Camera2D):
+		return
 	position = cam.position
 	offset = cam.offset
 	zoom = cam.zoom
 	_rotation = cam.rotation
-func apply_status(cam : Camera2D) -> void:
+func apply_status(cam : Node) -> void:
+	if !(cam is Camera2D):
+		return
 	cam.position = position
 	cam.offset = offset
 	cam.zoom = zoom

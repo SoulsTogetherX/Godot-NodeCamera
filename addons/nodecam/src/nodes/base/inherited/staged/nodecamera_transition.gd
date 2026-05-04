@@ -1,10 +1,16 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @icon("uid://dcxauqphisp2y")
-class_name NodeCamera2DTransition extends NodeCamera2DStaged
-## The base [NodeCamera2DLayer] node for all camera effects, reliant on
+class_name NodeCameraTransition extends NodeCameraStaged
+## The base [NodeCameraLayer] node for all camera effects, reliant on
 ## easing the current [GoCameraStateResource] resource into the target
 ## [GoCameraStateResource] resource of hosts.
+
+#region Tick Methods
+func get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
+	return TICK_TYPE.TRANSITIONS
+#endregion
+
 
 #region Virtual Methods (User Overwrite)
 func transition_stage_changed(

@@ -1,6 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCamera2DRecordStorage extends Object
+class_name NodeCameraRecordStorage extends Object
 
 #region Private Variables
 var _priority_buckets: Dictionary[int, Array] = {}

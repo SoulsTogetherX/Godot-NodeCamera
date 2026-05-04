@@ -1,8 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @icon("uid://kq0ubmkoup4y")
-class_name NodeCamera2DHost extends Node
-## The main node that controls the camera for the NodeCamera2D addon.
+class_name NodeCameraHost extends Node
+## The main node that controls the camera for the NodeCamera addon.
 
 #region Signals
 signal activate
@@ -15,12 +15,12 @@ signal camera_mask_changed
 
 #region Enums
 ## An enum used to denote at what times layers will run for
-## each [NodeCamera2DHost].
+## each [NodeCameraHost].
 enum CALLBACK_MODES {
 	AUTO,
 	IDLE, ## Layers will run on process frames.
 	PHYSICS, ## Layers will run on physics frames.
-	MANUAL ## Layers will run when manually requested to run. See [method NodeCamera2DHost.manual_tick]
+	MANUAL ## Layers will run when manually requested to run. See [method NodeCameraHost.manual_tick]
 }
 #endregion
 
@@ -36,14 +36,23 @@ enum CALLBACK_MODES {
 @export var disabled : bool:
 	set = set_disabled,
 	get = get_disabled
+
+@export_group("Camera Status")
+@export var target_status : NodeCameraState:
+	get = get_target_status,
+	set = set_target_status
+@export var current_status : NodeCameraState:
+	get = get_current_status,
+	set = set_current_status
 #endregion
 
 
 #region Private Variables
-var _camera : Camera2D
+var _camera : Node
 
-var _scope : NodeCamera2DHostExecutionScope = NodeCamera2DHostExecutionScope.new(
-	self, NodeCamera2DManager.get_layer_storage()
+var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
+	self, NodeCameraManager.get_layer_storage(),
+	target_status, current_status
 )
 #endregion
 
@@ -53,13 +62,16 @@ var _scope : NodeCamera2DHostExecutionScope = NodeCamera2DHostExecutionScope.new
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:
-			_camera = get_parent() as Camera2D
+			_camera = get_parent()
+			if !(_camera is Camera2D || _camera is Camera3D):
+				_camera = null
+				return
 			
-			if !disabled && _camera:
+			if !disabled:
 				_scope.overwrite_status()
-				NodeCamera2DManager.register_host(self)
+				NodeCameraManager.register_host(self)
 		NOTIFICATION_EXIT_TREE:
-			NodeCamera2DManager.unregister_host(self)
+			NodeCameraManager.unregister_host(self)
 		NOTIFICATION_PREDELETE:
 			_scope.free()
 #endregion
@@ -70,11 +82,11 @@ func _notification(what: int) -> void:
 func teleport_position() -> void:
 	_scope.teleport_overwrite()
 func process_tick() -> void:
-	NodeCamera2DManager.tick_host_scope(_scope)
+	NodeCameraManager.tick_host_scope(_scope)
 
-func get_scope() -> NodeCamera2DHostExecutionScope:
+func get_scope() -> NodeCameraHostExecutionScope:
 	return _scope
-func get_camera() -> Camera2D:
+func get_camera() -> Node:
 	return _camera
 #endregion
 
@@ -102,12 +114,30 @@ func set_disabled(val : bool) -> void:
 	disabled = val
 	
 	if !disabled && _camera:
-		NodeCamera2DManager.register_host(self)
+		NodeCameraManager.register_host(self)
 		_scope.overwrite_status()
 		return
-	NodeCamera2DManager.unregister_host(self)
+	NodeCameraManager.unregister_host(self)
 func get_disabled() -> bool:
 	return disabled
+
+func set_target_status(val : NodeCameraState) -> void:
+	target_status = val
+	if val:
+		val.overwrite_status(_camera)
+	
+	_scope.set_target_state(val)
+func get_target_status() -> NodeCameraState:
+	return target_status
+
+func set_current_status(val : NodeCameraState) -> void:
+	current_status = val
+	if val:
+		val.overwrite_status(_camera)
+	
+	_scope.set_current_state(val)
+func get_current_status() -> NodeCameraState:
+	return current_status
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

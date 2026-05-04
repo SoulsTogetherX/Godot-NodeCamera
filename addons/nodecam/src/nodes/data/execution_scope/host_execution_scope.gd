@@ -1,53 +1,63 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCamera2DHostExecutionScope extends NodeCamera2DExecutionScope
+class_name NodeCameraHostExecutionScope extends NodeCameraExecutionScope
 
 #region Private Variables
-var _host : NodeCamera2DHost
+var _host : NodeCameraHost
 
-var _current_state := NodeCameraState.new()
-var _target_state := NodeCameraState.new()
+var _target_state : NodeCameraState
+var _current_state : NodeCameraState
 #endregion
 
 
 
 #region Virtual Methods
 func _init(
-	host : NodeCamera2DHost, 
-	layer_storage : NodeCamera2DLayerStorage
+	host : NodeCameraHost, layer_storage : NodeCameraLayerStorage,
+	target_state : NodeCameraState, current_state : NodeCameraState
 ) -> void:
 	_host = host
 	_host_scope = self
 	_parent_record = null
-	_set_layer_storage(layer_storage)
+	
+	set_target_state(target_state)
+	set_current_state(current_state)
+	_settup_layer_storage(layer_storage)
+#endregion
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		_current_state.free()
-		_target_state.free()
+
+#region Camera Status Methods
+func set_target_state(state : NodeCameraState) -> void:
+	if state == null:
+		state = NodeCamera2DState.new()
+	_target_state = state
+func set_current_state(state : NodeCameraState) -> void:
+	if state == null:
+		state = NodeCamera2DState.new()
+	_current_state = state
 #endregion
 
 
 #region Layer State Methods
 func _sync_layer_stage(
-	layer: NodeCamera2DStaged, record : StagedLayerRecord,
-	scope : NodeCamera2DExecutionScope,
+	layer: NodeCameraStaged, record : StagedLayerRecord,
+	scope : NodeCameraExecutionScope,
 	update_start : bool = false, allow_remove : bool = true
 ) -> void:
 	layer._scope = scope
 	if update_start:
-		if layer is NodeCamera2DEffect:
+		if layer is NodeCameraEffect:
 			layer.effect_stage_changed(_target_state, record.stage)
-		elif layer is NodeCamera2DTransition:
+		elif layer is NodeCameraTransition:
 			layer.transition_stage_changed(_target_state, _current_state, record.stage)
 	
 	if record.stage & record.stage_process_mask == 0:
 		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
 			if record.stage & record.stage_changed_mask > 0:
-				if layer is NodeCamera2DEffect:
+				if layer is NodeCameraEffect:
 					layer.effect_stage_changed(_target_state, record.stage)
-				elif layer is NodeCamera2DTransition:
+				elif layer is NodeCameraTransition:
 					layer.transition_stage_changed(_target_state, _current_state, record.stage)
 			
 			if record.stage & record.stage_process_mask > 0:
@@ -56,8 +66,8 @@ func _sync_layer_stage(
 		scope._remove_layer(layer)
 
 func _set_layer_stage(
-	layer : NodeCamera2DStaged, record : StagedLayerRecord,
-	scope : NodeCamera2DExecutionScope,
+	layer : NodeCameraStaged, record : StagedLayerRecord,
+	scope : NodeCameraExecutionScope,
 	stage : LAYER_STAGES
 ) -> void:
 	if record.stage == stage:
@@ -66,8 +76,8 @@ func _set_layer_stage(
 	
 	_sync_layer_stage(layer, record, scope, true, true)
 func _advance_layer_stage(
-	layer : NodeCamera2DStaged, record : StagedLayerRecord,
-	scope : NodeCamera2DExecutionScope
+	layer : NodeCameraStaged, record : StagedLayerRecord,
+	scope : NodeCameraExecutionScope
 ) -> void:
 	record.stage >>= 1
 	_sync_layer_stage(layer, record, scope, false, true)

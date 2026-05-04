@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kq0ubmkoup4y"
-path="res://.godot/imported/NodeCamera2DHost.svg-3a5b96df198d3c3465fe787a35813026.ctex"
+uid="uid://dssbc6kgt43an"
+path="res://.godot/imported/NodeCameraLayer.svg-4e1c5732ecdadbb24fb25da0c8739a24.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/nodecam/assets/icons/NodeCamera2DHost.svg"
-dest_files=["res://.godot/imported/NodeCamera2DHost.svg-3a5b96df198d3c3465fe787a35813026.ctex"]
+source_file="res://addons/nodecam/assets/icons/NodeCameraLayer.svg"
+dest_files=["res://.godot/imported/NodeCameraLayer.svg-4e1c5732ecdadbb24fb25da0c8739a24.ctex"]
 
 [params]
 

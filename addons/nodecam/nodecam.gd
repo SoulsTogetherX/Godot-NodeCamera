@@ -4,8 +4,8 @@ extends EditorPlugin
 
 
 #region Constants
-const GO_CAMERA_AUTOLOAD_NAME := "GoCamera2DManager"
-const GO_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/global/nodecamera2d_manager.gd"
+const GO_CAMERA_AUTOLOAD_NAME := "GoCameraManager"
+const GO_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/global/nodecamera_manager.gd"
 
 const SRC_DIR = "res://addons/nodecam/src/"
 #endregion

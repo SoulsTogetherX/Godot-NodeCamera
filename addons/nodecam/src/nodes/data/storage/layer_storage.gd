@@ -1,31 +1,31 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCamera2DLayerStorage extends Object
+class_name NodeCameraLayerStorage extends Object
 
 #region Signals
-signal layer_added(layer : NodeCamera2DLayer)
-signal layer_removed(layer : NodeCamera2DLayer)
+signal layer_added(layer : NodeCameraLayer)
+signal layer_removed(layer : NodeCameraLayer)
 
-signal layer_changed_priority(layer : NodeCamera2DLayer, old_priority : int)
-signal layer_changed_mask(layer : NodeCamera2DLayer, old_mask : int)
+signal layer_changed_priority(layer : NodeCameraLayer, old_priority : int)
+signal layer_changed_mask(layer : NodeCameraLayer, old_mask : int)
 #endregion
 
 
 #region Private Variables
-var _layers : Array[NodeCamera2DLayer]
+var _layers : Array[NodeCameraLayer]
 
-var _priority_by_layer : Dictionary[NodeCamera2DLayer, int]
-var _masks_by_layer : Dictionary[NodeCamera2DLayer, int]
+var _priority_by_layer : Dictionary[NodeCameraLayer, int]
+var _masks_by_layer : Dictionary[NodeCameraLayer, int]
 #endregion
 
 
 
 #region Private Methods (Updating Layers)
-func _layer_changed_priority(layer : NodeCamera2DLayer) -> void:
+func _layer_changed_priority(layer : NodeCameraLayer) -> void:
 	layer_changed_priority.emit(
 		layer, _priority_by_layer[layer]
 	)
-func _layer_changed_mask(layer : NodeCamera2DLayer) -> void:
+func _layer_changed_mask(layer : NodeCameraLayer) -> void:
 	layer_changed_mask.emit(
 		layer, _masks_by_layer[layer]
 	)
@@ -33,10 +33,10 @@ func _layer_changed_mask(layer : NodeCamera2DLayer) -> void:
 
 
 #region Public Methods (Register Layer)
-func get_registered_layers() -> Array[NodeCamera2DLayer]:
+func get_registered_layers() -> Array[NodeCameraLayer]:
 	return _layers
 
-func register_layer(layer : NodeCamera2DLayer) -> void:
+func register_layer(layer : NodeCameraLayer) -> void:
 	if is_layer_registered(layer):
 		return
 	
@@ -54,7 +54,7 @@ func register_layer(layer : NodeCamera2DLayer) -> void:
 	
 	layer_added.emit(layer)
 	layer.activated.emit()
-func unregister_layer(layer : NodeCamera2DLayer) -> void:
+func unregister_layer(layer : NodeCameraLayer) -> void:
 	if !is_layer_registered(layer):
 		return
 	
@@ -77,7 +77,7 @@ func unregister_layer(layer : NodeCamera2DLayer) -> void:
 	layer_removed.emit(layer)
 	layer.deactivated.emit()
 
-func is_layer_registered(layer : NodeCamera2DLayer) -> bool:
+func is_layer_registered(layer : NodeCameraLayer) -> bool:
 	return layer.priority_changed.is_connected(
 		_layer_changed_priority
 	)

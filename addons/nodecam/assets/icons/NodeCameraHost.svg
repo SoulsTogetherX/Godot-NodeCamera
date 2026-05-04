@@ -4,7 +4,7 @@
    height="16"
    version="1.1"
    id="svg1"
-   sodipodi:docname="GoCamera2DHost.svg"
+   sodipodi:docname="NodeCameraHost.svg"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    xml:space="preserve"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -22,7 +22,7 @@
      inkscape:deskcolor="#505050"
      showgrid="false"
      inkscape:zoom="69.208076"
-     inkscape:cx="4.0168723"
+     inkscape:cx="4.0240968"
      inkscape:cy="9.78932"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
@@ -43,5 +43,5 @@
        transform="matrix(0.8322028,0.59371873,-0.59371873,0.8322028,14.087788,6.3160897)"
        style="fill:none;fill-opacity:1;stroke:#8da5f3;stroke-opacity:1"><path
          id="rect3"
-         style="stroke-width:0.954614;stroke-linecap:square;paint-order:fill markers stroke"
+         style="stroke-width:0.954614;stroke-linecap:square;paint-order:fill markers stroke;stroke:#ff00ff;stroke-opacity:1;fill:none"
          d="m -5.0119539,6.9511232 h 4.02390737 c 0.55994952,0 1.01073921,0.4507897 1.01073921,1.0107392 v 0.7239073 c 0,0.5599495 -0.45078969,1.0107392 -1.01073921,1.0107392 H -5.0119539 c -0.5599496,0 -1.0107393,-0.4507897 -1.0107393,-1.0107392 V 7.9618624 c 0,-0.5599495 0.4507897,-1.0107392 1.0107393,-1.0107392 z M -8.5119535,5.4773068 h 4.0239084 c 0.5599495,0 1.0107392,0.4507897 1.0107392,1.0107393 v 0.7239072 c 0,0.5599495 -0.4507897,1.0107392 -1.0107392,1.0107392 h -4.0239084 c -0.5599495,0 -1.0107392,-0.4507897 -1.0107392,-1.0107392 V 6.4880461 c 0,-0.5599496 0.4507897,-1.0107393 1.0107392,-1.0107393 z" /></g></g></svg>
