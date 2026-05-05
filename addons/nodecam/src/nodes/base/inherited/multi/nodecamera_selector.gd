@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @icon("uid://cax3r21pd3net")
-class_name NodeCameraMultiplexer extends NodeCameraMulti
+class_name NodeCameraSelector extends NodeCameraMulti
 
 #region Signal
 signal selection_changed
@@ -18,9 +18,9 @@ signal selection_changed
 
 #region Selection Methods
 func enforce_local_selection(sel : int) -> void:
-	(_scope as NodeCameraMultiplexerExecutionScope).flag_update_selection(sel)
+	(_scope as NodeCameraSelectorExecutionScope).flag_update_selection(sel)
 
-func get_local_selection_layer(scope : NodeCameraMultiplexerExecutionScope) -> NodeCameraLayer:
+func get_local_selection_layer(scope : NodeCameraSelectorExecutionScope) -> NodeCameraLayer:
 	return scope.get_selection()
 func get_global_selection_layer() -> NodeCameraLayer:
 	if selection == -1:
@@ -54,7 +54,7 @@ func get_selection() -> int:
 
 #region Tick Methods
 func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	var sel := (param_scope as NodeCameraMultiplexerExecutionScope).get_selection()
+	var sel := (param_scope as NodeCameraSelectorExecutionScope).get_selection()
 	
 	if sel == null:
 		return TICK_TYPE.NONE

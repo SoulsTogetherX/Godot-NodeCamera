@@ -18,17 +18,6 @@ func process_effect(
 #endregion
 
 
-#region Public Methods (Stages)
-func get_needed_process_stages() -> PackedInt32Array:
-	return [LAYER_STAGES.RUNNING]
-func get_needed_change_stages() -> PackedInt32Array:
-	return [
-		LAYER_STAGES.STARTING,
-		LAYER_STAGES.HAULTED
-	]
-#endregion
-
-
 #region Tick Methods
 func _get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
 	return TICK_TYPE.EFFECTS

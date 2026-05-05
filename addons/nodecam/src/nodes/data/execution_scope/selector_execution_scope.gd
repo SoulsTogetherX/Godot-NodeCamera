@@ -1,6 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraMultiplexerExecutionScope extends NodeCameraExecutionScope
+class_name NodeCameraSelectorExecutionScope extends NodeCameraExecutionScope
 
 #region External Variables
 var _selection : NodeCameraLayer
@@ -11,7 +11,7 @@ var _selection : NodeCameraLayer
 #region Virtual Methods
 func _init(
 	host_scope : NodeCameraHostExecutionScope, parent_record : MultiLayerRecord,
-	layer_storage : NodeCameraLayerStorage, layer : NodeCameraMultiplexer,
+	layer_storage : NodeCameraLayerStorage, layer : NodeCameraSelector,
 	start_selection : int
 ) -> void:
 	_host_scope = host_scope
@@ -33,7 +33,7 @@ func _init(
 #region Dirty Flagging Methods
 func _flag_global_selection() -> void:
 	flag_update_selection(
-		(_parent_record.layer as NodeCameraMultiplexer).selection
+		(_parent_record.layer as NodeCameraSelector).selection
 	)
 func flag_update_selection(idx : int) -> void:
 	var end_record = _record_by_layer.get(_selection, null)

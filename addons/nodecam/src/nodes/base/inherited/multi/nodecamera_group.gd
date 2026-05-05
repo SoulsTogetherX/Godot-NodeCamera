@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @icon("uid://dl0jprapnu02l")
-class_name NodeCameraParallel extends NodeCameraMulti
+class_name NodeCameraGroup extends NodeCameraMulti
 ## The [NodeCameraLayer] node used to help sync the activation and filter of
 ## children [NodeCameraLayer], while also boosting performance.
 

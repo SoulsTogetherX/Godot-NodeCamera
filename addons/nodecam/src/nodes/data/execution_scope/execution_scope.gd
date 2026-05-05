@@ -326,10 +326,10 @@ func _construct_multi_record(
 	layer : NodeCameraMulti
 ) -> LayerRecord:
 	var record := MultiLayerRecord.new()
-	var scope : NodeCameraMultiplexerExecutionScope
+	var scope : NodeCameraSelectorExecutionScope
 	
-	if layer is NodeCameraMultiplexer:
-		scope = NodeCameraMultiplexerExecutionScope.new(
+	if layer is NodeCameraSelector:
+		scope = NodeCameraSelectorExecutionScope.new(
 			_host_scope, record, layer.get_layer_storage(),
 			layer, layer.selection
 		)
