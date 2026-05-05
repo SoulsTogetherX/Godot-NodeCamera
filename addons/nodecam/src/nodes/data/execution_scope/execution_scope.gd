@@ -116,12 +116,12 @@ func _flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 			return
 		_flag_remove_layer(layer)
 
-func _flag_advance_stage(layer : NodeCameraLayer) -> void:
+func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	_layer_to_dirty_op[layer] = (
 		_layer_to_dirty_op.get(layer, 0) | DIRTY_FLAGS.STAGE_CHANGED
 	)
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
-func _flag_overwrite_stage(
+func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
 	_layer_to_force_stage[layer] = stage
@@ -240,28 +240,6 @@ func _clear_scope() -> void:
 	_record_by_layer.clear()
 
 
-func _add_layer(
-	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
-) -> int:
-	if _record_by_layer.has(layer):
-		return TICK_TYPE.NONE
-	if layer is NodeCameraSelector:
-		if !layer.selection_changed.is_connected(_flag_global_selection_changed):
-			layer.selection_changed.connect(
-				_flag_global_selection_changed, CONNECT_APPEND_SOURCE_OBJECT
-			)
-	
-	var record := _construct_record(layer, init_stage)
-	if record == null:
-		return TICK_TYPE.NONE
-	
-	if record.tick_mask & TICK_TYPE.EFFECTS > 0:
-		_effect_storage.add(record, layer.priority)
-	if record.tick_mask & TICK_TYPE.TRANSITIONS > 0:
-		_transition_storage.add(record, layer.priority)
-	
-	_record_by_layer.set(layer, record)
-	return record.tick_mask
 func _remove_layer(layer : NodeCameraLayer) -> int:
 	if layer is NodeCameraSelector:
 		if layer.selection_changed.is_connected(_flag_global_selection_changed):
@@ -291,6 +269,28 @@ func _reorder_layer(layer : NodeCameraLayer) -> int:
 		_effect_storage.reorder(record, layer.priority, old_priority)
 	if record.tick_mask & TICK_TYPE.TRANSITIONS > 0:
 		_transition_storage.reorder(record, layer.priority, old_priority)
+	return record.tick_mask
+func _add_layer(
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+) -> int:
+	if _record_by_layer.has(layer):
+		return TICK_TYPE.NONE
+	if layer is NodeCameraSelector:
+		if !layer.selection_changed.is_connected(_flag_global_selection_changed):
+			layer.selection_changed.connect(
+				_flag_global_selection_changed, CONNECT_APPEND_SOURCE_OBJECT
+			)
+	
+	var record := _construct_record(layer, init_stage)
+	if record == null:
+		return TICK_TYPE.NONE
+	
+	if record.tick_mask & TICK_TYPE.EFFECTS > 0:
+		_effect_storage.add(record, layer.priority)
+	if record.tick_mask & TICK_TYPE.TRANSITIONS > 0:
+		_transition_storage.add(record, layer.priority)
+	
+	_record_by_layer.set(layer, record)
 	return record.tick_mask
 
 
@@ -336,12 +336,17 @@ func _construct_staged_record(
 	layer : NodeCameraStaged, init_stage : LAYER_STAGES
 ) -> LayerRecord:
 	var record := StagedLayerRecord.new()
+	var process_mask := _get_stage_mask(layer.get_needed_process_stages())
 	
 	record.layer = layer
 	record.scope = self
 	record.stage = init_stage
-	record.stage_changed_mask = _get_stage_mask(layer.get_needed_change_stages())
-	record.stage_process_mask  = _get_stage_mask(layer.get_needed_process_stages())
+	
+	record.set_process_mask(process_mask)
+	record.set_linger_mask(
+		_get_stage_mask(layer.get_needed_linger_stages()) | process_mask
+	)
+	record.set_changed_mask(_get_stage_mask(layer.get_needed_change_stages()))
 	
 	_host_scope.sync_layer_stage(record, true)
 	if record.stage == LAYER_STAGES.HAULTED:

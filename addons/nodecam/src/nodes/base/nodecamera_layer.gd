@@ -72,6 +72,19 @@ func _register() -> void:
 #endregion
 
 
+#region Public Methods (Stage Helpers)
+func advance_stage() -> void:
+	_scope.flag_advance_stage(self)
+func overwrite_stage(stage : LAYER_STAGES) -> void:
+	_scope.flag_overwrite_stage(self, stage)
+
+func force_advance_stage(host : NodeCameraHost) -> void:
+	host._scope.flag_advance_stage(self)
+func force_overwrite_stage(host : NodeCameraHost, stage : LAYER_STAGES) -> void:
+	host._scope.flag_overwrite_stage(self, stage)
+#endregion
+
+
 #region Public Methods (Accessors)
 func get_scope() -> NodeCameraExecutionScope:
 	return _scope

@@ -69,22 +69,26 @@ func sync_layer_stage(
 	var layer : NodeCameraStaged = record.layer
 	layer._scope = record.scope
 	
-	if update_start:
+	var process_mask := record.get_process_mask()
+	var linger_mask := record.get_linger_mask()
+	var changed_mask := record.get_changed_mask()
+	
+	if update_start && record.stage & changed_mask:
 		if layer is NodeCameraEffect:
 			layer.effect_stage_changed(_target_state, record.stage)
 		elif layer is NodeCameraTransition:
 			layer.transition_stage_changed(_target_state, _current_state, record.stage)
 	
-	if record.stage & record.stage_process_mask == 0:
+	if record.stage & process_mask == 0:
 		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
-			if record.stage & record.stage_changed_mask > 0:
+			if record.stage & changed_mask > 0:
 				if layer is NodeCameraEffect:
 					layer.effect_stage_changed(_target_state, record.stage)
 				elif layer is NodeCameraTransition:
 					layer.transition_stage_changed(_target_state, _current_state, record.stage)
 			
-			if record.stage & record.stage_process_mask > 0:
+			if record.stage & process_mask > 0:
 				break
 	if record.stage == LAYER_STAGES.HAULTED:
 		return record.scope._remove_layer(layer)
@@ -97,7 +101,7 @@ func advance_stage(record : LayerRecord) -> int:
 		return propagate_advance_stage(record)
 	
 	record.stage >>= 1
-	return sync_layer_stage(record, false)
+	return sync_layer_stage(record, true)
 func overwrite_stage(
 	record : LayerRecord, stage : LAYER_STAGES
 ) -> int:
