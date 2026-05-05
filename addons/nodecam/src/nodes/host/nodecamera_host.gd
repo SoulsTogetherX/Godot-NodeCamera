@@ -44,6 +44,7 @@ enum CALLBACK_MODES {
 
 #region Private Variables
 var _camera : Node
+var _running : bool = false
 
 var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
 	self, NodeCameraManager.get_layer_storage()
@@ -58,7 +59,7 @@ func _notification(what: int) -> void:
 		NOTIFICATION_ENTER_TREE:
 			_settup_camera()
 			
-			if is_running():
+			if _running:
 				_scope.overwrite_status()
 				NodeCameraManager.register_host(self)
 		NOTIFICATION_EXIT_TREE:
@@ -73,10 +74,20 @@ func _settup_camera() -> void:
 	_camera = get_parent()
 	if !(_camera is Camera2D || _camera is Camera3D):
 		_camera = null
+		_settup_running()
 		return
 	_scope.settup_camera_states()
+	_settup_running()
 func get_camera() -> Node:
 	return _camera
+#endregion
+
+
+#region Running Check Methods
+func _settup_running() -> void:
+	_running = (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
+func is_running() -> bool:
+	return _running
 #endregion
 
 
@@ -86,8 +97,6 @@ func teleport_position() -> void:
 func process_tick() -> void:
 	NodeCameraManager.tick_host_scope(_scope)
 
-func is_running() -> bool:
-	return (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
 func get_scope() -> NodeCameraHostExecutionScope:
 	return _scope
 #endregion
@@ -117,7 +126,8 @@ func set_disabled(val : bool) -> void:
 		return
 	disabled = val
 	
-	if is_running():
+	_settup_running()
+	if _running:
 		_scope.overwrite_status()
 		NodeCameraManager.register_host(self)
 		return
@@ -130,7 +140,8 @@ func set_run_in_engine(val : bool) -> void:
 		return
 	run_in_engine = val
 	
-	if is_running():
+	_settup_running()
+	if _running:
 		_scope.overwrite_status()
 		NodeCameraManager.register_host(self)
 		return

@@ -21,7 +21,6 @@ limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
-run_in_engine = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
