@@ -18,6 +18,18 @@ func _notification(what: int) -> void:
 #endregion
 
 
+#region Private Methods (Register)
+func _unregister() -> void:
+	if !_layer_storage.is_empty():
+		return
+	super()
+func _register() -> void:
+	if _layer_storage.is_empty():
+		return
+	super()
+#endregion
+
+
 #region Virtual Methods (Overwritable)
 func process_effect(
 	target : NodeCameraState, _stage : LAYER_STAGES
@@ -35,8 +47,11 @@ func process_transition(
 #region Virtual Methods (Register)
 func register_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.register_layer(layer)
+	if _layer_storage.size() == 1:
+		_register()
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.unregister_layer(layer)
+	_unregister()
 #endregion
 
 

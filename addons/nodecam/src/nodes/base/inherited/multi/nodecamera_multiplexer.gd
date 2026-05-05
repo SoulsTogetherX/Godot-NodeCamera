@@ -3,21 +3,62 @@
 @icon("uid://cax3r21pd3net")
 class_name NodeCameraMultiplexer extends NodeCameraMulti
 
+#region Signal
+signal selection_changed
+#endregion
+
+
 #region External Variables
-@export var inital_selection : int
+@export var selection : int:
+	get = get_selection,
+	set = set_selection
 #endregion
 
 
 
 #region Tick Methods
 func get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	return 0
+	var sel := get_local_selection_layer(param_scope)
+	
+	if sel == null:
+		return TICK_TYPE.NONE
+	return sel.get_tick_mask(param_scope)
 #endregion
 
 
-#region Public Methods (Selection-Change Helper)
-func change_selection(sel : int) -> void:
+#region Selection Methods
+func enforce_local_selection(sel : int) -> void:
 	(_scope as NodeCameraMultiplexerExecutionScope).flag_update_selection(sel)
+
+func get_local_selection_layer(scope : NodeCameraMultiplexerExecutionScope) -> NodeCameraLayer:
+	return scope.get_selection()
+func get_global_selection_layer() -> NodeCameraLayer:
+	if selection == -1:
+		return null
+	return _layer_storage.get_registered_layers()[selection]
+#endregion
+
+
+#region Virtual Methods (Register)
+func register_layer(layer : NodeCameraLayer) -> void:
+	super(layer)
+	selection = selection
+func unregister_layer(layer : NodeCameraLayer) -> void:
+	super(layer)
+	selection = selection
+#endregion
+
+
+#region Accessor Methods
+func set_selection(val : int) -> void:
+	val = clampi(val, 0, _layer_storage.size() - 1)
+	if val == selection:
+		return
+	
+	selection = val
+	selection_changed.emit()
+func get_selection() -> int:
+	return selection
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

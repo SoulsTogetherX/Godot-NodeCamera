@@ -23,4 +23,15 @@ func process_effect(
 	prints(2, name, target, stage)
 #endregion
 
+
+#region Public Methods (Stages)
+func get_needed_process_stages() -> PackedInt32Array:
+	return [LAYER_STAGES.RUNNING]
+func get_needed_change_stages() -> PackedInt32Array:
+	return [
+		LAYER_STAGES.STARTING,
+		LAYER_STAGES.HAULTED
+	]
+#endregion
+
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

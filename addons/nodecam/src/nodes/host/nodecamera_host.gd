@@ -36,14 +36,6 @@ enum CALLBACK_MODES {
 @export var disabled : bool:
 	set = set_disabled,
 	get = get_disabled
-
-@export_group("Camera Status")
-@export var target_status : NodeCameraState:
-	get = get_target_status,
-	set = set_target_status
-@export var current_status : NodeCameraState:
-	get = get_current_status,
-	set = set_current_status
 #endregion
 
 
@@ -51,8 +43,7 @@ enum CALLBACK_MODES {
 var _camera : Node
 
 var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
-	self, NodeCameraManager.get_layer_storage(),
-	target_status, current_status
+	self, NodeCameraManager.get_layer_storage()
 )
 #endregion
 
@@ -62,10 +53,7 @@ var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:
-			_camera = get_parent()
-			if !(_camera is Camera2D || _camera is Camera3D):
-				_camera = null
-				return
+			_settup_camera()
 			
 			if !disabled:
 				_scope.overwrite_status()
@@ -77,8 +65,19 @@ func _notification(what: int) -> void:
 #endregion
 
 
+#region Camera Methods
+func _settup_camera() -> void:
+	_camera = get_parent()
+	if !(_camera is Camera2D || _camera is Camera3D):
+		_camera = null
+		return
+	_scope.settup_camera_states()
+func get_camera() -> Node:
+	return _camera
+#endregion
 
-#region Public Methods (Helper)
+
+#region Public Helper Methods
 func teleport_position() -> void:
 	_scope.teleport_overwrite()
 func process_tick() -> void:
@@ -86,8 +85,6 @@ func process_tick() -> void:
 
 func get_scope() -> NodeCameraHostExecutionScope:
 	return _scope
-func get_camera() -> Node:
-	return _camera
 #endregion
 
 
@@ -120,24 +117,6 @@ func set_disabled(val : bool) -> void:
 	NodeCameraManager.unregister_host(self)
 func get_disabled() -> bool:
 	return disabled
-
-func set_target_status(val : NodeCameraState) -> void:
-	target_status = val
-	if val:
-		val.overwrite_status(_camera)
-	
-	_scope.set_target_state(val)
-func get_target_status() -> NodeCameraState:
-	return target_status
-
-func set_current_status(val : NodeCameraState) -> void:
-	current_status = val
-	if val:
-		val.overwrite_status(_camera)
-	
-	_scope.set_current_state(val)
-func get_current_status() -> NodeCameraState:
-	return current_status
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

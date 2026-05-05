@@ -13,28 +13,44 @@ var _current_state : NodeCameraState
 
 #region Virtual Methods
 func _init(
-	host : NodeCameraHost, layer_storage : NodeCameraLayerStorage,
-	target_state : NodeCameraState, current_state : NodeCameraState
+	host : NodeCameraHost, layer_storage : NodeCameraLayerStorage
 ) -> void:
 	_host = host
 	_host_scope = self
 	_parent_record = null
 	
-	set_target_state(target_state)
-	set_current_state(current_state)
 	_settup_layer_storage(layer_storage)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_free_camera_states()
 #endregion
 
 
 #region Camera Status Methods
-func set_target_state(state : NodeCameraState) -> void:
-	if state == null:
-		state = NodeCamera2DState.new()
-	_target_state = state
-func set_current_state(state : NodeCameraState) -> void:
-	if state == null:
-		state = NodeCamera2DState.new()
-	_current_state = state
+func settup_camera_states() -> void:
+	var cam := _host.get_camera()
+	if cam is Camera2D:
+		if _target_state is NodeCamera2DState:
+			return
+		_target_state = NodeCamera2DState.new()
+		_current_state = NodeCamera2DState.new()
+	elif cam is Camera3D:
+		if _current_state is NodeCamera2DState:
+			return
+		_target_state = NodeCamera3DState.new()
+		_current_state = NodeCamera3DState.new()
+	else:
+		_target_state = null
+		_current_state = null
+		return
+	
+	_target_state.overwrite_status(cam)
+	_current_state.overwrite_status(cam)
+func _free_camera_states() -> void:
+	if _target_state:
+		_target_state.free()
+	if _current_state:
+		_current_state.free()
 #endregion
 
 
@@ -42,7 +58,7 @@ func set_current_state(state : NodeCameraState) -> void:
 func _sync_layer_stage(
 	layer: NodeCameraStaged, record : StagedLayerRecord,
 	scope : NodeCameraExecutionScope,
-	update_start : bool = false, allow_remove : bool = true
+	update_start : bool = false
 ) -> void:
 	layer._scope = scope
 	if update_start:
@@ -62,8 +78,8 @@ func _sync_layer_stage(
 			
 			if record.stage & record.stage_process_mask > 0:
 				break
-	if record.stage == LAYER_STAGES.HAULTED && allow_remove:
-		scope._remove_layer(layer)
+	if record.stage == LAYER_STAGES.HAULTED:
+		_remove_layer(layer)
 
 func _set_layer_stage(
 	layer : NodeCameraStaged, record : StagedLayerRecord,
@@ -74,13 +90,13 @@ func _set_layer_stage(
 		return
 	record.stage = stage
 	
-	_sync_layer_stage(layer, record, scope, true, true)
+	_sync_layer_stage(layer, record, scope, true)
 func _advance_layer_stage(
 	layer : NodeCameraStaged, record : StagedLayerRecord,
 	scope : NodeCameraExecutionScope
 ) -> void:
 	record.stage >>= 1
-	_sync_layer_stage(layer, record, scope, false, true)
+	_sync_layer_stage(layer, record, scope, false)
 #endregion
 
 

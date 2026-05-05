@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://d0rr28mur8wkj"]
 
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
-[ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_multiplexer.gd" id="1_gnvb1"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="4_4bahi"]
+[ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_multiplexer.gd" id="4_e6yeu"]
+[ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="5_e6yeu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -13,22 +13,6 @@ size = Vector2(12800, 64)
 size = Vector2(41, 488)
 
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
-
-[node name="NodeCamera2DMultiplexer" type="Node" parent="." unique_id=1171275502]
-script = ExtResource("1_gnvb1")
-metadata/_custom_type_script = "uid://nqu2162c3ade"
-
-[node name="Node1" type="Node" parent="NodeCamera2DMultiplexer" unique_id=1319441535]
-script = ExtResource("4_4bahi")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Node2" type="Node" parent="NodeCamera2DMultiplexer" unique_id=1431371053]
-script = ExtResource("4_4bahi")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Node3" type="Node" parent="NodeCamera2DMultiplexer" unique_id=1270444512]
-script = ExtResource("4_4bahi")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
 ignore_rotation = false
@@ -81,3 +65,18 @@ texture = ExtResource("2_kx3cl")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=24809213]
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
+
+[node name="NodeCameraMultiplexer" type="Node" parent="." unique_id=1189317909]
+script = ExtResource("4_e6yeu")
+selection = -1
+metadata/_custom_type_script = "uid://nqu2162c3ade"
+
+[node name="NodeCameraEffect" type="Node" parent="NodeCameraMultiplexer" unique_id=1022371892]
+script = ExtResource("5_e6yeu")
+disabled = true
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="NodeCameraEffect2" type="Node" parent="NodeCameraMultiplexer" unique_id=592531619]
+script = ExtResource("5_e6yeu")
+disabled = true
+metadata/_custom_type_script = "uid://brcthb2wv72uv"

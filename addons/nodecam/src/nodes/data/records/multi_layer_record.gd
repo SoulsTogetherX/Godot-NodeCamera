@@ -6,11 +6,6 @@ signal request_tick_mask_update
 #endregion
 
 
-#region Public Variables
-var scope : NodeCameraExecutionScope
-#endregion
-
-
 
 #region Virtual Methods
 func _notification(what: int) -> void:

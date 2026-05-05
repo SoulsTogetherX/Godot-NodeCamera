@@ -33,9 +33,6 @@ func _layer_changed_mask(layer : NodeCameraLayer) -> void:
 
 
 #region Public Methods (Register Layer)
-func get_registered_layers() -> Array[NodeCameraLayer]:
-	return _layers
-
 func register_layer(layer : NodeCameraLayer) -> void:
 	if is_layer_registered(layer):
 		return
@@ -82,5 +79,17 @@ func is_layer_registered(layer : NodeCameraLayer) -> bool:
 		_layer_changed_priority
 	)
 #endregion
+
+
+#region Accessor Methods
+func get_registered_layers() -> Array[NodeCameraLayer]:
+	return _layers
+
+func size() -> int:
+	return _layers.size()
+func is_empty() -> bool:
+	return _layers.is_empty()
+#endregion
+
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
