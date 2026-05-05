@@ -56,7 +56,7 @@ func get_selection() -> int:
 func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
 	var sel := (param_scope as NodeCameraSelectorExecutionScope).get_selection()
 	
-	if sel == null:
+	if !param_scope.has_record(sel):
 		return TICK_TYPE.NONE
 	return sel._get_tick_mask(param_scope)
 #endregion

@@ -6,7 +6,7 @@ class_name NodeCameraStaged extends NodeCameraLayer
 #region Public Methods (Stage Helpers)
 func advance_stage() -> void:
 	_scope.flag_layer_stage_advance(self)
-func set_stage(stage : LAYER_STAGES) -> void:
+func overwrite_stage(stage : LAYER_STAGES) -> void:
 	_scope.flag_layer_direct_stage_change(self, stage)
 #endregion
 

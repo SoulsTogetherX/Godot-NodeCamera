@@ -63,12 +63,12 @@ func _free_camera_states() -> void:
 
 
 #region Layer State Methods
-func _sync_layer_stage(
-	layer: NodeCameraStaged, record : StagedLayerRecord,
-	scope : NodeCameraExecutionScope,
-	update_start : bool = false
+func sync_layer_stage(
+	record : StagedLayerRecord, update_start : bool = false
 ) -> int:
-	layer._scope = scope
+	var layer : NodeCameraStaged = record.layer
+	layer._scope = record.scope
+	
 	if update_start:
 		if layer is NodeCameraEffect:
 			layer.effect_stage_changed(_target_state, record.stage)
@@ -87,25 +87,48 @@ func _sync_layer_stage(
 			if record.stage & record.stage_process_mask > 0:
 				break
 	if record.stage == LAYER_STAGES.HAULTED:
-		return scope._remove_layer(layer)
+		return record.scope._remove_layer(layer)
 	return TICK_TYPE.NONE
 
-func _set_layer_stage(
-	layer : NodeCameraStaged, record : StagedLayerRecord,
-	scope : NodeCameraExecutionScope,
-	stage : LAYER_STAGES
+func advance_stage(record : LayerRecord) -> int:
+	if record == null:
+		return TICK_TYPE.NONE
+	if record is MultiLayerRecord:
+		return propagate_advance_stage(record)
+	
+	record.stage >>= 1
+	return sync_layer_stage(record, false)
+func overwrite_stage(
+	record : LayerRecord, stage : LAYER_STAGES
 ) -> int:
+	if record == null:
+		return TICK_TYPE.NONE
+	if record is MultiLayerRecord:
+		return propagate_overwrite_stage(record, stage)
 	if record.stage == stage:
 		return TICK_TYPE.NONE
-	record.stage = stage
 	
-	return _sync_layer_stage(layer, record, scope, true)
-func _advance_layer_stage(
-	layer : NodeCameraStaged, record : StagedLayerRecord,
-	scope : NodeCameraExecutionScope
+	record.stage = stage
+	return sync_layer_stage(record, true)
+
+func propagate_advance_stage(record : MultiLayerRecord) -> int:
+	var mask := TICK_TYPE.NONE
+	for rec : LayerRecord in record.scope.get_effect_records():
+		mask |= advance_stage(rec)
+	for rec : LayerRecord in record.scope.get_transitions_records():
+		mask |= advance_stage(rec)
+	
+	return mask
+func propagate_overwrite_stage(
+	record : MultiLayerRecord, stage : LAYER_STAGES
 ) -> int:
-	record.stage >>= 1
-	return _sync_layer_stage(layer, record, scope, false)
+	var mask := TICK_TYPE.NONE
+	for rec : LayerRecord in record.scope.get_effect_records():
+		mask |= overwrite_stage(rec, stage)
+	for rec : LayerRecord in record.scope.get_transitions_records():
+		mask |= overwrite_stage(rec, stage)
+	
+	return mask
 #endregion
 
 

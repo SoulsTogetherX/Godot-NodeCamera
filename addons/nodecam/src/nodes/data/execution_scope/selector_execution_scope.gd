@@ -11,43 +11,17 @@ var _selection : NodeCameraLayer
 #region Virtual Methods
 func _init(
 	host_scope : NodeCameraHostExecutionScope, parent_record : MultiLayerRecord,
-	layer_storage : NodeCameraLayerStorage, layer : NodeCameraSelector,
-	start_selection : int
+	layer_storage : NodeCameraLayerStorage, start_selection : int
 ) -> void:
 	_host_scope = host_scope
 	_parent_record = parent_record
 	_settup_layer_storage(layer_storage)
-	
-	layer.selection_changed.connect(
-		_flag_global_selection
-	)
 	
 	var layers := layer_storage.get_registered_layers()
 	if 0 <= start_selection && start_selection < layers.size():
 		_selection = layers[start_selection]
 		return
 	_selection = null
-#endregion
-
-
-#region Dirty Flagging Methods
-func _flag_global_selection() -> void:
-	flag_update_selection(
-		(_parent_record.layer as NodeCameraSelector).selection
-	)
-func flag_update_selection(idx : int) -> void:
-	var end_record = _record_by_layer.get(_selection, null)
-	if end_record && end_record.stage > LAYER_STAGES.ENDING:
-		_flag_stage_overwrite(_selection, LAYER_STAGES.ENDING)
-	
-	var layers := _layer_storage.get_registered_layers()
-	if idx < 0 || idx >= layers.size():
-		_selection = null
-		return
-	
-	var sel := layers[idx]
-	_flag_stage_overwrite(sel, LAYER_STAGES.STARTING)
-	_selection = sel
 #endregion
 
 
@@ -58,6 +32,26 @@ func _add_layer(
 	if layer != _selection:
 		return TICK_TYPE.NONE
 	return super(layer, init_stage)
+
+func _update_selection(idx : int) -> int:
+	var mask := TICK_TYPE.NONE
+	
+	var end_record = _record_by_layer.get(_selection, null)
+	if end_record && end_record.stage > LAYER_STAGES.ENDING:
+		mask |= _host_scope.overwrite_stage(end_record, LAYER_STAGES.ENDING)
+	
+	var layers := _layer_storage.get_registered_layers()
+	if idx < 0 || idx >= layers.size():
+		_selection = null
+		return mask
+	
+	var sel := layers[idx]
+	mask |= _host_scope.overwrite_stage(
+		_record_by_layer.get(_selection, null), LAYER_STAGES.STARTING
+	)
+	_selection = sel
+	
+	return mask
 #endregion
 
 

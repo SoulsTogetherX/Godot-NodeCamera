@@ -73,6 +73,9 @@ func _register() -> void:
 
 
 #region Public Methods (Accessors)
+func get_scope() -> NodeCameraExecutionScope:
+	return _scope
+
 func set_disabled(val : bool) -> void:
 	if val == disabled:
 		return
