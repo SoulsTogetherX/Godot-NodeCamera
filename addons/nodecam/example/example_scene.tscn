@@ -67,31 +67,35 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="NodeCameraGroup" type="Node" parent="." unique_id=943854428]
+[node name="NodeCameraSelector" type="Node" parent="." unique_id=2044202283]
+script = ExtResource("4_e6yeu")
+selection = 1
+metadata/_custom_type_script = "uid://nqu2162c3ade"
+
+[node name="NodeCameraGroup" type="Node" parent="NodeCameraSelector" unique_id=943854428]
 script = ExtResource("5_gnvb1")
-disabled = true
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="MultiplexerTest" type="Node" parent="NodeCameraGroup" unique_id=1189317909]
-script = ExtResource("4_e6yeu")
-metadata/_custom_type_script = "uid://nqu2162c3ade"
-
-[node name="Effect1" type="Node" parent="NodeCameraGroup/MultiplexerTest" unique_id=1022371892]
+[node name="Effect0" type="Node" parent="NodeCameraSelector/NodeCameraGroup" unique_id=2068079352]
 script = ExtResource("5_e6yeu")
+priority = -1
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Effect2" type="Node" parent="NodeCameraGroup/MultiplexerTest" unique_id=592531619]
+[node name="Effect1" type="Node" parent="NodeCameraSelector/NodeCameraGroup" unique_id=785775782]
 script = ExtResource("5_e6yeu")
+priority = -1
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="MultiplexerTest2" type="Node" parent="NodeCameraGroup" unique_id=1221814694]
-script = ExtResource("4_e6yeu")
-metadata/_custom_type_script = "uid://nqu2162c3ade"
+[node name="NodeCameraGroup2" type="Node" parent="NodeCameraSelector" unique_id=548511573]
+script = ExtResource("5_gnvb1")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="Effect3" type="Node" parent="NodeCameraGroup/MultiplexerTest2" unique_id=958260173]
+[node name="Effect2" type="Node" parent="NodeCameraSelector/NodeCameraGroup2" unique_id=1080382010]
 script = ExtResource("5_e6yeu")
+priority = -1
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Effect4" type="Node" parent="NodeCameraGroup/MultiplexerTest2" unique_id=2002246688]
+[node name="Effect3" type="Node" parent="NodeCameraSelector/NodeCameraGroup2" unique_id=537268458]
 script = ExtResource("5_e6yeu")
+priority = -1
 metadata/_custom_type_script = "uid://brcthb2wv72uv"

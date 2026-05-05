@@ -19,10 +19,6 @@ func _notification(what: int) -> void:
 
 
 #region Private Methods (Register)
-func _unregister() -> void:
-	if !_layer_storage.is_empty():
-		return
-	super()
 func _register() -> void:
 	if _layer_storage.is_empty():
 		return
@@ -51,7 +47,8 @@ func register_layer(layer : NodeCameraLayer) -> void:
 		_register()
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.unregister_layer(layer)
-	_unregister()
+	if _layer_storage.is_empty():
+		_unregister()
 #endregion
 
 

@@ -71,14 +71,14 @@ func _settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
 		_layer_storage.layer_added.disconnect(_flag_add_layer)
 		_layer_storage.layer_removed.disconnect(_flag_remove_layer)
 		_layer_storage.layer_changed_mask.disconnect(_flag_camera_mask_changed)
-		_layer_storage.layer_changed_priority.disconnect(_reorder_layer)
+		_layer_storage.layer_changed_priority.disconnect(_flag_reorder_layer)
 	
 	_layer_storage = storage
 	if _layer_storage != null:
 		_layer_storage.layer_added.connect(_flag_add_layer)
 		_layer_storage.layer_removed.connect(_flag_remove_layer)
 		_layer_storage.layer_changed_mask.connect(_flag_camera_mask_changed)
-		_layer_storage.layer_changed_priority.connect(_reorder_layer)
+		_layer_storage.layer_changed_priority.connect(_flag_reorder_layer)
 #endregion
 
 
@@ -228,11 +228,11 @@ func _clear_scope() -> void:
 
 
 func _add_layer(
-	layer : NodeCameraLayer, default_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> int:
 	if _record_by_layer.has(layer):
 		return TICK_TYPE.NONE
-	var record := _construct_record(layer, default_stage)
+	var record := _construct_record(layer, init_stage)
 	if record == null:
 		return TICK_TYPE.NONE
 	
@@ -294,19 +294,19 @@ func _update_multi_tick_mask(record : MultiLayerRecord) -> int:
 
 #region Helper Methods
 func _construct_record(
-	layer : NodeCameraLayer, default_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> LayerRecord:
 	if layer is NodeCameraStaged:
-		return _construct_staged_record(layer, default_stage)
+		return _construct_staged_record(layer, init_stage)
 	if layer is NodeCameraMulti:
 		return _construct_multi_record(layer)
 	return null
 func _construct_staged_record(
-	layer : NodeCameraStaged, starting_stage : LAYER_STAGES
+	layer : NodeCameraStaged, init_stage : LAYER_STAGES
 ) -> LayerRecord:
 	var record := StagedLayerRecord.new()
 	
-	record.stage = starting_stage
+	record.stage = init_stage
 	record.stage_changed_mask = _get_stage_mask(layer.get_needed_change_stages())
 	record.stage_process_mask  = _get_stage_mask(layer.get_needed_process_stages())
 	

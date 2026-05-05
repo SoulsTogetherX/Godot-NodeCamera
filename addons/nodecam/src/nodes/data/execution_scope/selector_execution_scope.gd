@@ -53,12 +53,11 @@ func flag_update_selection(idx : int) -> void:
 
 #region Dirty Operations Methods
 func _add_layer(
-	layer : NodeCameraLayer, default_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> int:
-	return super(
-		layer, 
-		default_stage if layer == _selection else LAYER_STAGES.HAULTED
-	)
+	if layer != _selection:
+		return TICK_TYPE.NONE
+	return super(layer, init_stage)
 #endregion
 
 
