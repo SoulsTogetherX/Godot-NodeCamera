@@ -147,7 +147,7 @@ func _handle_dirty_layers() -> void:
 		_clear_scope()
 		_clear_dirty_flags()
 		return
-	if _host_scope.is_disabled():
+	if !_host_scope.is_running():
 		_clear_dirty_flags()
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
@@ -338,13 +338,13 @@ func _construct_multi_record(
 			_host_scope, record, layer.get_layer_storage()
 		)
 	
+	record.scope = scope
 	scope.force_construct_scope()
 	record.tick_mask = layer._get_tick_mask(scope)
 	if record.tick_mask == TICK_TYPE.NONE:
 		record.free()
 		return
 	
-	record.scope = scope
 	record.layer = layer
 	record.request_tick_mask_update.connect(
 		_flag_multi_tick_mask_changed, CONNECT_APPEND_SOURCE_OBJECT

@@ -36,6 +36,9 @@ enum CALLBACK_MODES {
 @export var disabled : bool:
 	set = set_disabled,
 	get = get_disabled
+@export var run_in_engine : bool:
+	set = set_run_in_engine,
+	get = get_run_in_engine
 #endregion
 
 
@@ -55,7 +58,7 @@ func _notification(what: int) -> void:
 		NOTIFICATION_ENTER_TREE:
 			_settup_camera()
 			
-			if !disabled:
+			if is_running():
 				_scope.overwrite_status()
 				NodeCameraManager.register_host(self)
 		NOTIFICATION_EXIT_TREE:
@@ -83,6 +86,8 @@ func teleport_position() -> void:
 func process_tick() -> void:
 	NodeCameraManager.tick_host_scope(_scope)
 
+func is_running() -> bool:
+	return (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
 func get_scope() -> NodeCameraHostExecutionScope:
 	return _scope
 #endregion
@@ -108,15 +113,30 @@ func get_camera_mask() -> int:
 	return camera_mask
 
 func set_disabled(val : bool) -> void:
+	if val == disabled:
+		return
 	disabled = val
 	
-	if !disabled && _camera:
-		NodeCameraManager.register_host(self)
+	if is_running():
 		_scope.overwrite_status()
+		NodeCameraManager.register_host(self)
 		return
 	NodeCameraManager.unregister_host(self)
 func get_disabled() -> bool:
 	return disabled
+
+func set_run_in_engine(val : bool) -> void:
+	if val == run_in_engine:
+		return
+	run_in_engine = val
+	
+	if is_running():
+		_scope.overwrite_status()
+		NodeCameraManager.register_host(self)
+		return
+	NodeCameraManager.unregister_host(self)
+func get_run_in_engine() -> bool:
+	return run_in_engine
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

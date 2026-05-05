@@ -142,8 +142,8 @@ func run_tick() -> void:
 
 
 #region Host Accessor Methods
-func is_disabled() -> bool:
-	return _host.disabled
+func is_running() -> bool:
+	return _host.is_running()
 
 func get_mask() -> int:
 	return _host.camera_mask
