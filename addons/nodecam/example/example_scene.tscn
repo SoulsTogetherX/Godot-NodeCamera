@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
 [ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_selector.gd" id="4_e6yeu"]
 [ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="5_e6yeu"]
+[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_group.gd" id="5_gnvb1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -66,14 +67,31 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="MultiplexerTest" type="Node" parent="." unique_id=1189317909]
+[node name="NodeCameraGroup" type="Node" parent="." unique_id=943854428]
+script = ExtResource("5_gnvb1")
+disabled = true
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="MultiplexerTest" type="Node" parent="NodeCameraGroup" unique_id=1189317909]
 script = ExtResource("4_e6yeu")
 metadata/_custom_type_script = "uid://nqu2162c3ade"
 
-[node name="NodeCameraEffect" type="Node" parent="MultiplexerTest" unique_id=1022371892]
+[node name="Effect1" type="Node" parent="NodeCameraGroup/MultiplexerTest" unique_id=1022371892]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="NodeCameraEffect2" type="Node" parent="MultiplexerTest" unique_id=592531619]
+[node name="Effect2" type="Node" parent="NodeCameraGroup/MultiplexerTest" unique_id=592531619]
+script = ExtResource("5_e6yeu")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="MultiplexerTest2" type="Node" parent="NodeCameraGroup" unique_id=1221814694]
+script = ExtResource("4_e6yeu")
+metadata/_custom_type_script = "uid://nqu2162c3ade"
+
+[node name="Effect3" type="Node" parent="NodeCameraGroup/MultiplexerTest2" unique_id=958260173]
+script = ExtResource("5_e6yeu")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="Effect4" type="Node" parent="NodeCameraGroup/MultiplexerTest2" unique_id=2002246688]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"

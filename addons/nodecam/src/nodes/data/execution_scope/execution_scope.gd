@@ -14,10 +14,10 @@ enum DIRTY_FLAGS {
 }
 
 enum LAYER_STAGES {
-	HAULTED = 0,
-	ENDING = 1 << 0,
-	RUNNING = 1 << 1,
-	STARTING = 1 << 2,
+	HAULTED = 1 << 0,
+	ENDING = 1 << 1,
+	RUNNING = 1 << 2,
+	STARTING = 1 << 3,
 }
 
 enum TICK_TYPE {
@@ -326,7 +326,7 @@ func _construct_multi_record(
 	layer : NodeCameraMulti
 ) -> LayerRecord:
 	var record := MultiLayerRecord.new()
-	var scope : NodeCameraSelectorExecutionScope
+	var scope : NodeCameraExecutionScope
 	
 	if layer is NodeCameraSelector:
 		scope = NodeCameraSelectorExecutionScope.new(

@@ -9,7 +9,7 @@ class_name NodeCameraEffect extends NodeCameraStaged
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	pass
+	prints(name, stage, target)
 
 func process_effect(
 	target : NodeCameraState, stage : LAYER_STAGES

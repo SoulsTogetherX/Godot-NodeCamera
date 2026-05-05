@@ -3,7 +3,7 @@
 @abstract
 class_name NodeCameraStaged extends NodeCameraLayer
 
-#region Public Methods (During-Layer Helper)
+#region Public Methods (Stage Helpers)
 func advance_stage() -> void:
 	_scope.flag_layer_stage_advance(self)
 func set_stage(stage : LAYER_STAGES) -> void:
@@ -35,4 +35,5 @@ func get_needed_change_stages() -> PackedInt32Array:
 		LAYER_STAGES.HAULTED
 	]
 #endregion
+
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
