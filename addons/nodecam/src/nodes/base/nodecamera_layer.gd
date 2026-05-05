@@ -54,12 +54,6 @@ func _notification(what: int) -> void:
 #endregion
 
 
-#region Tick Methods
-func get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
-	return TICK_TYPE.NONE
-#endregion
-
-
 #region Private Methods (Register)
 func _unregister() -> void:
 	var parent := get_parent()
@@ -107,6 +101,12 @@ func set_camera_mask(val : int) -> void:
 	camera_mask_changed.emit()
 func get_camera_mask() -> int:
 	return camera_mask
+#endregion
+
+
+#region Tick Methods
+@abstract
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 

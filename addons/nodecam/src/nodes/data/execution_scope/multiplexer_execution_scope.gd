@@ -51,15 +51,14 @@ func flag_update_selection(idx : int) -> void:
 #endregion
 
 
-#region Helper Methods
-func _construct_record(layer : NodeCameraLayer) -> LayerRecord:
-	if layer is NodeCameraStaged:
-		return _construct_staged_record(layer, 
-			LAYER_STAGES.STARTING if layer == _selection else LAYER_STAGES.HAULTED
-		)
-	if layer is NodeCameraMulti:
-		return _construct_multi_record(layer)
-	return null
+#region Dirty Operations Methods
+func _add_layer(
+	layer : NodeCameraLayer, default_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+) -> int:
+	return super(
+		layer, 
+		default_stage if layer == _selection else LAYER_STAGES.HAULTED
+	)
 #endregion
 
 

@@ -32,18 +32,26 @@ func settup_camera_states() -> void:
 	if cam is Camera2D:
 		if _target_state is NodeCamera2DState:
 			return
+		_free_camera_states()
 		_target_state = NodeCamera2DState.new()
 		_current_state = NodeCamera2DState.new()
 	elif cam is Camera3D:
 		if _current_state is NodeCamera2DState:
 			return
+		_free_camera_states()
 		_target_state = NodeCamera3DState.new()
 		_current_state = NodeCamera3DState.new()
 	else:
+		_free_camera_states()
 		_target_state = null
 		_current_state = null
 		return
 	
+	# Args record is referenced in both camera states
+	_target_state.args = {}
+	_current_state.args = _target_state.args
+	
+	# Overwrite the states with the current camera information
 	_target_state.overwrite_status(cam)
 	_current_state.overwrite_status(cam)
 func _free_camera_states() -> void:
@@ -59,7 +67,7 @@ func _sync_layer_stage(
 	layer: NodeCameraStaged, record : StagedLayerRecord,
 	scope : NodeCameraExecutionScope,
 	update_start : bool = false
-) -> void:
+) -> int:
 	layer._scope = scope
 	if update_start:
 		if layer is NodeCameraEffect:
@@ -79,24 +87,25 @@ func _sync_layer_stage(
 			if record.stage & record.stage_process_mask > 0:
 				break
 	if record.stage == LAYER_STAGES.HAULTED:
-		_remove_layer(layer)
+		return scope._remove_layer(layer)
+	return TICK_TYPE.NONE
 
 func _set_layer_stage(
 	layer : NodeCameraStaged, record : StagedLayerRecord,
 	scope : NodeCameraExecutionScope,
 	stage : LAYER_STAGES
-) -> void:
+) -> int:
 	if record.stage == stage:
-		return
+		return TICK_TYPE.NONE
 	record.stage = stage
 	
-	_sync_layer_stage(layer, record, scope, true)
+	return _sync_layer_stage(layer, record, scope, true)
 func _advance_layer_stage(
 	layer : NodeCameraStaged, record : StagedLayerRecord,
 	scope : NodeCameraExecutionScope
-) -> void:
+) -> int:
 	record.stage >>= 1
-	_sync_layer_stage(layer, record, scope, false)
+	return _sync_layer_stage(layer, record, scope, false)
 #endregion
 
 

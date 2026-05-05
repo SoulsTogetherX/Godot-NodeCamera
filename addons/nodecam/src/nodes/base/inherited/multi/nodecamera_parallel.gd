@@ -6,7 +6,7 @@ class_name NodeCameraParallel extends NodeCameraMulti
 ## children [NodeCameraLayer], while also boosting performance.
 
 #region Tick Methods
-func get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
 	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
 	
 	if param_scope.has_effects():

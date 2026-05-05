@@ -3,6 +3,12 @@
 @abstract
 class_name NodeCameraState extends Object
 
+#region External Variables
+@export var args : Dictionary[StringName, Variant]
+#endregion
+
+
+
 #region Public Helper Methods
 @abstract
 func overwrite_status(cam : Node) -> void

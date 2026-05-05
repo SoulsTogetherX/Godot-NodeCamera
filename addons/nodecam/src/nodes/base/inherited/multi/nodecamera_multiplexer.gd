@@ -16,16 +16,6 @@ signal selection_changed
 
 
 
-#region Tick Methods
-func get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	var sel := get_local_selection_layer(param_scope)
-	
-	if sel == null:
-		return TICK_TYPE.NONE
-	return sel.get_tick_mask(param_scope)
-#endregion
-
-
 #region Selection Methods
 func enforce_local_selection(sel : int) -> void:
 	(_scope as NodeCameraMultiplexerExecutionScope).flag_update_selection(sel)
@@ -59,6 +49,16 @@ func set_selection(val : int) -> void:
 	selection_changed.emit()
 func get_selection() -> int:
 	return selection
+#endregion
+
+
+#region Tick Methods
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
+	var sel := (param_scope as NodeCameraMultiplexerExecutionScope).get_selection()
+	
+	if sel == null:
+		return TICK_TYPE.NONE
+	return sel._get_tick_mask(param_scope)
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

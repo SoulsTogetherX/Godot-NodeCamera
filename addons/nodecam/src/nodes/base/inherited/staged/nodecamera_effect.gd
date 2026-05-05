@@ -5,22 +5,16 @@ class_name NodeCameraEffect extends NodeCameraStaged
 ## The base [NodeCameraLayer] node for all camera effects, reliant on
 ## manipulating the target [GoCameraStateResource] resource of hosts.
 
-#region Tick Methods
-func get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
-	return TICK_TYPE.EFFECTS
-#endregion
-
-
 #region Virtual Methods (User Overwrite)
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	prints(1, name, target, stage)
+	pass
 
 func process_effect(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	prints(2, name, target, stage)
+	pass
 #endregion
 
 
@@ -32,6 +26,12 @@ func get_needed_change_stages() -> PackedInt32Array:
 		LAYER_STAGES.STARTING,
 		LAYER_STAGES.HAULTED
 	]
+#endregion
+
+
+#region Tick Methods
+func _get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
+	return TICK_TYPE.EFFECTS
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

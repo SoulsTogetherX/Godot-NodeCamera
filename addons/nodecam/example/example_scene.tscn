@@ -66,17 +66,14 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="NodeCameraMultiplexer" type="Node" parent="." unique_id=1189317909]
+[node name="MultiplexerTest" type="Node" parent="." unique_id=1189317909]
 script = ExtResource("4_e6yeu")
-selection = -1
 metadata/_custom_type_script = "uid://nqu2162c3ade"
 
-[node name="NodeCameraEffect" type="Node" parent="NodeCameraMultiplexer" unique_id=1022371892]
+[node name="NodeCameraEffect" type="Node" parent="MultiplexerTest" unique_id=1022371892]
 script = ExtResource("5_e6yeu")
-disabled = true
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="NodeCameraEffect2" type="Node" parent="NodeCameraMultiplexer" unique_id=592531619]
+[node name="NodeCameraEffect2" type="Node" parent="MultiplexerTest" unique_id=592531619]
 script = ExtResource("5_e6yeu")
-disabled = true
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
