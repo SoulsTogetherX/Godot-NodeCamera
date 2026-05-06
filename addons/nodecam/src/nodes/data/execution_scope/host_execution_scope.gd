@@ -17,7 +17,7 @@ func _init(
 ) -> void:
 	_host = host
 	_host_scope = self
-	_parent_record = null
+	_container_record = null
 	
 	_settup_layer_storage(layer_storage)
 func _notification(what: int) -> void:
@@ -62,8 +62,8 @@ func _free_camera_states() -> void:
 #endregion
 
 
-#region Layer State Methods
-func sync_layer_stage(
+#region Layer State Methods (Protected)
+func _sync_layer_stage(
 	record : StagedLayerRecord, update_start : bool = false
 ) -> int:
 	var layer : NodeCameraStaged = record.layer
@@ -79,61 +79,69 @@ func sync_layer_stage(
 		elif layer is NodeCameraTransition:
 			layer.transition_stage_changed(_target_state, _current_state, record.stage)
 	
-	if record.stage & process_mask == 0:
+	if !(record.stage & linger_mask):
 		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
-			if record.stage & changed_mask > 0:
+			if record.stage & changed_mask:
 				if layer is NodeCameraEffect:
 					layer.effect_stage_changed(_target_state, record.stage)
 				elif layer is NodeCameraTransition:
 					layer.transition_stage_changed(_target_state, _current_state, record.stage)
 			
-			if record.stage & process_mask > 0:
+			if record.stage & linger_mask:
 				break
+	
 	if record.stage == LAYER_STAGES.HAULTED:
 		return record.scope._remove_layer(layer)
+	if record.stage & process_mask:
+		return record.scope._set_pause_layer(record, false)
+	else:
+		record.scope._set_pause_layer(record, true)
+	
 	return TICK_TYPE.NONE
 
-func advance_stage(record : LayerRecord) -> int:
+func _advance_stage(record : LayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
-		return propagate_advance_stage(record)
+		return _propagate_advance_stage(record)
+	if record.stage == LAYER_STAGES.HAULTED:
+		return TICK_TYPE.NONE
 	
 	record.stage >>= 1
-	return sync_layer_stage(record, true)
-func overwrite_stage(
+	return _sync_layer_stage(record, true)
+func _overwrite_stage(
 	record : LayerRecord, stage : LAYER_STAGES
 ) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
-		return propagate_overwrite_stage(record, stage)
+		return _propagate_overwrite_stage(record, stage)
 	if record.stage == stage:
 		return TICK_TYPE.NONE
 	
 	record.stage = stage
-	return sync_layer_stage(record, true)
+	return _sync_layer_stage(record, true)
 
-func propagate_advance_stage(record : MultiLayerRecord) -> int:
+func _propagate_advance_stage(record : MultiLayerRecord) -> int:
 	var mask := TICK_TYPE.NONE
-	var records := record.scope.get_running_records()
+	var records := record.scope.get_records()
 	
 	for rec : LayerRecord in records:
-		mask |= advance_stage(rec)
+		mask |= _advance_stage(rec)
 	# This should only occur after _handle_dirty_layers fully ran, if
 	# ran at all. To save CPU time, just skip to the end.
 	record.scope.force_rebuild_flat_lists(mask)
 	
 	return mask
-func propagate_overwrite_stage(
+func _propagate_overwrite_stage(
 	record : MultiLayerRecord, stage : LAYER_STAGES
 ) -> int:
 	var mask := TICK_TYPE.NONE
-	var records := record.scope.get_running_records()
+	var records := record.scope.get_records()
 	
 	for rec : LayerRecord in records:
-		mask |= overwrite_stage(rec, stage)
+		mask |= _overwrite_stage(rec, stage)
 	# This should only occur after _handle_dirty_layers fully ran, if
 	# ran at all. To save CPU time, just skip to the end.
 	record.scope.force_rebuild_flat_lists(mask)

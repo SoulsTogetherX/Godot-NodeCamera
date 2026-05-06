@@ -2,6 +2,8 @@
 class_name LayerRecord extends Object
 
 #region Public Variables
+var paused : bool = false
+
 var layer : NodeCameraLayer
 var tick_mask : int
 var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HAULTED

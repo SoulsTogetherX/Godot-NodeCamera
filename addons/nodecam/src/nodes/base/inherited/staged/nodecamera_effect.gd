@@ -14,8 +14,7 @@ func effect_stage_changed(
 func process_effect(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	pass
-	#prints(2, name, stage, target)
+	prints(2, name, stage, target)
 #endregion
 
 

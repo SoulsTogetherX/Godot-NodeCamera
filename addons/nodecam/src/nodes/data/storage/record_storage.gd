@@ -34,6 +34,9 @@ func _remove_from_bucket(record: LayerRecord, priority : int) -> void:
 	if bucket.is_empty():
 		_priority_buckets.erase(priority)
 		_priority_record.erase(priority)
+
+func _check_if_paused(record : LayerRecord) -> bool:
+	return record.paused
 #endregion
 
 
@@ -46,6 +49,7 @@ func rebuild() -> void:
 	_flat_layer_list.clear()
 	for priority : int in _priority_record:
 		_flat_layer_list.append_array(_priority_buckets[priority])
+	_flat_layer_list = _flat_layer_list.filter(_check_if_paused)
 
 func add(record: LayerRecord, priority : int) -> void:
 	_insert_into_bucket(record, priority)
@@ -62,7 +66,7 @@ func reorder(
 func get_flat_list() -> Array[LayerRecord]:
 	return _flat_layer_list
 func is_empty() -> bool:
-	return _flat_layer_list.is_empty()
+	return _priority_record.is_empty()
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

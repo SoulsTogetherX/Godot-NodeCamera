@@ -2,7 +2,7 @@
 class_name MultiLayerRecord extends LayerRecord
 
 #region Signals
-signal request_tick_mask_update
+var parent_scope : NodeCameraExecutionScope
 #endregion
 
 
