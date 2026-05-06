@@ -43,11 +43,11 @@ func process_transition(
 #region Virtual Methods (Register)
 func register_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.register_layer(layer)
-	if _layer_storage.size() == 1:
+	if _layer_storage.size() == 1 && !disabled:
 		_register()
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.unregister_layer(layer)
-	if _layer_storage.is_empty():
+	if _layer_storage.is_empty() && !disabled:
 		_unregister()
 #endregion
 

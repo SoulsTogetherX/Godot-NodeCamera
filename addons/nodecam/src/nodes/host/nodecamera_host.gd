@@ -44,7 +44,6 @@ enum CALLBACK_MODES {
 
 #region Private Variables
 var _camera : Node
-var _running : bool = false
 
 var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
 	self, NodeCameraManager.get_layer_storage()
@@ -58,10 +57,6 @@ func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:
 			_settup_camera()
-			
-			if _running:
-				_scope.overwrite_status()
-				NodeCameraManager.register_host(self)
 		NOTIFICATION_EXIT_TREE:
 			NodeCameraManager.unregister_host(self)
 		NOTIFICATION_PREDELETE:
@@ -74,28 +69,25 @@ func _settup_camera() -> void:
 	_camera = get_parent()
 	if !(_camera is Camera2D || _camera is Camera3D):
 		_camera = null
-		_settup_running()
+		NodeCameraManager.unregister_host(self)
 		return
 	_scope.settup_camera_states()
-	_settup_running()
+	if is_running():
+		NodeCameraManager.register_host(self)
+
 func get_camera() -> Node:
 	return _camera
 #endregion
 
 
-#region Running Check Methods
-func _settup_running() -> void:
-	_running = (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
-func is_running() -> bool:
-	return _running
-#endregion
-
-
 #region Public Helper Methods
 func teleport_position() -> void:
-	_scope.teleport_overwrite()
+	_scope.teleport_cam_position()
 func process_tick() -> void:
 	NodeCameraManager.tick_host_scope(_scope)
+
+func is_running() -> bool:
+	return (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
 
 func get_scope() -> NodeCameraHostExecutionScope:
 	return _scope
@@ -126,9 +118,8 @@ func set_disabled(val : bool) -> void:
 		return
 	disabled = val
 	
-	_settup_running()
-	if _running:
-		_scope.overwrite_status()
+	if is_running():
+		_scope.overwrite_cam_status()
 		NodeCameraManager.register_host(self)
 		return
 	NodeCameraManager.unregister_host(self)
@@ -140,9 +131,8 @@ func set_run_in_engine(val : bool) -> void:
 		return
 	run_in_engine = val
 	
-	_settup_running()
-	if _running:
-		_scope.overwrite_status()
+	if is_running():
+		_scope.overwrite_cam_status()
 		NodeCameraManager.register_host(self)
 		return
 	NodeCameraManager.unregister_host(self)

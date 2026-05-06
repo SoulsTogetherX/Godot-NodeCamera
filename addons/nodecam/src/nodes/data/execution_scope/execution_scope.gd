@@ -60,6 +60,7 @@ func _init(
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
+		_scope_hault_stage()
 		_clear_scope()
 		_effect_storage.free()
 		_transition_storage.free()
@@ -102,7 +103,7 @@ func flag_reorder_layer(layer : NodeCameraLayer, old_priority : int) -> void:
 	) | DIRTY_FLAGS.REORDER_LAYER
 	_flag_request(DIRTY_FLAGS.REORDER_LAYER)
 func flag_add_layer(layer : NodeCameraLayer) -> void:
-	if _layer_to_dirty_op[layer] & DIRTY_FLAGS.REMOVE_LAYER:
+	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
 		# Can't remove and add
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
 			layer, 0
@@ -129,7 +130,7 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 		flag_remove_layer(layer)
 
 func flag_pause(layer : NodeCameraLayer) -> void:
-	if _layer_to_dirty_op[layer] & DIRTY_FLAGS.UNPAUSE_LAYER:
+	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.UNPAUSE_LAYER:
 		# Can't unpause and pause
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
 			layer, 0
@@ -145,7 +146,7 @@ func flag_pause(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.PAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.PAUSE_LAYER)
 func flag_unpause(layer : NodeCameraLayer) -> void:
-	if _layer_to_dirty_op[layer] & DIRTY_FLAGS.UNPAUSE_LAYER:
+	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.UNPAUSE_LAYER:
 		# Can't pause and unpause
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
 			layer, 0
@@ -162,13 +163,20 @@ func flag_unpause(layer : NodeCameraLayer) -> void:
 	_flag_request(DIRTY_FLAGS.UNPAUSE_LAYER)
 
 func flag_advance_stage(layer : NodeCameraLayer) -> void:
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = DIRTY_FLAGS.STAGE_CHANGED
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
 func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = stage
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
+
 func flag_multi_tick_mask_changed(record : LayerRecord) -> void:
 	_layer_to_dirty_op[record.layer] = _layer_to_dirty_op.get(
 		record.layer, 0
@@ -185,6 +193,7 @@ func _flag_request(op : DIRTY_FLAGS) -> void:
 #region Dirty Operations Methods
 func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CLEARED:
+		_scope_hault_stage()
 		_clear_scope()
 		force_rebuild_flat_lists(TICK_TYPE.BOTH)
 		_clear_dirty_flags()
@@ -201,55 +210,50 @@ func _handle_dirty_layers() -> void:
 		return
 	
 	var rebuild_flags : int = TICK_TYPE.NONE
-	#			REBUILD PHASE: STAGES
-	for layer : NodeCameraLayer in _layer_to_force_stage:
-		var record : LayerRecord = _record_by_layer.get(layer, null)
-		var stage := _layer_to_force_stage[layer] # Either Advance or Overwrite
-		
-		# Advance Stage
-		if stage == DIRTY_FLAGS.STAGE_CHANGED:
-			rebuild_flags |= _host_scope._advance_stage(record)
-			continue
-		
-		# Overwrite Stage
-		if record == null:
-			if stage != LAYER_STAGES.HAULTED:
-				rebuild_flags |= _add_layer(layer, stage)
-			continue
-		rebuild_flags |= _host_scope._overwrite_stage(record, stage)
-	
+	var record : LayerRecord
 	#			REBUILD PHASE: LAYERS
-	for layer : NodeCameraLayer in _layer_to_dirty_op:
-		var op := _layer_to_dirty_op[layer]
-		if _dirty_mask & DIRTY_FLAGS.REMOVE_LAYER:
+	for layer : NodeCameraLayer in _get_priority_order(_layer_to_dirty_op.keys()):
+		var op := _layer_to_dirty_op.get(layer, null)
+		
+		if op & DIRTY_FLAGS.REMOVE_LAYER:
 			rebuild_flags |= _remove_layer(layer)
 			# If removed, nothing else matters
 			continue
-		if _dirty_mask & DIRTY_FLAGS.ADD_LAYER:
+		if op & DIRTY_FLAGS.ADD_LAYER:
 			rebuild_flags |= _add_layer(layer)
-			# Adding a layer takes care of everything already
-			continue
+			# Adding a layer takes care of everything already, but addtional
+			# editions can be made
 		
-		if _dirty_mask & DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED:
+		if op & DIRTY_FLAGS.STAGE_CHANGED:
+			var stage := _layer_to_force_stage.get(layer, 0) # Either Advance or Overwrite
+			
+			if stage == DIRTY_FLAGS.STAGE_CHANGED:
+				# Advance Stage
+				rebuild_flags |= _host_scope._advance_stage(layer, self)
+			else:
+				# Overwrite Stage
+				rebuild_flags |= _host_scope._overwrite_stage(layer, self, stage)
+			
+			if !_record_by_layer.has(layer):
+				# Record was removed. We can ignore everything after.
+				continue
+		
+		if op & DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED:
 			rebuild_flags |= _update_multi_tick_mask(
 				_record_by_layer.get(layer, null)
 			)
-			# Reording or pausing can still happen after this point
-		if _dirty_mask & DIRTY_FLAGS.REORDER_LAYER:
+		if op & DIRTY_FLAGS.REORDER_LAYER:
 			rebuild_flags |= _reorder_layer(layer)
-			# Pausing can still happen at this point
 		
-		if _dirty_mask & DIRTY_FLAGS.UNPAUSE_LAYER:
+		# You can only unpausing or pause in a single frame
+		if op & DIRTY_FLAGS.UNPAUSE_LAYER:
 			rebuild_flags |= _set_pause_layer(
 				_record_by_layer.get(layer, null), false
 			)
-			# You can only unpausing or pause in a single frame
-			continue
-		if _dirty_mask & DIRTY_FLAGS.PAUSE_LAYER:
+		elif op & DIRTY_FLAGS.PAUSE_LAYER:
 			rebuild_flags |= _set_pause_layer(
 				_record_by_layer.get(layer, null), true
 			)
-			# You can only unpausing or pause in a single frame
 	
 	force_rebuild_flat_lists(rebuild_flags)
 	if rebuild_flags && _container_record:
@@ -283,7 +287,7 @@ func _construct_scope(
 	
 	var rebuild_flags : int = TICK_TYPE.NONE
 	var mask := _host_scope.get_mask()
-	for layer : NodeCameraLayer in scope_layers:
+	for layer : NodeCameraLayer in _get_priority_order(scope_layers):
 		if !(layer.camera_mask & mask):
 			continue
 		rebuild_flags |= _add_layer(layer, init_stage)
@@ -295,6 +299,14 @@ func _clear_scope() -> void:
 	for record : LayerRecord in _record_by_layer.values():
 		record.free()
 	_record_by_layer.clear()
+func _scope_hault_stage() -> void:
+	for record : LayerRecord in get_records():
+		if (
+			record.stage != LAYER_STAGES.HAULTED &&
+			record.get_changed_mask() & LAYER_STAGES.HAULTED
+		):
+			# NOTE: MultiLayerRecord always have a stage of LAYER_STAGES.HAULTED
+			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HAULTED)
 
 
 func _remove_layer(layer : NodeCameraLayer) -> int:
@@ -307,7 +319,16 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	if record.tick_mask & TICK_TYPE.TRANSITIONS:
 		_transition_storage.remove(record, layer.priority)
 	
+	if (
+		record.stage != LAYER_STAGES.HAULTED &&
+		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HAULTED
+	):
+		# NOTE: MultiLayerRecord always have a stage of LAYER_STAGES.HAULTED
+		_host_scope._force_stage_change(layer, LAYER_STAGES.HAULTED)
+	
 	if record.paused:
+		_record_by_layer.erase(layer)
+		record.free()
 		return TICK_TYPE.NONE
 	
 	var mask := record.tick_mask
@@ -442,6 +463,12 @@ func _get_stage_mask(stages : PackedInt32Array) -> int:
 	for stage : int in stages:
 		mask |= stage
 	return mask
+
+func _priority_check(l1 : NodeCameraLayer, l2 : NodeCameraLayer) -> bool:
+	return l1.priority > l2.priority
+func _get_priority_order(ret : Array[NodeCameraLayer]) -> Array[NodeCameraLayer]:
+	ret.sort_custom(_priority_check)
+	return ret
 #endregion
 
 

@@ -74,19 +74,13 @@ func _sync_layer_stage(
 	var changed_mask := record.get_changed_mask()
 	
 	if update_start && record.stage & changed_mask:
-		if layer is NodeCameraEffect:
-			layer.effect_stage_changed(_target_state, record.stage)
-		elif layer is NodeCameraTransition:
-			layer.transition_stage_changed(_target_state, _current_state, record.stage)
+		_force_stage_change(layer, record.stage)
 	
 	if !(record.stage & linger_mask):
 		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
 			if record.stage & changed_mask:
-				if layer is NodeCameraEffect:
-					layer.effect_stage_changed(_target_state, record.stage)
-				elif layer is NodeCameraTransition:
-					layer.transition_stage_changed(_target_state, _current_state, record.stage)
+				_force_stage_change(layer, record.stage)
 			
 			if record.stage & linger_mask:
 				break
@@ -99,8 +93,19 @@ func _sync_layer_stage(
 		record.scope._set_pause_layer(record, true)
 	
 	return TICK_TYPE.NONE
+func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void:
+	if layer is NodeCameraEffect:
+		layer.effect_stage_changed(_target_state, stage)
+	elif layer is NodeCameraTransition:
+		layer.transition_stage_changed(_target_state, _current_state, stage)
 
-func _advance_stage(record : LayerRecord) -> int:
+
+
+func _advance_stage(
+	layer : NodeCameraLayer, scope : NodeCameraExecutionScope
+) -> int:
+	return _advance_stage_record(scope.get_record(layer))
+func _advance_stage_record(record : LayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
@@ -110,7 +115,16 @@ func _advance_stage(record : LayerRecord) -> int:
 	
 	record.stage >>= 1
 	return _sync_layer_stage(record, true)
+
 func _overwrite_stage(
+	layer : NodeCameraLayer, scope : NodeCameraExecutionScope,
+	stage : LAYER_STAGES
+) -> int:
+	var record := scope.get_record(layer)
+	if record == null && stage != LAYER_STAGES.HAULTED:
+		return scope._add_layer(layer, stage)
+	return _overwrite_stage_record(record, stage)
+func _overwrite_stage_record(
 	record : LayerRecord, stage : LAYER_STAGES
 ) -> int:
 	if record == null:
@@ -123,15 +137,14 @@ func _overwrite_stage(
 	record.stage = stage
 	return _sync_layer_stage(record, true)
 
+
+
 func _propagate_advance_stage(record : MultiLayerRecord) -> int:
 	var mask := TICK_TYPE.NONE
 	var records := record.scope.get_records()
 	
 	for rec : LayerRecord in records:
-		mask |= _advance_stage(rec)
-	# This should only occur after _handle_dirty_layers fully ran, if
-	# ran at all. To save CPU time, just skip to the end.
-	record.scope.force_rebuild_flat_lists(mask)
+		mask |= _advance_stage_record(rec)
 	
 	return mask
 func _propagate_overwrite_stage(
@@ -141,26 +154,23 @@ func _propagate_overwrite_stage(
 	var records := record.scope.get_records()
 	
 	for rec : LayerRecord in records:
-		mask |= _overwrite_stage(rec, stage)
-	# This should only occur after _handle_dirty_layers fully ran, if
-	# ran at all. To save CPU time, just skip to the end.
-	record.scope.force_rebuild_flat_lists(mask)
+		mask |= _overwrite_stage_record(rec, stage)
 	
 	return mask
 #endregion
 
 
 #region Camera Movement Methods
-func align_position() -> void:
+func align_cam_position() -> void:
 	_current_state.apply_status(_host.get_camera())
-func teleport_position() -> void:
+func teleport_cam_position() -> void:
 	_target_state.apply_status(_host.get_camera())
 
-func overwrite_status() -> void:
+func overwrite_cam_status() -> void:
 	var cam := _host.get_camera()
 	_current_state.overwrite_status(cam)
 	_target_state.overwrite_status(cam)
-func teleport_overwrite() -> void:
+func teleport_cam_status() -> void:
 	var cam := _host.get_camera()
 	_target_state.apply_status(cam)
 	_current_state.overwrite_status(cam)
@@ -174,11 +184,11 @@ func run_tick() -> void:
 	
 	run_effects(_target_state)
 	if _transition_storage.is_empty():
-		teleport_position()
+		teleport_cam_position()
 		return
 	
 	run_transitions(_target_state, _current_state)
-	align_position()
+	align_cam_position()
 #endregion
 
 
