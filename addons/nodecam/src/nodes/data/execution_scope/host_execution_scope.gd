@@ -79,7 +79,7 @@ func sync_layer_stage(
 		elif layer is NodeCameraTransition:
 			layer.transition_stage_changed(_target_state, _current_state, record.stage)
 	
-	if record.stage & process_mask == 0:
+	if record.stage & linger_mask == 0:
 		while record.stage > LAYER_STAGES.HAULTED:
 			record.stage >>= 1
 			if record.stage & changed_mask > 0:
@@ -88,10 +88,12 @@ func sync_layer_stage(
 				elif layer is NodeCameraTransition:
 					layer.transition_stage_changed(_target_state, _current_state, record.stage)
 			
-			if record.stage & process_mask > 0:
+			if record.stage & linger_mask > 0:
 				break
 	if record.stage == LAYER_STAGES.HAULTED:
 		return record.scope._remove_layer(layer)
+	if record.stage & process_mask == 0:
+		return record.scope._pause_layer(layer, record)
 	return TICK_TYPE.NONE
 
 func advance_stage(record : LayerRecord) -> int:
