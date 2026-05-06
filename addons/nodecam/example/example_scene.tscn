@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_selector.gd" id="4_gnvb1"]
 [ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="5_e6yeu"]
 [ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_group.gd" id="5_wlspu"]
 
@@ -21,6 +20,7 @@ limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
+run_in_engine = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
@@ -67,34 +67,50 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="Selector1" type="Node" parent="." unique_id=2084457918]
-script = ExtResource("4_gnvb1")
-metadata/_custom_type_script = "uid://nqu2162c3ade"
-
-[node name="Group1" type="Node" parent="Selector1" unique_id=633598642]
+[node name="Group1" type="Node" parent="." unique_id=633598642]
 script = ExtResource("5_wlspu")
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="Effect0" type="Node" parent="Selector1/Group1" unique_id=2068079352]
+[node name="Effect0" type="Node" parent="Group1" unique_id=2068079352]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Effect1" type="Node" parent="Selector1/Group1" unique_id=1742037896]
+[node name="Effect1" type="Node" parent="Group1" unique_id=1742037896]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Group2" type="Node" parent="Selector1" unique_id=321665964]
+[node name="Group2" type="Node" parent="Group1" unique_id=2024679915]
 script = ExtResource("5_wlspu")
 metadata/_custom_type_script = "uid://cc3usok7mcrsg"
 
-[node name="Effect2" type="Node" parent="Selector1/Group2" unique_id=1300240678]
+[node name="Effect2" type="Node" parent="Group1/Group2" unique_id=1080553505]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Effect3" type="Node" parent="Selector1/Group2" unique_id=759205718]
+[node name="Effect3" type="Node" parent="Group1/Group2" unique_id=1534833939]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Effect4" type="Node" parent="Selector1" unique_id=1968909069]
+[node name="Group3" type="Node" parent="Group1/Group2" unique_id=524375317]
+script = ExtResource("5_wlspu")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="Effect4" type="Node" parent="Group1/Group2/Group3" unique_id=1769022860]
+script = ExtResource("5_e6yeu")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="Effect5" type="Node" parent="Group1/Group2/Group3" unique_id=1403691103]
+script = ExtResource("5_e6yeu")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="Group4" type="Node" parent="Group1" unique_id=304876130]
+script = ExtResource("5_wlspu")
+metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+
+[node name="Effect6" type="Node" parent="Group1/Group4" unique_id=1054266138]
+script = ExtResource("5_e6yeu")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="Effect7" type="Node" parent="Group1/Group4" unique_id=1757104165]
 script = ExtResource("5_e6yeu")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"

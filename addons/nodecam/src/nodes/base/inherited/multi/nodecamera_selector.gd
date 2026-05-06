@@ -17,11 +17,11 @@ signal selection_changed
 
 
 #region Selection Methods
-func enforce_local_selection(sel : int) -> void:
+func set_local_selection(sel : int) -> void:
 	(_scope as NodeCameraSelectorExecutionScope).flag_update_selection(sel)
+func get_local_selection_layer() -> NodeCameraLayer:
+	return (_scope as NodeCameraSelectorExecutionScope).get_selection()
 
-func get_local_selection_layer(scope : NodeCameraSelectorExecutionScope) -> NodeCameraLayer:
-	return scope.get_selection()
 func get_global_selection_layer() -> NodeCameraLayer:
 	if selection == -1:
 		return null

@@ -24,7 +24,8 @@ enum LAYER_STAGES {
 enum TICK_TYPE {
 	NONE		= 0b00,
 	EFFECTS		= 0b01,
-	TRANSITIONS	= 0b10
+	TRANSITIONS	= 0b10,
+	BOTH		= 0b11
 }
 #endregion
 
@@ -150,15 +151,17 @@ func _flag_request(op : DIRTY_FLAGS) -> void:
 func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CLEARED:
 		_clear_scope()
+		force_rebuild_flat_lists(TICK_TYPE.BOTH)
 		_clear_dirty_flags()
 		return
 	if !_host_scope.is_running():
 		_clear_dirty_flags()
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
-		_construct_scope(
+		var rebuild_flags : int = _construct_scope(
 			_layer_storage.get_registered_layers(), LAYER_STAGES.STARTING
 		)
+		force_rebuild_flat_lists(rebuild_flags)
 		_clear_dirty_flags()
 		return
 	
@@ -179,15 +182,17 @@ func _handle_dirty_layers() -> void:
 			continue
 		
 		if _dirty_mask & DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED:
-			rebuild_flags |= _update_multi_tick_mask(_record_by_layer[layer])
+			rebuild_flags |= _update_multi_tick_mask(
+				_record_by_layer.get(layer, null)
+			)
 		if _dirty_mask & DIRTY_FLAGS.STAGE_CHANGED:
 			rebuild_flags |= _host_scope.advance_stage(
-				_record_by_layer[layer]
+				_record_by_layer.get(layer, null)
 			)
 			continue
 	
 	for layer : NodeCameraLayer in _layer_to_force_stage:
-		var record := _record_by_layer.get(layer, null)
+		var record : LayerRecord = _record_by_layer.get(layer, null)
 		var stage := _layer_to_force_stage[layer]
 		if record == null:
 			if stage != LAYER_STAGES.HAULTED:
@@ -196,10 +201,7 @@ func _handle_dirty_layers() -> void:
 		
 		rebuild_flags |= _host_scope.overwrite_stage(record, stage)
 	
-	if rebuild_flags & TICK_TYPE.EFFECTS > 0:
-		_effect_storage.rebuild()
-	if rebuild_flags & TICK_TYPE.TRANSITIONS > 0:
-		_transition_storage.rebuild()
+	force_rebuild_flat_lists(rebuild_flags)
 	if rebuild_flags > 0 && _parent_record:
 		_parent_record.request_tick_mask_update.emit()
 	
@@ -215,9 +217,16 @@ func force_construct_scope(
 	init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> void:
 	_construct_scope(_layer_storage.get_registered_layers(), init_stage)
+	force_rebuild_flat_lists(TICK_TYPE.BOTH)
+func force_rebuild_flat_lists(tick_mask : int) -> void:
+	if tick_mask & TICK_TYPE.EFFECTS > 0:
+		_effect_storage.rebuild()
+	if tick_mask & TICK_TYPE.TRANSITIONS > 0:
+		_transition_storage.rebuild()
+
 func _construct_scope(
 	scope_layers : Array[NodeCameraLayer], init_stage : LAYER_STAGES
-) -> void:
+) -> int:
 	_clear_scope()
 	
 	var rebuild_flags : int = TICK_TYPE.NONE
@@ -226,11 +235,7 @@ func _construct_scope(
 		if !(layer.camera_mask & mask):
 			continue
 		rebuild_flags |= _add_layer(layer, init_stage)
-
-	if rebuild_flags & TICK_TYPE.EFFECTS > 0:
-		_effect_storage.rebuild()
-	if rebuild_flags & TICK_TYPE.TRANSITIONS > 0:
-		_transition_storage.rebuild()
+	return rebuild_flags
 func _clear_scope() -> void:
 	_effect_storage.clear()
 	_transition_storage.clear()
@@ -241,13 +246,11 @@ func _clear_scope() -> void:
 
 
 func _remove_layer(layer : NodeCameraLayer) -> int:
-	if layer is NodeCameraSelector:
-		if layer.selection_changed.is_connected(_flag_global_selection_changed):
-			layer.selection_changed.disconnect(_flag_global_selection_changed)
-	
 	var record : LayerRecord = _record_by_layer.get(layer, null)
 	if record == null:
 		return TICK_TYPE.NONE
+	if layer is NodeCameraSelector:
+		layer.selection_changed.disconnect(_flag_global_selection_changed)
 	
 	if record.tick_mask & TICK_TYPE.EFFECTS > 0:
 		_effect_storage.remove(record, layer.priority)
@@ -259,7 +262,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	record.free()
 	return mask
 func _reorder_layer(layer : NodeCameraLayer) -> int:
-	var record := _record_by_layer.get(layer, null)
+	var record : LayerRecord = _record_by_layer.get(layer, null)
 	if record == null:
 		return 0
 	
@@ -275,12 +278,6 @@ func _add_layer(
 ) -> int:
 	if _record_by_layer.has(layer):
 		return TICK_TYPE.NONE
-	if layer is NodeCameraSelector:
-		if !layer.selection_changed.is_connected(_flag_global_selection_changed):
-			layer.selection_changed.connect(
-				_flag_global_selection_changed, CONNECT_APPEND_SOURCE_OBJECT
-			)
-	
 	var record := _construct_record(layer, init_stage)
 	if record == null:
 		return TICK_TYPE.NONE
@@ -383,6 +380,10 @@ func _construct_multi_record(
 		record.free()
 		return
 	
+	if layer is NodeCameraSelector:
+		layer.selection_changed.connect(
+			_flag_global_selection_changed, CONNECT_APPEND_SOURCE_OBJECT
+		)
 	record.request_tick_mask_update.connect(
 		_flag_multi_tick_mask_changed, CONNECT_APPEND_SOURCE_OBJECT
 	)
@@ -420,11 +421,15 @@ func get_effect_records() -> Array[LayerRecord]:
 	return _effect_storage.get_flat_list()
 func get_transitions_records() -> Array[LayerRecord]:
 	return _effect_storage.get_flat_list()
+
+func get_running_records() -> Array[LayerRecord]:
+	return _record_by_layer.values()
+
 func get_registered_layers() -> Array[NodeCameraLayer]:
 	return _layer_storage.get_registered_layers()
 
 func has_record(layer : NodeCameraLayer) -> bool:
-	return layer in _record_by_layer
+	return _record_by_layer.has(layer)
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

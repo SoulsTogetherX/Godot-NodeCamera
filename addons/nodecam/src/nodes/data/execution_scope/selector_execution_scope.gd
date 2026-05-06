@@ -36,8 +36,8 @@ func _add_layer(
 func _update_selection(idx : int) -> int:
 	var mask := TICK_TYPE.NONE
 	
-	var end_record = _record_by_layer.get(_selection, null)
-	if end_record && end_record.stage > LAYER_STAGES.ENDING:
+	var end_record : LayerRecord = _record_by_layer.get(_selection, null)
+	if end_record && (!(end_record is StagedLayerRecord) || end_record.stage > LAYER_STAGES.ENDING):
 		mask |= _host_scope.overwrite_stage(end_record, LAYER_STAGES.ENDING)
 	
 	var layers := _layer_storage.get_registered_layers()
@@ -46,9 +46,13 @@ func _update_selection(idx : int) -> int:
 		return mask
 	
 	var sel := layers[idx]
-	mask |= _host_scope.overwrite_stage(
-		_record_by_layer.get(_selection, null), LAYER_STAGES.STARTING
-	)
+	var record := _record_by_layer.get(sel, null)
+	if record == null:
+		mask |= _add_layer(sel, LAYER_STAGES.STARTING)
+	else:
+		mask |= _host_scope.overwrite_stage(
+			record, LAYER_STAGES.STARTING
+		)
 	_selection = sel
 	
 	return mask

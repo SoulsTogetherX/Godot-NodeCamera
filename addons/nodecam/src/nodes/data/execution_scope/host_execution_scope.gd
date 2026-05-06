@@ -117,20 +117,26 @@ func overwrite_stage(
 
 func propagate_advance_stage(record : MultiLayerRecord) -> int:
 	var mask := TICK_TYPE.NONE
-	for rec : LayerRecord in record.scope.get_effect_records():
+	var records := record.scope.get_running_records()
+	
+	for rec : LayerRecord in records:
 		mask |= advance_stage(rec)
-	for rec : LayerRecord in record.scope.get_transitions_records():
-		mask |= advance_stage(rec)
+	# This should only occur after _handle_dirty_layers fully ran, if
+	# ran at all. To save CPU time, just skip to the end.
+	record.scope.force_rebuild_flat_lists(mask)
 	
 	return mask
 func propagate_overwrite_stage(
 	record : MultiLayerRecord, stage : LAYER_STAGES
 ) -> int:
 	var mask := TICK_TYPE.NONE
-	for rec : LayerRecord in record.scope.get_effect_records():
+	var records := record.scope.get_running_records()
+	
+	for rec : LayerRecord in records:
 		mask |= overwrite_stage(rec, stage)
-	for rec : LayerRecord in record.scope.get_transitions_records():
-		mask |= overwrite_stage(rec, stage)
+	# This should only occur after _handle_dirty_layers fully ran, if
+	# ran at all. To save CPU time, just skip to the end.
+	record.scope.force_rebuild_flat_lists(mask)
 	
 	return mask
 #endregion
