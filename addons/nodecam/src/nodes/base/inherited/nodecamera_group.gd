@@ -1,7 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-@abstract
-class_name NodeCameraMulti extends NodeCameraLayer
+class_name NodeCameraGroup extends NodeCameraLayer
 
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
@@ -23,6 +22,19 @@ func _register() -> void:
 	if _layer_storage.is_empty():
 		return
 	super()
+#endregion
+
+
+#region Tick Methods
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
+	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
+	
+	if param_scope.has_effects():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
+	if param_scope.has_transitions():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
+	
+	return mask
 #endregion
 
 

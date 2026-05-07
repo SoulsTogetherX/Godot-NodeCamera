@@ -8,7 +8,7 @@ var layer : NodeCameraLayer
 var tick_mask : int
 var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HAULTED
 
-# Layer's local scope if [member layer] is a [NodeCameraMulti]. Otherwise,
+# Layer's local scope if [member layer] is a [NodeCameraGroup]. Otherwise,
 # it is the [member layer]'s parent scope.
 var scope : NodeCameraExecutionScope
 #endregion

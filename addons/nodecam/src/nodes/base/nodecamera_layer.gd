@@ -58,17 +58,31 @@ func _notification(what: int) -> void:
 func _unregister() -> void:
 	var parent := get_parent()
 	
-	if parent is NodeCameraMulti:
+	if parent is NodeCameraGroup:
 		parent.unregister_layer(self)
 		return
 	NodeCameraManager.unregister_layer(self)
 func _register() -> void:
 	var parent := get_parent()
 	
-	if parent is NodeCameraMulti:
+	if parent is NodeCameraGroup:
 		parent.register_layer(self)
 		return
 	NodeCameraManager.register_layer(self)
+#endregion
+
+
+#region Tick Methods
+@abstract
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
+#endregion
+
+
+#region Grouping Methods
+func _on_remove(param_scope : NodeCameraExecutionScope) -> void:
+	pass
+func _on_add(param_scope : NodeCameraExecutionScope) -> void:
+	pass
 #endregion
 
 
@@ -117,12 +131,6 @@ func set_camera_mask(val : int) -> void:
 	camera_mask_changed.emit()
 func get_camera_mask() -> int:
 	return camera_mask
-#endregion
-
-
-#region Tick Methods
-@abstract
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 

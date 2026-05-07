@@ -100,20 +100,27 @@ func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void
 		layer.transition_stage_changed(_target_state, _current_state, stage)
 
 
-
-func _advance_stage(
-	layer : NodeCameraLayer, scope : NodeCameraExecutionScope
-) -> int:
-	return _advance_stage_record(scope.get_record(layer))
 func _advance_stage_record(record : LayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
-		return _propagate_advance_stage(record)
+		return _propagate_call(record, _advance_stage_record)
 	if record.stage == LAYER_STAGES.HAULTED:
 		return TICK_TYPE.NONE
 	
 	record.stage >>= 1
+	return _sync_layer_stage(record, true)
+func _advance_to_stage_record(
+	record : LayerRecord, stage : LAYER_STAGES
+) -> int:
+	if record == null:
+		return TICK_TYPE.NONE
+	if record is MultiLayerRecord:
+		return _propagate_call(record, _advance_to_stage_record.bind(stage))
+	if record.stage <= stage:
+		return TICK_TYPE.NONE
+	
+	record.stage = stage
 	return _sync_layer_stage(record, true)
 
 func _overwrite_stage(
@@ -130,31 +137,18 @@ func _overwrite_stage_record(
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
-		return _propagate_overwrite_stage(record, stage)
-	if record.stage == stage:
-		return TICK_TYPE.NONE
+		return _propagate_call(record, _overwrite_stage_record.bind(stage))
 	
 	record.stage = stage
 	return _sync_layer_stage(record, true)
 
 
-
-func _propagate_advance_stage(record : MultiLayerRecord) -> int:
+func _propagate_call(record : MultiLayerRecord, foo : Callable) -> int:
 	var mask := TICK_TYPE.NONE
 	var records := record.scope.get_records()
 	
 	for rec : LayerRecord in records:
-		mask |= _advance_stage_record(rec)
-	
-	return mask
-func _propagate_overwrite_stage(
-	record : MultiLayerRecord, stage : LAYER_STAGES
-) -> int:
-	var mask := TICK_TYPE.NONE
-	var records := record.scope.get_records()
-	
-	for rec : LayerRecord in records:
-		mask |= _overwrite_stage_record(rec, stage)
+		mask |= foo.call(rec)
 	
 	return mask
 #endregion
@@ -192,9 +186,11 @@ func run_tick() -> void:
 #endregion
 
 
-#region Host Accessor Methods
+#region Accessor Methods
 func is_running() -> bool:
 	return _host.is_running()
+func is_paused() -> bool:
+	return false
 
 func get_mask() -> int:
 	return _host.camera_mask

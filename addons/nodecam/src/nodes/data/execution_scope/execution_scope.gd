@@ -168,6 +168,14 @@ func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = DIRTY_FLAGS.STAGE_CHANGED
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
+func flag_advance_to_stage(
+	layer : NodeCameraLayer, stage : LAYER_STAGES
+) -> void:
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.STAGE_CHANGED
+	_layer_to_force_stage[layer] = stage | DIRTY_FLAGS.STAGE_CHANGED
+	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
 func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
@@ -195,24 +203,27 @@ func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CLEARED:
 		_scope_hault_stage()
 		_clear_scope()
-		force_rebuild_flat_lists(TICK_TYPE.BOTH)
+		_force_rebuild_flat_lists(TICK_TYPE.BOTH)
 		_clear_dirty_flags()
+		_flag_parent_multi_tick_mask_changed()
 		return
 	if !_host_scope.is_running():
 		_clear_dirty_flags()
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
-		var rebuild_flags : int = _construct_scope(
-			_layer_storage.get_registered_layers(), LAYER_STAGES.STARTING
+		_clear_scope()
+		_construct_scope(
+			_layer_storage.get_registered(), LAYER_STAGES.STARTING
 		)
-		force_rebuild_flat_lists(rebuild_flags)
+		_force_rebuild_flat_lists(TICK_TYPE.BOTH)
 		_clear_dirty_flags()
+		_flag_parent_multi_tick_mask_changed()
 		return
 	
 	var rebuild_flags : int = TICK_TYPE.NONE
 	var record : LayerRecord
 	#			REBUILD PHASE: LAYERS
-	for layer : NodeCameraLayer in _get_priority_order(_layer_to_dirty_op.keys()):
+	for layer : NodeCameraLayer in _sort_priority_order(_layer_to_dirty_op.keys()):
 		var op := _layer_to_dirty_op.get(layer, null)
 		
 		if op & DIRTY_FLAGS.REMOVE_LAYER:
@@ -227,9 +238,17 @@ func _handle_dirty_layers() -> void:
 		if op & DIRTY_FLAGS.STAGE_CHANGED:
 			var stage := _layer_to_force_stage.get(layer, 0) # Either Advance or Overwrite
 			
-			if stage == DIRTY_FLAGS.STAGE_CHANGED:
+			if stage > DIRTY_FLAGS.STAGE_CHANGED:
+				# Advance to Stage
+				rebuild_flags |= _host_scope._advance_to_stage_record(
+					_record_by_layer.get(layer, null),
+					stage & ~DIRTY_FLAGS.STAGE_CHANGED
+				)
+			elif stage == DIRTY_FLAGS.STAGE_CHANGED:
 				# Advance Stage
-				rebuild_flags |= _host_scope._advance_stage(layer, self)
+				rebuild_flags |= _host_scope._advance_stage_record(
+					_record_by_layer.get(layer, null)
+				)
 			else:
 				# Overwrite Stage
 				rebuild_flags |= _host_scope._overwrite_stage(layer, self, stage)
@@ -242,6 +261,11 @@ func _handle_dirty_layers() -> void:
 			rebuild_flags |= _update_multi_tick_mask(
 				_record_by_layer.get(layer, null)
 			)
+			
+			if !_record_by_layer.has(layer):
+				# Record was removed. We can ignore everything after.
+				continue
+		
 		if op & DIRTY_FLAGS.REORDER_LAYER:
 			rebuild_flags |= _reorder_layer(layer)
 		
@@ -255,11 +279,12 @@ func _handle_dirty_layers() -> void:
 				_record_by_layer.get(layer, null), true
 			)
 	
-	force_rebuild_flat_lists(rebuild_flags)
+	_force_rebuild_flat_lists(rebuild_flags)
 	if rebuild_flags && _container_record:
-		_container_record.parent_scope.flag_multi_tick_mask_changed(
-			_container_record
-		)
+		if _record_by_layer.is_empty():
+			_container_record.parent_scope.flag_remove_layer(
+				_container_record.layer
+			)
 	
 	_clear_dirty_flags()
 func _clear_dirty_flags() -> void:
@@ -267,14 +292,20 @@ func _clear_dirty_flags() -> void:
 	_layer_to_old_priority.clear()
 	_layer_to_force_stage.clear()
 	_dirty_mask = 0
+func _flag_parent_multi_tick_mask_changed() -> void:
+	if !_container_record:
+		return
+	_container_record.parent_scope.flag_multi_tick_mask_changed(
+		_container_record
+	)
 
 
-func force_construct_scope(
+func _force_rebuild_scope(
 	init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> void:
-	_construct_scope(_layer_storage.get_registered_layers(), init_stage)
-	force_rebuild_flat_lists(TICK_TYPE.BOTH)
-func force_rebuild_flat_lists(tick_mask : int) -> void:
+	_construct_scope(_layer_storage.get_registered(), init_stage)
+	_force_rebuild_flat_lists(TICK_TYPE.BOTH)
+func _force_rebuild_flat_lists(tick_mask : int) -> void:
 	if tick_mask & TICK_TYPE.EFFECTS:
 		_effect_storage.rebuild()
 	if tick_mask & TICK_TYPE.TRANSITIONS:
@@ -282,16 +313,14 @@ func force_rebuild_flat_lists(tick_mask : int) -> void:
 
 func _construct_scope(
 	scope_layers : Array[NodeCameraLayer], init_stage : LAYER_STAGES
-) -> int:
+) -> void:
 	_clear_scope()
 	
-	var rebuild_flags : int = TICK_TYPE.NONE
 	var mask := _host_scope.get_mask()
-	for layer : NodeCameraLayer in _get_priority_order(scope_layers):
+	for layer : NodeCameraLayer in _sort_priority_order(scope_layers):
 		if !(layer.camera_mask & mask):
 			continue
-		rebuild_flags |= _add_layer(layer, init_stage)
-	return rebuild_flags
+		_add_layer(layer, init_stage)
 func _clear_scope() -> void:
 	_effect_storage.clear()
 	_transition_storage.clear()
@@ -313,6 +342,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	var record : LayerRecord = _record_by_layer.get(layer, null)
 	if record == null:
 		return TICK_TYPE.NONE
+	layer._on_remove(self)
 	
 	if record.tick_mask & TICK_TYPE.EFFECTS:
 		_effect_storage.remove(record, layer.priority)
@@ -335,6 +365,27 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	_record_by_layer.erase(layer)
 	record.free()
 	return mask
+func _add_layer(
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+) -> int:
+	if _record_by_layer.has(layer):
+		return TICK_TYPE.NONE
+	layer._on_add(self)
+	
+	var record := _construct_record(layer, init_stage)
+	if record == null:
+		return TICK_TYPE.NONE
+	
+	if record.tick_mask & TICK_TYPE.EFFECTS:
+		_effect_storage.add(record, layer.priority)
+	if record.tick_mask & TICK_TYPE.TRANSITIONS:
+		_transition_storage.add(record, layer.priority)
+	
+	_record_by_layer.set(layer, record)
+	
+	if record.paused:
+		return TICK_TYPE.NONE
+	return record.tick_mask
 func _reorder_layer(layer : NodeCameraLayer) -> int:
 	var record : LayerRecord = _record_by_layer.get(layer, null)
 	if record == null:
@@ -346,25 +397,6 @@ func _reorder_layer(layer : NodeCameraLayer) -> int:
 		_effect_storage.reorder(record, layer.priority, old_priority)
 	if record.tick_mask & TICK_TYPE.TRANSITIONS:
 		_transition_storage.reorder(record, layer.priority, old_priority)
-	
-	if record.paused:
-		return TICK_TYPE.NONE
-	return record.tick_mask
-func _add_layer(
-	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
-) -> int:
-	if _record_by_layer.has(layer):
-		return TICK_TYPE.NONE
-	var record := _construct_record(layer, init_stage)
-	if record == null:
-		return TICK_TYPE.NONE
-	
-	if record.tick_mask & TICK_TYPE.EFFECTS:
-		_effect_storage.add(record, layer.priority)
-	if record.tick_mask & TICK_TYPE.TRANSITIONS:
-		_transition_storage.add(record, layer.priority)
-	
-	_record_by_layer.set(layer, record)
 	
 	if record.paused:
 		return TICK_TYPE.NONE
@@ -405,11 +437,12 @@ func _update_multi_tick_mask(record : MultiLayerRecord) -> int:
 func _construct_record(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> LayerRecord:
+	var record : LayerRecord
 	if layer is NodeCameraStaged:
-		return _construct_staged_record(layer, init_stage)
-	if layer is NodeCameraMulti:
-		return _construct_multi_record(layer, init_stage)
-	return null
+		record = _construct_staged_record(layer, init_stage)
+	elif layer is NodeCameraGroup:
+		record = _construct_multi_record(layer, init_stage)
+	return record
 func _construct_staged_record(
 	layer : NodeCameraStaged, init_stage : LAYER_STAGES
 ) -> LayerRecord:
@@ -417,8 +450,8 @@ func _construct_staged_record(
 	var process_mask := _get_stage_mask(layer.get_needed_process_stages())
 	
 	record.layer = layer
-	record.scope = self
 	record.stage = init_stage
+	record.scope = self
 	
 	record.set_masks(
 		_get_stage_mask(layer.get_needed_process_stages()),
@@ -427,6 +460,7 @@ func _construct_staged_record(
 	)
 	
 	_host_scope._sync_layer_stage(record, true)
+	
 	if record.stage == LAYER_STAGES.HAULTED:
 		record.free()
 		return null
@@ -437,19 +471,24 @@ func _construct_staged_record(
 		record.tick_mask = TICK_TYPE.TRANSITIONS
 	return record
 func _construct_multi_record(
-	layer : NodeCameraMulti, init_stage : LAYER_STAGES
+	layer : NodeCameraGroup, init_stage : LAYER_STAGES
 ) -> LayerRecord:
 	var record := MultiLayerRecord.new()
 	var scope : NodeCameraExecutionScope
 	
 	record.layer = layer
-	scope = NodeCameraExecutionScope.new(
-		_host_scope, record, layer.get_layer_storage()
-	)
-	
-	record.scope = scope
 	record.parent_scope = self
-	scope.force_construct_scope(init_stage)
+	
+	if layer is NodeCameraSelector:
+		scope = NodeCameraSelectionExecutionScope.new(
+			_host_scope, record, layer.get_layer_storage()
+		)
+	else:
+		scope = NodeCameraExecutionScope.new(
+			_host_scope, record, layer.get_layer_storage()
+		)
+	record.scope = scope
+	scope._force_rebuild_scope(init_stage)
 	
 	record.tick_mask = layer._get_tick_mask(scope)
 	if record.tick_mask == TICK_TYPE.NONE:
@@ -466,7 +505,7 @@ func _get_stage_mask(stages : PackedInt32Array) -> int:
 
 func _priority_check(l1 : NodeCameraLayer, l2 : NodeCameraLayer) -> bool:
 	return l1.priority > l2.priority
-func _get_priority_order(ret : Array[NodeCameraLayer]) -> Array[NodeCameraLayer]:
+func _sort_priority_order(ret : Array[NodeCameraLayer]) -> Array[NodeCameraLayer]:
 	ret.sort_custom(_priority_check)
 	return ret
 #endregion
@@ -486,7 +525,7 @@ func run_transitions(
 #endregion
 
 
-#region Storage Access
+#region Accesor Access
 func has_effects() -> bool:
 	return !_effect_storage.is_empty()
 func has_transitions() -> bool:
@@ -504,9 +543,12 @@ func has_record(layer : NodeCameraLayer) -> bool:
 	return _record_by_layer.has(layer)
 func get_record(layer : NodeCameraLayer) -> LayerRecord:
 	return _record_by_layer.get(layer, null)
+func is_record_running(layer : NodeCameraLayer) -> bool:
+	var record : LayerRecord = _record_by_layer.get(layer, null)
+	return record != null && !record.paused
 
-func get_registered_layers() -> Array[NodeCameraLayer]:
-	return _layer_storage.get_registered_layers()
+func get_registered() -> Array[NodeCameraLayer]:
+	return _layer_storage.get_registered()
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

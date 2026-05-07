@@ -3,8 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
+[ext_resource type="Script" uid="uid://nqu2162c3ade" path="res://addons/nodecam/src/nodes/base/inherited/group/nodecamera_selector.gd" id="4_gnvb1"]
 [ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="5_e6yeu"]
-[ext_resource type="Script" uid="uid://cc3usok7mcrsg" path="res://addons/nodecam/src/nodes/base/inherited/multi/nodecamera_group.gd" id="5_wlspu"]
+[ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="5_gnvb1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -67,13 +68,12 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="NodeCameraSelector" type="Node" parent="." unique_id=309750760]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+[node name="NodeCameraSelector" type="Node" parent="." unique_id=773114983]
+script = ExtResource("4_gnvb1")
+metadata/_custom_type_script = "uid://nqu2162c3ade"
 
 [node name="Group0" type="Node" parent="NodeCameraSelector" unique_id=2135653440]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+script = ExtResource("5_gnvb1")
 
 [node name="Effect0" type="Node" parent="NodeCameraSelector/Group0" unique_id=2068079352]
 script = ExtResource("5_e6yeu")
@@ -81,61 +81,48 @@ metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect1" type="Node" parent="NodeCameraSelector/Group0" unique_id=1742037896]
 script = ExtResource("5_e6yeu")
-priority = 1
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Group1" type="Node" parent="NodeCameraSelector" unique_id=633598642]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+script = ExtResource("5_gnvb1")
 
 [node name="Effect2" type="Node" parent="NodeCameraSelector/Group1" unique_id=1557606628]
 script = ExtResource("5_e6yeu")
-priority = 2
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect3" type="Node" parent="NodeCameraSelector/Group1" unique_id=136833623]
 script = ExtResource("5_e6yeu")
-priority = 3
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Group2" type="Node" parent="NodeCameraSelector" unique_id=968811263]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+[node name="Group2" type="Node" parent="NodeCameraSelector" unique_id=426108673]
+script = ExtResource("5_gnvb1")
 
 [node name="Group3" type="Node" parent="NodeCameraSelector" unique_id=662053971]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+script = ExtResource("5_gnvb1")
 
 [node name="Effect4" type="Node" parent="NodeCameraSelector/Group3" unique_id=36325450]
 script = ExtResource("5_e6yeu")
-priority = 4
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect5" type="Node" parent="NodeCameraSelector/Group3" unique_id=1212733138]
 script = ExtResource("5_e6yeu")
-priority = 5
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Group4" type="Node" parent="NodeCameraSelector" unique_id=159864319]
-script = ExtResource("5_wlspu")
-metadata/_custom_type_script = "uid://cc3usok7mcrsg"
+script = ExtResource("5_gnvb1")
 
 [node name="Effect6" type="Node" parent="NodeCameraSelector/Group4" unique_id=3438179]
 script = ExtResource("5_e6yeu")
-priority = 6
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect7" type="Node" parent="NodeCameraSelector/Group4" unique_id=1968549967]
 script = ExtResource("5_e6yeu")
-priority = 7
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect8" type="Node" parent="NodeCameraSelector" unique_id=1518628717]
 script = ExtResource("5_e6yeu")
-priority = 8
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Effect9" type="Node" parent="NodeCameraSelector" unique_id=671213782]
 script = ExtResource("5_e6yeu")
-priority = 9
 metadata/_custom_type_script = "uid://brcthb2wv72uv"

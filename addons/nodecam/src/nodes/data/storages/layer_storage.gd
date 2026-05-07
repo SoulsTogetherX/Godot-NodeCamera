@@ -82,8 +82,10 @@ func is_layer_registered(layer : NodeCameraLayer) -> bool:
 
 
 #region Accessor Methods
-func get_registered_layers() -> Array[NodeCameraLayer]:
+func get_registered() -> Array[NodeCameraLayer]:
 	return _layers
+func get_registered_at(idx : int) -> NodeCameraLayer:
+	return _layers[idx]
 
 func size() -> int:
 	return _layers.size()
