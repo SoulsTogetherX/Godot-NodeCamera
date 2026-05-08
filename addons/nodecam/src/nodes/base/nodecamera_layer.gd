@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @abstract
-@icon("uid://dssbc6kgt43an")
+@icon("uid://briuld2likt26")
 class_name NodeCameraLayer extends Node
 ## The base layer for all camera manipulation.
 
@@ -72,17 +72,17 @@ func _register() -> void:
 #endregion
 
 
-#region Tick Methods
-@abstract
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
+#region Scope Methods
+func _added_to_scope(scope : NodeCameraExecutionScope) -> void:
+	pass
+func _removed_from_scope(scope : NodeCameraExecutionScope) -> void:
+	pass
 #endregion
 
 
-#region Grouping Methods
-func _on_remove(param_scope : NodeCameraExecutionScope) -> void:
-	pass
-func _on_add(param_scope : NodeCameraExecutionScope) -> void:
-	pass
+#region Tick Methods
+@abstract
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 

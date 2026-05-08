@@ -1,5 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
+@icon("uid://gs4cuiaqel64")
 class_name NodeCameraGroup extends NodeCameraLayer
 
 #region Private Variables

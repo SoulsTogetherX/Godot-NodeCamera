@@ -1,6 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-@icon("uid://kq0ubmkoup4y")
+@icon("uid://chab621uln4on")
 class_name NodeCameraHost extends Node
 ## The main node that controls the camera for the NodeCamera addon.
 

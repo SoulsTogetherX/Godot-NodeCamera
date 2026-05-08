@@ -25,10 +25,12 @@ func _layer_changed_priority(layer : NodeCameraLayer) -> void:
 	layer_changed_priority.emit(
 		layer, _priority_by_layer[layer]
 	)
+	_priority_by_layer[layer] = layer.priority
 func _layer_changed_mask(layer : NodeCameraLayer) -> void:
 	layer_changed_mask.emit(
 		layer, _masks_by_layer[layer]
 	)
+	_masks_by_layer[layer] = layer.camera_mask
 #endregion
 
 

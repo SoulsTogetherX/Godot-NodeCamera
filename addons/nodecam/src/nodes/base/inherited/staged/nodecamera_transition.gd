@@ -1,6 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-@icon("uid://dcxauqphisp2y")
+@icon("uid://0xkswoe4y0tm")
 class_name NodeCameraTransition extends NodeCameraStaged
 ## The base [NodeCameraLayer] node for all camera effects, reliant on
 ## easing the current [GoCameraStateResource] resource into the target
