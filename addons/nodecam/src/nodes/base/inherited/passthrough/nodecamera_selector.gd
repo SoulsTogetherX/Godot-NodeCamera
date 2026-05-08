@@ -39,15 +39,27 @@ func _update_selected_layer() -> void:
 	var layers : Array[Node] = get_children().filter(_is_layer)
 	
 	if selection < 0 || selection >= layers.size():
-		for scope : NodeCameraExecutionScope in get_active_scopes():
-			scope.flag_construct_scope()
+		_flag_selection_changed(_current_layer, null)
 		_current_layer = null
 		return
 	
 	var old_selection := _current_layer
 	_current_layer = layers[selection]
+	_flag_selection_changed(old_selection, _current_layer)
+
+func _flag_selection_changed(old : NodeCameraLayer, new : NodeCameraLayer) -> void:
+	if old == new:
+		return
 	for scope : NodeCameraExecutionScope in get_active_scopes():
-		scope.flag_construct_scope()
+		var record := scope.get_record(self)
+		if !record:
+			scope.flag_add_layer(self)
+			continue
+		
+		var old_record := record.scope.get_record(old)
+		if old_record && old_record.stage > LAYER_STAGES.ENDING:
+			record.scope.flag_overwrite_stage(old, LAYER_STAGES.ENDING)
+		record.scope.flag_overwrite_stage(new, LAYER_STAGES.STARTING)
 #endregion
 
 

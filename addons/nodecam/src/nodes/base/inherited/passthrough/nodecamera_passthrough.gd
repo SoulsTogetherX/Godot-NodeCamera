@@ -8,7 +8,6 @@ var _scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
-
 #region Private Scope Methods
 @abstract
 func _get_active_layers() -> Array[NodeCameraLayer]

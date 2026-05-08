@@ -100,11 +100,15 @@ func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void
 		layer.transition_stage_changed(_target_state, _current_state, stage)
 
 
+func _advance_stage(
+	layer : NodeCameraLayer, scope : NodeCameraExecutionScope
+) -> int:
+	return _advance_stage_record(scope.get_record(layer))
 func _advance_stage_record(record : LayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
-		return TICK_TYPE.NONE
+		return _propagate_call(record.layer, record.scope, _advance_stage)
 	if record.stage == LAYER_STAGES.HAULTED:
 		return TICK_TYPE.NONE
 	
@@ -117,9 +121,7 @@ func _overwrite_stage(
 ) -> int:
 	var record := scope.get_record(layer)
 	if record == null:
-		if stage != LAYER_STAGES.HAULTED:
-			return scope._add_layer(layer, stage)
-		return TICK_TYPE.NONE
+		return scope._add_layer(layer, stage)
 	return _overwrite_record_stage(record, stage)
 func _overwrite_record_stage(
 	record : LayerRecord, stage : LAYER_STAGES
@@ -127,18 +129,37 @@ func _overwrite_record_stage(
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is MultiLayerRecord:
+		return _propagate_call(record.layer, record.scope, _overwrite_stage.bind(stage))
+	if record.stage == stage:
 		return TICK_TYPE.NONE
 	
 	record.stage = stage
 	return _sync_layer_stage(record, true)
 
+
+func _propagate_call(
+	layer : NodeCameraLayer, scope : NodeCameraExecutionScope,
+	foo : Callable
+) -> int:
+	var mask := TICK_TYPE.NONE
+	var active_layers : Array[NodeCameraLayer]
+	
+	if layer is NodeCameraSelector:
+		active_layers = layer._get_active_layers()
+	else:
+		active_layers = scope.get_registered_layers()
+	
+	for l : NodeCameraLayer in active_layers:
+		mask |= foo.call(l, scope)
+	
+	return mask
 func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
 			record.stage != LAYER_STAGES.HAULTED &&
-			record.get_changed_mask() & LAYER_STAGES.HAULTED
+			record is StagedLayerRecord &&
+			(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HAULTED
 		):
-			# NOTE: MultiLayerRecord always have a stage of LAYER_STAGES.HAULTED
 			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HAULTED)
 #endregion
 

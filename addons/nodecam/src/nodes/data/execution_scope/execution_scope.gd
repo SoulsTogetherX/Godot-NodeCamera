@@ -93,16 +93,22 @@ func flag_clear_scope() -> void:
 	_flag_request(DIRTY_FLAGS.STRUCTURE_CLEARED)
 
 func flag_remove_layer(layer : NodeCameraLayer) -> void:
+	if !layer: return
+	
 	# If remove, ignore all other layer flags
 	_layer_to_dirty_op[layer] = DIRTY_FLAGS.REMOVE_LAYER
 	_flag_request(DIRTY_FLAGS.REMOVE_LAYER)
 func flag_reorder_layer(layer : NodeCameraLayer, old_priority : int) -> void:
+	if !layer: return
+	
 	_layer_to_old_priority[layer] = old_priority
 	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
 		layer, 0
 	) | DIRTY_FLAGS.REORDER_LAYER
 	_flag_request(DIRTY_FLAGS.REORDER_LAYER)
 func flag_add_layer(layer : NodeCameraLayer) -> void:
+	if !layer: return
+	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
 		# Can't remove and add
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
@@ -119,6 +125,8 @@ func flag_add_layer(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.ADD_LAYER
 	_flag_request(DIRTY_FLAGS.ADD_LAYER)
 func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
+	if !layer: return
+	
 	var host_mask := _host_scope.get_mask()
 	var new_mask := layer.camera_mask
 	var mask_diff := old_mask ^ new_mask
@@ -130,6 +138,8 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 		flag_remove_layer(layer)
 
 func flag_pause(layer : NodeCameraLayer) -> void:
+	if !layer: return
+	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.UNPAUSE_LAYER:
 		# Can't unpause and pause
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
@@ -146,6 +156,8 @@ func flag_pause(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.PAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.PAUSE_LAYER)
 func flag_unpause(layer : NodeCameraLayer) -> void:
+	if !layer: return
+	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.UNPAUSE_LAYER:
 		# Can't pause and unpause
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
@@ -163,6 +175,8 @@ func flag_unpause(layer : NodeCameraLayer) -> void:
 	_flag_request(DIRTY_FLAGS.UNPAUSE_LAYER)
 
 func flag_advance_stage(layer : NodeCameraLayer) -> void:
+	if !layer: return
+	
 	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
 		layer, 0
 	) | DIRTY_FLAGS.STAGE_CHANGED
@@ -171,6 +185,8 @@ func flag_advance_stage(layer : NodeCameraLayer) -> void:
 func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
+	if !layer: return
+	
 	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
 		layer, 0
 	) | DIRTY_FLAGS.STAGE_CHANGED
@@ -178,6 +194,8 @@ func flag_overwrite_stage(
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
 
 func flag_multi_tick_mask_changed(record : LayerRecord) -> void:
+	if !record: return
+	
 	_layer_to_dirty_op[record.layer] = _layer_to_dirty_op.get(
 		record.layer, 0
 	) | DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED
@@ -204,7 +222,7 @@ func _handle_dirty_layers() -> void:
 		_clear_dirty_flags()
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
-		_force_rebuild_scope()
+		_force_rebuild_scope(LAYER_STAGES.STARTING)
 		_clear_dirty_flags()
 		_flag_parent_multi_tick_mask_changed()
 		return
@@ -284,9 +302,9 @@ func _flag_parent_multi_tick_mask_changed() -> void:
 
 
 # Scope rebuild Methods
-func _force_rebuild_scope() -> void:
+func _force_rebuild_scope(init_stage : LAYER_STAGES) -> void:
 	# Rebuilds scop and flatlists
-	_construct_scope()
+	_construct_scope(init_stage)
 	_force_rebuild_flat_lists(TICK_TYPE.BOTH)
 func _force_rebuild_flat_lists(tick_mask : int) -> void:
 	if tick_mask & TICK_TYPE.EFFECTS:
@@ -294,30 +312,32 @@ func _force_rebuild_flat_lists(tick_mask : int) -> void:
 	if tick_mask & TICK_TYPE.TRANSITIONS:
 		_transition_storage.rebuild()
 
-func _construct_scope() -> void:
+func _construct_scope(init_stage : LAYER_STAGES) -> void:
 	_clear_scope()
 	
 	var lay : NodeCameraLayer = _container_record.layer if _container_record else null
 	if lay is NodeCameraPassthrough:
-		_construct_passthrough_check(lay._get_active_layers())
+		_construct_passthrough_check(init_stage, lay._get_active_layers())
 		return
-	_construct_scope_layers_check()
-func _construct_passthrough_check(layers : Array[NodeCameraLayer]) -> void:
+	_construct_scope_layers_check(init_stage)
+func _construct_passthrough_check(
+	init_stage : LAYER_STAGES, layers : Array[NodeCameraLayer]
+) -> void:
 	var mask := _host_scope.get_mask()
 	var parent : NodeCameraPassthrough = _container_record.layer
 	
 	for layer : NodeCameraLayer in layers:
 		if !(layer.camera_mask & mask) || !layer.get_parent() == parent:
 			continue
-		_add_layer(layer)
-func _construct_scope_layers_check() -> void:
+		_add_layer(layer, init_stage)
+func _construct_scope_layers_check(init_stage : LAYER_STAGES) -> void:
 	var mask := _host_scope.get_mask()
 	var layers := _sort_priority_order(_layer_storage.get_registered())
 	
 	for layer : NodeCameraLayer in layers:
 		if !(layer.camera_mask & mask):
 			continue
-		_add_layer(layer)
+		_add_layer(layer, init_stage)
 	
 func _clear_scope() -> void:
 	_effect_storage.clear()
@@ -343,9 +363,9 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	
 	if (
 		record.stage != LAYER_STAGES.HAULTED &&
+		record is StagedLayerRecord &&
 		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HAULTED
 	):
-		# NOTE: MultiLayerRecord always have a stage of LAYER_STAGES.HAULTED
 		_host_scope._force_stage_change(layer, LAYER_STAGES.HAULTED)
 	
 	if record.paused:
@@ -433,7 +453,7 @@ func _construct_record(
 	if layer is NodeCameraStaged:
 		record = _construct_staged_record(layer, init_stage)
 	elif layer is NodeCameraGroup:
-		record = _construct_multi_record(layer)
+		record = _construct_multi_record(layer, init_stage)
 	return record
 func _construct_staged_record(
 	layer : NodeCameraStaged, init_stage : LAYER_STAGES
@@ -462,7 +482,9 @@ func _construct_staged_record(
 	else:
 		record.tick_mask = TICK_TYPE.TRANSITIONS
 	return record
-func _construct_multi_record(layer : NodeCameraGroup) -> LayerRecord:
+func _construct_multi_record(
+	layer : NodeCameraGroup, init_stage : LAYER_STAGES
+) -> LayerRecord:
 	var record := MultiLayerRecord.new()
 	
 	record.layer = layer
@@ -471,7 +493,7 @@ func _construct_multi_record(layer : NodeCameraGroup) -> LayerRecord:
 		_host_scope, record, layer.get_layer_storage()
 	)
 	
-	record.scope._force_rebuild_scope()
+	record.scope._force_rebuild_scope(init_stage)
 	
 	record.tick_mask = layer._get_tick_mask(record.scope)
 	if !(layer is NodeCameraPassthrough):
@@ -522,7 +544,6 @@ func get_transitions_records() -> Array[LayerRecord]:
 
 func get_records() -> Array[LayerRecord]:
 	return _record_by_layer.values()
-
 func has_record(layer : NodeCameraLayer) -> bool:
 	return _record_by_layer.has(layer)
 func get_record(layer : NodeCameraLayer) -> LayerRecord:
