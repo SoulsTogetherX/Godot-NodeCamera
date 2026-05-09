@@ -1,6 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraHostExecutionScope extends NodeCameraExecutionScope
+## The primary host execution scope used by [NodeCameraHost] nodes.
 
 #region Private Variables
 var _host : NodeCameraHost
@@ -27,7 +28,7 @@ func _notification(what: int) -> void:
 
 
 #region Camera Status Methods
-func settup_camera_states() -> void:
+func _settup_camera_states() -> void:
 	var cam := _host.get_camera()
 	if cam is Camera2D:
 		if _target_state is NodeCamera2DState:
@@ -54,11 +55,18 @@ func settup_camera_states() -> void:
 	# Overwrite the states with the current camera information
 	_target_state.overwrite_status(cam)
 	_current_state.overwrite_status(cam)
+
 func _free_camera_states() -> void:
 	if _target_state:
 		_target_state.free()
 	if _current_state:
 		_current_state.free()
+#endregion
+
+
+#region Dirty Operations Methods
+func _add_check(layer : NodeCameraLayer) -> bool:
+	return true
 #endregion
 
 
@@ -120,7 +128,7 @@ func _overwrite_stage(
 	stage : LAYER_STAGES
 ) -> int:
 	var record := scope.get_record(layer)
-	if record == null:
+	if record == null && scope._add_check(layer):
 		return scope._add_layer(layer, stage)
 	return _overwrite_record_stage(record, stage)
 func _overwrite_record_stage(
@@ -142,16 +150,8 @@ func _propagate_call(
 	foo : Callable
 ) -> int:
 	var mask := TICK_TYPE.NONE
-	var active_layers : Array[NodeCameraLayer]
-	
-	if layer is NodeCameraSelector:
-		active_layers = layer._get_active_layers()
-	else:
-		active_layers = scope.get_registered_layers()
-	
-	for l : NodeCameraLayer in active_layers:
+	for l : NodeCameraLayer in layer._get_allowed_layers(scope):
 		mask |= foo.call(l, scope)
-	
 	return mask
 func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
@@ -165,16 +165,25 @@ func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
 
 
 #region Camera Movement Methods
+## Sets the attached [NodeCameraHost]'s camera's values to the transitional
+## 'current` [NodeCameraState].
 func align_cam_position() -> void:
 	_current_state.apply_status(_host.get_camera())
-func teleport_cam_position() -> void:
+## Sets the attached [NodeCameraHost]'s camera's values to the effects-bound
+## 'target` [NodeCameraState].
+func teleport_cam_status() -> void:
 	_target_state.apply_status(_host.get_camera())
 
+## Overwrites the transitional 'current' and effects-bound 'target`
+## [NodeCameraState]s to the attached [NodeCameraHost]'s camera's values
 func overwrite_cam_status() -> void:
 	var cam := _host.get_camera()
 	_current_state.overwrite_status(cam)
 	_target_state.overwrite_status(cam)
-func teleport_cam_status() -> void:
+## Sets the attached [NodeCameraHost]'s camera's values, and overwrites the
+## transitional 'current' [NodeCameraState], to the effects-bound 'target`
+## [NodeCameraState].
+func teleport_overwrite_cam_status() -> void:
 	var cam := _host.get_camera()
 	_target_state.apply_status(cam)
 	_current_state.overwrite_status(cam)
@@ -182,26 +191,38 @@ func teleport_cam_status() -> void:
 
 
 #region Tick Methods
-func run_tick() -> void:
+## Runs all effect and transition [LayerRecord]s in order of priority.
+## [br][br]
+## [b]NOTE[/b]: Operations happen in a set order:[br]
+## 1.) If there are no effects, return without doing anything.[br]
+## 2.) Runs all effects in order of priority.[br]
+## 3.) If there are no transitions, call [method teleport_cam_status] and return.[br]
+## 4.) Runs all transitions in order of priority.[br]
+## 5.) Call [method align_cam_position].
+func run_tick(delta: float) -> void:
 	if _effect_storage.is_empty():
 		return
 	
-	run_effects(_target_state)
+	run_effects(delta, _target_state)
 	if _transition_storage.is_empty():
-		teleport_cam_position()
+		teleport_cam_status()
 		return
 	
-	run_transitions(_target_state, _current_state)
+	run_transitions(delta, _target_state, _current_state)
 	align_cam_position()
 #endregion
 
 
 #region Accessor Methods
+## Returns if the attached [NodeCameraHost] is running.
+## [br][br]
+## Also see [method NodeCameraHost.is_running].
 func is_running() -> bool:
 	return _host.is_running()
-func is_paused() -> bool:
-	return false
 
+## Returns the attached [NodeCameraHost]'s camera_mask.
+## [br][br]
+## Also see [member NodeCameraHost.camera_mask].
 func get_mask() -> int:
 	return _host.camera_mask
 #endregion

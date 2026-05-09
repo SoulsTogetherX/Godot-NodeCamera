@@ -3,8 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/passthrough/nodecamera_selector.gd" id="4_e6yeu"]
-[ext_resource type="Script" uid="uid://brcthb2wv72uv" path="res://addons/nodecam/src/nodes/base/inherited/staged/nodecamera_effect.gd" id="5_e6yeu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -66,33 +64,3 @@ texture = ExtResource("2_kx3cl")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=24809213]
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
-
-[node name="Selector1" type="Node" parent="." unique_id=599201609]
-script = ExtResource("4_e6yeu")
-metadata/_custom_type_script = "uid://mlgr1bvxdhab"
-
-[node name="Selector2" type="Node" parent="Selector1" unique_id=1406535013]
-script = ExtResource("4_e6yeu")
-selection = 1
-metadata/_custom_type_script = "uid://mlgr1bvxdhab"
-
-[node name="Effect1" type="Node" parent="Selector1/Selector2" unique_id=1846082327]
-script = ExtResource("5_e6yeu")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Selector3" type="Node" parent="Selector1/Selector2" unique_id=774556606]
-script = ExtResource("4_e6yeu")
-selection = 1
-metadata/_custom_type_script = "uid://mlgr1bvxdhab"
-
-[node name="Effect2" type="Node" parent="Selector1/Selector2/Selector3" unique_id=1677999547]
-script = ExtResource("5_e6yeu")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Effect3" type="Node" parent="Selector1/Selector2/Selector3" unique_id=81112490]
-script = ExtResource("5_e6yeu")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Effect4" type="Node" parent="Selector1" unique_id=1206468070]
-script = ExtResource("5_e6yeu")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"

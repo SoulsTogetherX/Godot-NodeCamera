@@ -1,6 +1,9 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraRecordStorage extends Object
+## Stores and orders [LayerRecord]s, in order of priority, with the use of priority
+## buckets. Using the available methods, you can use the priority buckets to
+## construct an iterable and cache-friendly flatlist.
 
 #region Private Variables
 var _priority_buckets: Dictionary[int, Array] = {}
@@ -41,20 +44,29 @@ func _check_if_paused(record : LayerRecord) -> bool:
 
 
 #endregion Public Access Methods
+## Clears all data. Does not free the stored [LayerRecord]s' memory.
 func clear() -> void:
 	_priority_buckets.clear()
 	_priority_record.clear()
 	_flat_layer_list.clear()
+## Rebuilds the flatlist according to the data already stored.
 func rebuild() -> void:
 	_flat_layer_list.clear()
 	for priority : int in _priority_record:
-		_flat_layer_list.append_array(_priority_buckets[priority])
-	_flat_layer_list = _flat_layer_list.filter(_check_if_paused)
+		var bucket: Array = _priority_buckets[priority]
+		for record: LayerRecord in bucket:
+			if !record.paused:
+				_flat_layer_list.append(record)
 
+## Add [param record], with [param priority], to the [NodeCameraRecordStorage].
 func add(record: LayerRecord, priority : int) -> void:
 	_insert_into_bucket(record, priority)
+## Removes [param record], with [param priority], if found inside
+## the [NodeCameraRecordStorage].
 func remove(record: LayerRecord, priority : int) -> void:
 	_remove_from_bucket(record, priority)
+## Changes the priority of [param record], with [param old_priority],
+## to [param new_priority], if found inside the [NodeCameraRecordStorage].
 func reorder(
 	record: LayerRecord, new_priority : int, old_priority : int
 ) -> void:
@@ -63,8 +75,10 @@ func reorder(
 	_remove_from_bucket(record, old_priority)
 	_insert_into_bucket(record, new_priority)
 
+## Returns the previously-constructed of this [NodeCameraRecordStorage].
 func get_flat_list() -> Array[LayerRecord]:
 	return _flat_layer_list
+## Returns if there are no stored records in this [NodeCameraRecordStorage].
 func is_empty() -> bool:
 	return _priority_record.is_empty()
 #endregion

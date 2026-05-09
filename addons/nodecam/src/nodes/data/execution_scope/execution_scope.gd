@@ -1,32 +1,39 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraExecutionScope extends Object
+## The base execution scope for all NodeCam operations.
 
 #region Enums
+## The dirty operation bitflags used for batch mutations.
 enum DIRTY_FLAGS {
-	STRUCTURE_CHANGED			= 1 << 0,
-	STRUCTURE_CLEARED			= 1 << 1,
-	REMOVE_LAYER				= 1 << 2,
-	REORDER_LAYER				= 1 << 3,
-	ADD_LAYER					= 1 << 4,
-	PAUSE_LAYER					= 1 << 5,
-	UNPAUSE_LAYER				= 1 << 6,
-	STAGE_CHANGED				= 1 << 7,
-	MULTI_TICK_MASK_CHANGED		= 1 << 8,
+	STRUCTURE_CHANGED			= 1 << 0, ## Flags the scope structure to be recreated.
+	STRUCTURE_CLEARED			= 1 << 1, ## Flags the scope to be freed.
+	REMOVE_LAYER				= 1 << 2, ## Flags the scope to remove a layer.
+	REORDER_LAYER				= 1 << 3, ## Flags the scope to change a layer's priority.
+	ADD_LAYER					= 1 << 4, ## Flags the scope to remove a layer.
+	PAUSE_LAYER					= 1 << 5, ## Flags the scope to pause a layer's execution.
+	UNPAUSE_LAYER				= 1 << 6, ## Flags the scope to unpause a layer's execution.
+	STAGE_CHANGED				= 1 << 7, ## Flags the scope to change a layer's stage.
+	MULTI_TICK_MASK_CHANGED		= 1 << 8, ## Flags the scope to change a layer's usage (effect, transition, both, or neither).
 }
 
+## The bitwise flags for [LayerRecord] stages.
+## [br][br]
+## Stages go in order: [code]STARTING > RUNNING > ENDING > HAULTED[/code].
 enum LAYER_STAGES {
-	HAULTED = 1 << 0,
-	ENDING = 1 << 1,
-	RUNNING = 1 << 2,
-	STARTING = 1 << 3,
+	HAULTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
+	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
+	RUNNING		= 1 << 2,	## [LayerRecord] is running it's execution.
+	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
 }
 
+## Defines what type a [LayerRecord] is defined as (effect,
+## transition, both, or neither).
 enum TICK_TYPE {
-	NONE		= 0b00,
-	EFFECTS		= 0b01,
-	TRANSITIONS	= 0b10,
-	BOTH		= 0b11
+	NONE		= 0b00,	## This [LayerRecord] is not used for anything. Will normally be deleted soon.
+	EFFECTS		= 0b01,	## This [LayerRecord] is an effect.
+	TRANSITIONS	= 0b10,	## This [LayerRecord] is a transition.
+	BOTH		= 0b11	## This [LayerRecord] is both an effect and transition.
 }
 #endregion
 
@@ -72,14 +79,18 @@ func _settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
 	if _layer_storage == storage:
 		return
 	if _layer_storage != null:
-		_layer_storage.layer_added.disconnect(flag_add_layer)
+		if _layer_storage.layer_added.is_connected(flag_add_layer):
+			_layer_storage.layer_added.disconnect(flag_add_layer)
+		
 		_layer_storage.layer_removed.disconnect(flag_remove_layer)
 		_layer_storage.layer_changed_mask.disconnect(flag_camera_mask_changed)
 		_layer_storage.layer_changed_priority.disconnect(flag_reorder_layer)
 	
 	_layer_storage = storage
 	if _layer_storage != null:
-		_layer_storage.layer_added.connect(flag_add_layer)
+		if !_container_record || _container_record.layer._allow_auto_add():
+			_layer_storage.layer_added.connect(flag_add_layer)
+		
 		_layer_storage.layer_removed.connect(flag_remove_layer)
 		_layer_storage.layer_changed_mask.connect(flag_camera_mask_changed)
 		_layer_storage.layer_changed_priority.connect(flag_reorder_layer)
@@ -87,27 +98,28 @@ func _settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
 
 
 #region Dirty Flagging Methods
+## Flags this scope for reconstruction next mutation batch.
 func flag_construct_scope() -> void:
 	_flag_request(DIRTY_FLAGS.STRUCTURE_CHANGED)
+	# If rebuilding, don't clear.
+	_dirty_mask = (_dirty_mask & ~ DIRTY_FLAGS.STRUCTURE_CLEARED)
+## Flags this scope to be cleared next mutation batch.
 func flag_clear_scope() -> void:
 	_flag_request(DIRTY_FLAGS.STRUCTURE_CLEARED)
+	# If clearing, don't rebuild.
+	_dirty_mask = (_dirty_mask & ~ DIRTY_FLAGS.STRUCTURE_CHANGED)
 
+## Flags this scope to remove [param layer] next mutation batch.
 func flag_remove_layer(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
 	# If remove, ignore all other layer flags
 	_layer_to_dirty_op[layer] = DIRTY_FLAGS.REMOVE_LAYER
 	_flag_request(DIRTY_FLAGS.REMOVE_LAYER)
-func flag_reorder_layer(layer : NodeCameraLayer, old_priority : int) -> void:
-	if !layer: return
-	
-	_layer_to_old_priority[layer] = old_priority
-	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
-		layer, 0
-	) | DIRTY_FLAGS.REORDER_LAYER
-	_flag_request(DIRTY_FLAGS.REORDER_LAYER)
+## Flags this scope to add [param layer] next mutation batch.
 func flag_add_layer(layer : NodeCameraLayer) -> void:
 	if !layer: return
+	if !_add_check(layer): return
 	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
 		# Can't remove and add
@@ -124,6 +136,19 @@ func flag_add_layer(layer : NodeCameraLayer) -> void:
 		layer, 0
 	) | DIRTY_FLAGS.ADD_LAYER
 	_flag_request(DIRTY_FLAGS.ADD_LAYER)
+## Flags this scope to change the priority of [param layer]'s record
+## next mutation batch.
+func flag_reorder_layer(layer : NodeCameraLayer, old_priority : int) -> void:
+	if !layer: return
+	
+	_layer_to_old_priority[layer] = old_priority
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
+	) | DIRTY_FLAGS.REORDER_LAYER
+	_flag_request(DIRTY_FLAGS.REORDER_LAYER)
+
+## Flags this scope to remove or add [param layer], depending on the
+## camera mask change.
 func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 	if !layer: return
 	
@@ -137,6 +162,7 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 			return
 		flag_remove_layer(layer)
 
+## Flags this scope to pause [param layer] next mutation batch.
 func flag_pause(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -155,6 +181,7 @@ func flag_pause(layer : NodeCameraLayer) -> void:
 		layer, 0
 	) | DIRTY_FLAGS.PAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.PAUSE_LAYER)
+## Flags this scope to unpause [param layer] next mutation batch.
 func flag_unpause(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -174,6 +201,13 @@ func flag_unpause(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.UNPAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.UNPAUSE_LAYER)
 
+## Flags this scope to advance the [param layer]'s stage,
+## to the next stage, next mutation batch.
+## [br][br]
+## [b]NOTE[/b]: Using this on a [NodeCameraGroup] layer will propagate it
+## to it's children instead.
+## [br][br]
+## Also see [enum LAYER_STAGES].
 func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -182,6 +216,12 @@ func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = DIRTY_FLAGS.STAGE_CHANGED
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
+## Flags this scope to advance the [param layer]'s stage next mutation batch.
+## [br][br]
+## [b]NOTE[/b]: Using this on a [NodeCameraGroup] layer will propagate it
+## to it's children instead.
+## [br][br]
+## Also see [enum LAYER_STAGES].
 func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
@@ -193,13 +233,17 @@ func flag_overwrite_stage(
 	_layer_to_force_stage[layer] = stage
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
 
-func flag_multi_tick_mask_changed(record : LayerRecord) -> void:
-	if !record: return
+## Flags this scope to update [param layer]'s type classification.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func flag_multi_tick_mask_changed(layer : NodeCameraLayer) -> void:
+	if !layer: return
 	
-	_layer_to_dirty_op[record.layer] = _layer_to_dirty_op.get(
-		record.layer, 0
+	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
+		layer, 0
 	) | DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED
 	_flag_request(DIRTY_FLAGS.MULTI_TICK_MASK_CHANGED)
+
 
 func _flag_request(op : DIRTY_FLAGS) -> void:
 	if _dirty_mask == 0:
@@ -297,7 +341,7 @@ func _flag_parent_multi_tick_mask_changed() -> void:
 	if !_container_record:
 		return
 	_container_record.parent_scope.flag_multi_tick_mask_changed(
-		_container_record
+		_container_record.layer
 	)
 
 
@@ -315,24 +359,26 @@ func _force_rebuild_flat_lists(tick_mask : int) -> void:
 func _construct_scope(init_stage : LAYER_STAGES) -> void:
 	_clear_scope()
 	
-	var lay : NodeCameraLayer = _container_record.layer if _container_record else null
-	if lay is NodeCameraPassthrough:
-		_construct_passthrough_check(init_stage, lay._get_active_layers())
+	if _container_record:
+		_construct_passthrough_check(
+			init_stage,
+			_container_record.layer._get_allowed_layers(self)
+		)
 		return
 	_construct_scope_layers_check(init_stage)
 func _construct_passthrough_check(
 	init_stage : LAYER_STAGES, layers : Array[NodeCameraLayer]
 ) -> void:
 	var mask := _host_scope.get_mask()
-	var parent : NodeCameraPassthrough = _container_record.layer
+	var parent : NodeCameraGroup = _container_record.layer
 	
 	for layer : NodeCameraLayer in layers:
-		if !(layer.camera_mask & mask) || !layer.get_parent() == parent:
+		if !(layer.camera_mask & mask) || layer.get_parent() != parent:
 			continue
 		_add_layer(layer, init_stage)
 func _construct_scope_layers_check(init_stage : LAYER_STAGES) -> void:
 	var mask := _host_scope.get_mask()
-	var layers := _sort_priority_order(_layer_storage.get_registered())
+	var layers := _layer_storage.get_registered() # Already Priority Sorted
 	
 	for layer : NodeCameraLayer in layers:
 		if !(layer.camera_mask & mask):
@@ -377,6 +423,9 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	_record_by_layer.erase(layer)
 	record.free()
 	return mask
+
+func _add_check(layer : NodeCameraLayer) -> bool:
+	return (_container_record.layer as NodeCameraGroup)._allow_layer(layer, self)
 func _add_layer(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 ) -> int:
@@ -459,8 +508,6 @@ func _construct_staged_record(
 	layer : NodeCameraStaged, init_stage : LAYER_STAGES
 ) -> LayerRecord:
 	var record := StagedLayerRecord.new()
-	var process_mask := _get_stage_mask(layer.get_needed_process_stages())
-	
 	record.layer = layer
 	record.stage = init_stage
 	record.scope = self
@@ -518,42 +565,65 @@ func _sort_priority_order(ret : Array[NodeCameraLayer]) -> Array[NodeCameraLayer
 
 
 #region Tick Methods
-func run_effects(target : NodeCameraState) -> void:
+## Runs all [LayerRecord]s, classified as 'effects', within this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func run_effects(delta: float, target : NodeCameraState) -> void:
 	for record : LayerRecord in _effect_storage.get_flat_list():
 		record.layer._scope = record.scope
-		record.layer.process_effect(target, record.stage)
+		record.layer.process_effect(delta, target, record.stage)
+## Runs all [LayerRecord]s, classified as 'transitions', within this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
 func run_transitions(
-	target : NodeCameraState, current : NodeCameraState
+	delta: float, target : NodeCameraState, current : NodeCameraState
 ) -> void:
 	for record : LayerRecord in _transition_storage.get_flat_list():
 		record.layer._scope = record.scope
-		record.layer.process_transition(target, current, record.stage)
+		record.layer.process_transition(delta, target, current, record.stage)
 #endregion
 
 
 #region Accesor Access
+## Returns if this scope has any [LayerRecord]s classified as 'effects'.
+## [br][br]
+## Also see [enum TICK_TYPE].
 func has_effects() -> bool:
 	return !_effect_storage.is_empty()
+## Returns if this scope has any [LayerRecord]s classified as 'transitions'.
+## [br][br]
+## Also see [enum TICK_TYPE].
 func has_transitions() -> bool:
 	return !_transition_storage.is_empty()
 
+## Returns all [LayerRecord], classified as 'effects', in this scope.
+## [br][br]
+## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_effect_records() -> Array[LayerRecord]:
-	return _effect_storage.get_flat_list()
+	return _effect_storage.get_flat_list().duplicate()
+## Returns all [LayerRecord], classified as 'transitions', in this scope.
+## [br][br]
+## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_transitions_records() -> Array[LayerRecord]:
-	return _effect_storage.get_flat_list()
+	return _transition_storage.get_flat_list().duplicate()
 
+## Returns all [LayerRecord] in this scope.
+## [br][br]
+## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_records() -> Array[LayerRecord]:
 	return _record_by_layer.values()
+## Returns if [param layer] has a [LayerRecord]s in this scope.
 func has_record(layer : NodeCameraLayer) -> bool:
 	return _record_by_layer.has(layer)
+## Returns the [LayerRecord], attributed to a [param layer], if in the scope.
+## [br][br]
+## [b]NOTE[/b]: Freeing the returned [LayerRecord] may cause an engine crash.
 func get_record(layer : NodeCameraLayer) -> LayerRecord:
 	return _record_by_layer.get(layer, null)
-func is_record_running(layer : NodeCameraLayer) -> bool:
-	var record : LayerRecord = _record_by_layer.get(layer, null)
-	return record != null && !record.paused
 
+## Returns all [NodeCameraLayer] registered to this scope.
 func get_registered_layers() -> Array[NodeCameraLayer]:
-	return _layer_storage.get_registered()
+	return _layer_storage.get_registered().duplicate()
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

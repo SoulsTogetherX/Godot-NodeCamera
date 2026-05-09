@@ -4,8 +4,8 @@ extends EditorPlugin
 
 
 #region Constants
-const GO_CAMERA_AUTOLOAD_NAME := "GoCameraManager"
-const GO_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/global/nodecamera_manager.gd"
+const NODE_CAMERA_AUTOLOAD_NAME := "NodeCameraManager"
+const NODE_CAMERA_AUTOLOAD_PATH := "res://addons/nodecam/src/global/nodecamera_manager.gd"
 
 const SRC_DIR = "res://addons/nodecam/src/"
 #endregion
@@ -15,10 +15,10 @@ const SRC_DIR = "res://addons/nodecam/src/"
 #region Virtual Methods (Plugin)
 func _enable_plugin() -> void:
 	add_autoload_singleton(
-		GO_CAMERA_AUTOLOAD_NAME, GO_CAMERA_AUTOLOAD_PATH
+		NODE_CAMERA_AUTOLOAD_NAME, NODE_CAMERA_AUTOLOAD_PATH
 	)
 func _disable_plugin() -> void:
-	remove_autoload_singleton(GO_CAMERA_AUTOLOAD_NAME)
+	remove_autoload_singleton(NODE_CAMERA_AUTOLOAD_NAME)
 #endregion
 
 

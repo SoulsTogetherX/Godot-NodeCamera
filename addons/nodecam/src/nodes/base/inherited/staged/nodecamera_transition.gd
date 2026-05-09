@@ -2,19 +2,31 @@
 @tool
 @icon("uid://0xkswoe4y0tm")
 class_name NodeCameraTransition extends NodeCameraStaged
-## The base [NodeCameraLayer] node for all camera effects, reliant on
-## easing the current [GoCameraStateResource] resource into the target
-## [GoCameraStateResource] resource of hosts.
+## A [NodeCameraStaged] node used to describe the current values any relevant
+## camera should have, while transitioning the desired values, via chaining
+## these nodes together.
 
 #region Virtual Methods (User Overwrite)
+## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
+## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
+## be called within this method, if implemented.
+## [br][br]
+## This method is called whenever a record, containing this layer, has it's
+## stage changed.
 func transition_stage_changed(
-	target : NodeCameraState, current : NodeCameraState,
+	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
 	pass
 
+## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
+## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
+## be called within this method, if implemented.
+## [br][br]
+## This method is called whenever a record, containing this layer, is being
+## processed in an execution scope.
 func process_transition(
-	target : NodeCameraState, current : NodeCameraState,
+	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
 	pass

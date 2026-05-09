@@ -1,6 +1,9 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 extends Node
+## The main singleton in charge of registering [NodeCameraHost]s, storing
+## top-level [NodeCameraLayer]s, and executing/clearing
+## [NodeCameraHostExecutionScope]s.
 
 #region Private Variables
 var _top_level_storage := NodeCameraLayerStorage.new()
@@ -23,11 +26,13 @@ func _notification(what: int) -> void:
 
 #region Private Methods (Tick Hosts)
 func _process_tick() -> void:
+	var delta := get_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _process_hosts:
-		scope.run_tick()
+		scope.run_tick(delta)
 func _physics_tick() -> void:
+	var delta := get_physics_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _physics_hosts:
-		scope.run_tick()
+		scope.run_tick(delta)
 
 func _update_ticks() -> void:
 	var process := get_tree().process_frame
@@ -82,6 +87,8 @@ func _host_update_mask(host : NodeCameraHost) -> void:
 
 
 #region Public Methods (Register Host)
+## Registers and sets up [param host] to be processed according to
+## the available top-level [NodeCameraLayer]s.
 func register_host(host : NodeCameraHost) -> void:
 	if is_host_registered(host):
 		return
@@ -97,6 +104,7 @@ func register_host(host : NodeCameraHost) -> void:
 	host.get_scope().flag_construct_scope()
 	_update_ticks()
 	host.activate.emit()
+## Unregisters [param host] and clears their [NodeCameraHostExecutionScope].
 func unregister_host(host : NodeCameraHost) -> void:
 	if !is_host_registered(host):
 		return
@@ -115,30 +123,37 @@ func unregister_host(host : NodeCameraHost) -> void:
 	_update_ticks()
 	host.deactivate.emit()
 
+## Returns if [param host] has been registered.
 func is_host_registered(host : NodeCameraHost) -> bool:
-	return host.callback_mode_changed.is_connected(
-		_host_update_callback
-	)
+	return _scope_array_by_host.has(host)
 #endregion
 
 
 #region Public Methods (Register Host)
+## Registers [param layer] has a top-level layer.
+## [br][br]
+## [b]NOTE[/b]: Attempting to register a non-top level layer as one can
+## cause an infinite loop.
 func register_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.register_layer(layer)
+## Unregisters [param layer] has a top-level layer.
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.unregister_layer(layer)
-#endregion
 
-
-#region Public Methods (Tick Host)
-func tick_host_scope(scope : NodeCameraHostExecutionScope) -> void:
-	scope.run_tick()
+## Returns if [param layer] has been registered as top-level.
+func is_layer_registered(layer : NodeCameraLayer) -> bool:
+	return _top_level_storage.is_layer_registered(layer)
 #endregion
 
 
 #region Public Methods (Accessor)
+## Returns an array of all registered [NodeCameraHost]s.
 func get_hosts() -> Array[NodeCameraHost]:
 	return _scope_array_by_host.keys()
+
+## Returns the [NodeCameraLayerStorage] holding on top-level layers.
+## [br][br]
+## [b]NOTE[/b]: Freeing this may cause an engine crash.
 func get_layer_storage() -> NodeCameraLayerStorage:
 	return _top_level_storage
 #endregion
