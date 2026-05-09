@@ -11,9 +11,9 @@ class_name NodeCameraTransition extends NodeCameraStaged
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
 ## be called within this method, if implemented.
 ## [br][br]
-## This method is called whenever a record, containing this layer, has it's
-## stage changed.
-func transition_stage_changed(
+## This method is called whenever a record, containing this layer, is being
+## processed in an execution scope.
+func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
@@ -23,10 +23,10 @@ func transition_stage_changed(
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
 ## be called within this method, if implemented.
 ## [br][br]
-## This method is called whenever a record, containing this layer, is being
-## processed in an execution scope.
-func process_transition(
-	delta : float, target : NodeCameraState, current : NodeCameraState,
+## This method is called whenever a record, containing this layer, has it's
+## stage changed.
+func transition_stage_changed(
+	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
 	pass

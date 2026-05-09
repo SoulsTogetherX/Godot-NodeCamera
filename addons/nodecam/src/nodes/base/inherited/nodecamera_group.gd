@@ -27,6 +27,19 @@ func _register() -> void:
 #endregion
 
 
+#region Private Tick Methods
+func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
+	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
+	
+	if param_scope.has_effects():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
+	if param_scope.has_transitions():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
+	
+	return mask
+#endregion
+
+
 #region Private Scope Methods
 ## Implement this method to return an array of [NodeCameraLayer] nodes
 ## that is used when this [NodeCameraGroup]'s [param scope] is first constructed.
@@ -51,19 +64,6 @@ func _allow_layer(
 ## Also see [method _allow_layer] and [method NodeCameraLayer.get_scope].
 func _allow_auto_add() -> bool:
 	return true
-#endregion
-
-
-#region Private Tick Methods
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
-	
-	if param_scope.has_effects():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
-	if param_scope.has_transitions():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
-	
-	return mask
 #endregion
 
 

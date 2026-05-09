@@ -53,8 +53,8 @@ func _settup_camera_states() -> void:
 	_current_state.args = _target_state.args
 	
 	# Overwrite the states with the current camera information
-	_target_state.overwrite_status(cam)
-	_current_state.overwrite_status(cam)
+	_target_state.set_camera(cam)
+	_current_state.set_camera(cam)
 
 func _free_camera_states() -> void:
 	if _target_state:
@@ -168,25 +168,23 @@ func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
 ## Sets the attached [NodeCameraHost]'s camera's values to the transitional
 ## 'current` [NodeCameraState].
 func align_cam_position() -> void:
-	_current_state.apply_status(_host.get_camera())
+	_current_state.apply_status()
 ## Sets the attached [NodeCameraHost]'s camera's values to the effects-bound
 ## 'target` [NodeCameraState].
 func teleport_cam_status() -> void:
-	_target_state.apply_status(_host.get_camera())
+	_target_state.apply_status()
 
 ## Overwrites the transitional 'current' and effects-bound 'target`
 ## [NodeCameraState]s to the attached [NodeCameraHost]'s camera's values
 func overwrite_cam_status() -> void:
-	var cam := _host.get_camera()
-	_current_state.overwrite_status(cam)
-	_target_state.overwrite_status(cam)
+	_current_state.overwrite_status()
+	_target_state.overwrite_status()
 ## Sets the attached [NodeCameraHost]'s camera's values, and overwrites the
 ## transitional 'current' [NodeCameraState], to the effects-bound 'target`
 ## [NodeCameraState].
 func teleport_overwrite_cam_status() -> void:
-	var cam := _host.get_camera()
-	_target_state.apply_status(cam)
-	_current_state.overwrite_status(cam)
+	_target_state.apply_status()
+	_current_state.overwrite_status()
 #endregion
 
 

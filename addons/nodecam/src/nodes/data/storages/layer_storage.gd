@@ -10,13 +10,6 @@ class_name NodeCameraLayerStorage extends Object
 signal layer_added(layer : NodeCameraLayer)
 ## Emitted when a layer is removed to this [NodeCameraLayerStorage].
 signal layer_removed(layer : NodeCameraLayer)
-
-## Emitted when a stored layer changes priority. The old priority is stored in
-## a Dictionary.
-signal layer_changed_priority(layer : NodeCameraLayer, old_priority : int)
-## Emitted when a stored layer changes camera_mask. The old camera_mask is stored
-## in a Dictionary.
-signal layer_changed_mask(layer : NodeCameraLayer, old_mask : int)
 #endregion
 
 
@@ -27,20 +20,6 @@ var _priority_by_layer : Dictionary[NodeCameraLayer, int]
 var _masks_by_layer : Dictionary[NodeCameraLayer, int]
 #endregion
 
-
-
-#region Private Methods (Updating Layers)
-func _layer_changed_priority(layer : NodeCameraLayer) -> void:
-	layer_changed_priority.emit(
-		layer, _priority_by_layer[layer]
-	)
-	_priority_by_layer[layer] = layer.priority
-func _layer_changed_mask(layer : NodeCameraLayer) -> void:
-	layer_changed_mask.emit(
-		layer, _masks_by_layer[layer]
-	)
-	_masks_by_layer[layer] = layer.camera_mask
-#endregion
 
 
 #region Private Helper Methods
@@ -55,13 +34,6 @@ func register_layer(layer : NodeCameraLayer) -> void:
 	if is_layer_registered(layer):
 		return
 	
-	layer.priority_changed.connect(
-		_layer_changed_priority, CONNECT_APPEND_SOURCE_OBJECT
-	)
-	layer.camera_mask_changed.connect(
-		_layer_changed_mask, CONNECT_APPEND_SOURCE_OBJECT
-	)
-	
 	_layers.insert(_layers.bsearch_custom(layer, _priority_check), layer)
 	
 	_masks_by_layer[layer] = layer.camera_mask
@@ -73,13 +45,6 @@ func register_layer(layer : NodeCameraLayer) -> void:
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	if !is_layer_registered(layer):
 		return
-	
-	layer.priority_changed.disconnect(
-		_layer_changed_priority
-	)
-	layer.camera_mask_changed.disconnect(
-		_layer_changed_mask
-	)
 	
 	_layers.remove_at(_layers.bsearch_custom(layer, _priority_check))
 	_masks_by_layer.erase(layer)

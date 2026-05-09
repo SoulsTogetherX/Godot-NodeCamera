@@ -3,6 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/nce_glue.gd" id="4_4bahi"]
+[ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="4_gnvb1"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="5_e6yeu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -18,7 +21,6 @@ limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
-run_in_engine = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
@@ -64,3 +66,18 @@ texture = ExtResource("2_kx3cl")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=24809213]
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
+
+[node name="NodeCameraGroup" type="Node" parent="." unique_id=483301273]
+script = ExtResource("4_gnvb1")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="NodeCameraEffect" type="Node" parent="NodeCameraGroup" unique_id=206962324]
+script = ExtResource("4_4bahi")
+follow_target = NodePath("../../Player")
+priority = 1
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="NodeCameraTransition" type="Node" parent="NodeCameraGroup" unique_id=1096935604]
+script = ExtResource("5_e6yeu")
+duration = 2.0
+metadata/_custom_type_script = "uid://bbiihjq16tho2"

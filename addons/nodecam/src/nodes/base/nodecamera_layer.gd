@@ -61,6 +61,8 @@ const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
 
 #region Private Variables
 var _scope : NodeCameraExecutionScope
+
+var _scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
@@ -97,14 +99,31 @@ func _register() -> void:
 
 
 #region Scope Methods
+func _register_scope(scope : NodeCameraExecutionScope) -> void:
+	_scopes.append(scope)
+	added_to_scope(scope)
+func _unregister_scope(scope : NodeCameraExecutionScope) -> void:
+	_scopes.erase(scope)
+	removed_from_scope(scope)
+
 ## A virtual method called when this [NodeCameraLayer] is added to the
-## execution scope [param scope].
-func _added_to_scope(scope : NodeCameraExecutionScope) -> void:
+## given execution [param scope].
+func added_to_scope(scope : NodeCameraExecutionScope) -> void:
 	pass
 ## A virtual method called when this [NodeCameraLayer] is removed from the
-## execution scope [param scope].
-func _removed_from_scope(scope : NodeCameraExecutionScope) -> void:
+## given execution [param scope].
+func removed_from_scope(scope : NodeCameraExecutionScope) -> void:
 	pass
+#endregion
+
+
+#region Private Scope Methods
+func _flag_priority_changed(old : int) -> void:
+	for scope : NodeCameraExecutionScope in _scopes:
+		scope.flag_reorder_layer(self, old)
+func _flag_camera_mask_changed(old : int) -> void:
+	for scope : NodeCameraExecutionScope in _scopes:
+		scope.flag_camera_mask_changed(self, old)
 #endregion
 
 
@@ -127,6 +146,11 @@ func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 ## [b]Note[/b]: Freeing the returned value may cause an engine crash.
 func get_scope() -> NodeCameraExecutionScope:
 	return _scope
+## Returns all scopes this layer is currently active in.
+## [br][br]
+## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
+func get_active_scopes() -> Array[NodeCameraExecutionScope]:
+	return _scopes
 
 func set_disabled(val : bool) -> void:
 	if val == disabled:
@@ -144,7 +168,11 @@ func get_disabled() -> bool:
 func set_priority(val : int) -> void:
 	if val == priority:
 		return
+	
+	var old := priority
 	priority = val
+	_flag_priority_changed(old)
+	
 	priority_changed.emit()
 func get_priority() -> int:
 	return priority
@@ -152,7 +180,11 @@ func get_priority() -> int:
 func set_camera_mask(val : int) -> void:
 	if val == camera_mask:
 		return
+	
+	var old := camera_mask
 	camera_mask = val
+	_flag_camera_mask_changed(old)
+	
 	camera_mask_changed.emit()
 func get_camera_mask() -> int:
 	return camera_mask

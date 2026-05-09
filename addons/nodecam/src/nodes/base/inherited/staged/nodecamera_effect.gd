@@ -10,9 +10,9 @@ class_name NodeCameraEffect extends NodeCameraStaged
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
 ## be called within this method, if implemented.
 ## [br][br]
-## This method is called whenever a record, containing this layer, has it's
-## stage changed.
-func effect_stage_changed(
+## This method is called whenever a record, containing this layer, is being
+## processed in an execution scope.
+func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	pass
@@ -21,10 +21,10 @@ func effect_stage_changed(
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can
 ## be called within this method, if implemented.
 ## [br][br]
-## This method is called whenever a record, containing this layer, is being
-## processed in an execution scope.
-func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+## This method is called whenever a record, containing this layer, has it's
+## stage changed.
+func effect_stage_changed(
+	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	pass
 #endregion

@@ -1,8 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @icon("res://addons/nodecam/assets/icons/NodeCameraSelector.svg")
-class_name NodeCameraSelector extends NodeCameraPassthrough
-## A [NodeCameraPassthrough] class with only a single active layer, switching
+class_name NodeCameraSelector extends NodeCameraGroup
+## A [NodeCameraGroup] class with only a single active layer, switching
 ## via the [member selection] index. Switching active layers advances the
 ## previous's status to [enum NodeCameraExecutionScope.LAYER_STAGES].ENDING,
 ## if possible to advance to.
