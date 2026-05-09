@@ -29,7 +29,7 @@ func _ready() -> void:
 #endregion
 
 
-#region Private Scope Methods
+#region Private Scope Add Methods
 func _get_allowed_layers(_scope : NodeCameraExecutionScope) -> Array[NodeCameraLayer]:
 	var ret : Array[NodeCameraLayer]
 	if _current_layer:
@@ -64,7 +64,7 @@ func _update_selected_layer() -> void:
 func _flag_selection_changed(old : NodeCameraLayer, new : NodeCameraLayer) -> void:
 	if old == new:
 		return
-	for scope : NodeCameraExecutionScope in get_active_scopes():
+	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		var record := scope.get_record(self)
 		if !record:
 			scope.flag_add_layer(self)

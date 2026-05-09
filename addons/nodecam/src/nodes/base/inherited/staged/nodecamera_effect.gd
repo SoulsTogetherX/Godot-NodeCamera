@@ -12,6 +12,9 @@ class_name NodeCameraEffect extends NodeCameraStaged
 ## [br][br]
 ## This method is called whenever a record, containing this layer, is being
 ## processed in an execution scope.
+## [br][br]
+## [b]NOTE[/b]: This method will always be called after [method effect_stage_changed],
+## and [method NodeCameraTransition.transition_stage_changed].
 func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
@@ -23,6 +26,9 @@ func process_effect(
 ## [br][br]
 ## This method is called whenever a record, containing this layer, has it's
 ## stage changed.
+## [br][br]
+## [b]NOTE[/b]: This method will always be called before [method process_effect],
+## and [method NodeCameraTransition.process_transition].
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:

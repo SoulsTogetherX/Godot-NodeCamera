@@ -16,8 +16,7 @@ signal layer_removed(layer : NodeCameraLayer)
 #region Private Variables
 var _layers : Array[NodeCameraLayer]
 
-var _priority_by_layer : Dictionary[NodeCameraLayer, int]
-var _masks_by_layer : Dictionary[NodeCameraLayer, int]
+var _scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
@@ -34,10 +33,8 @@ func register_layer(layer : NodeCameraLayer) -> void:
 	if is_layer_registered(layer):
 		return
 	
+	layer._scopes = _scopes
 	_layers.insert(_layers.bsearch_custom(layer, _priority_check), layer)
-	
-	_masks_by_layer[layer] = layer.camera_mask
-	_priority_by_layer[layer] = layer.priority
 	
 	layer_added.emit(layer)
 	layer.activated.emit()
@@ -46,16 +43,31 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 	if !is_layer_registered(layer):
 		return
 	
+	layer._scopes = []
 	_layers.remove_at(_layers.bsearch_custom(layer, _priority_check))
-	_masks_by_layer.erase(layer)
-	_priority_by_layer.erase(layer)
 	
 	layer_removed.emit(layer)
 	layer.deactivated.emit()
 
 ## Returns if a layer is registered in this [NodeCameraLayerStorage].
 func is_layer_registered(layer : NodeCameraLayer) -> bool:
-	return _masks_by_layer.has(layer)
+	return _layers.has(layer)
+#endregion
+
+
+#region Public Methods (Register Scop)
+## Registers a scope into this [NodeCameraLayerStorage], passed to all layers.
+func register_scope(scope : NodeCameraExecutionScope) -> void:
+	if is_scope_registered(scope):
+		return
+	_scopes.append(scope)
+## Unregisters a scope from this [NodeCameraLayerStorage], removed from all layers.
+func unregister_scope(scope : NodeCameraExecutionScope) -> void:
+	_scopes.erase(scope)
+
+## Returns if a scope is registered in this [NodeCameraLayerStorage].
+func is_scope_registered(scope : NodeCameraExecutionScope) -> bool:
+	return _scopes.has(scope)
 #endregion
 
 

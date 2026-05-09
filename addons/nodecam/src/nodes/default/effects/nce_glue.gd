@@ -11,6 +11,10 @@ var follow_target : NodePath:
 @export var one_time : bool:
 	set = set_one_time,
 	get = get_one_time
+
+@export var reconstruct_allowed : bool = true:
+	set = set_reconstruct_allowed,
+	get = get_reconstruct_allowed
 #endregion
 
 
@@ -31,7 +35,6 @@ func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
 	target.position = _follow_node.position
-	prints(target.position, target)
 
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
@@ -46,9 +49,9 @@ func get_needed_process_stages() -> PackedInt32Array:
 		return []
 	return [LAYER_STAGES.STARTING]
 func get_needed_change_stages() -> PackedInt32Array:
-	if one_time && _follow_node != null:
-		return [LAYER_STAGES.STARTING]
-	return []
+	if _follow_node == null:
+		return []
+	return [LAYER_STAGES.STARTING]
 #endregion
 
 
@@ -58,7 +61,12 @@ func set_follow_target(val : NodePath) -> void:
 		return
 	
 	follow_target = val
-	_follow_node = get_node_or_null(val)
+	set_deferred("_follow_node", get_node_or_null(val))
+	
+	if reconstruct_allowed:
+		notify_stage_masks_changed()
+		flag_refresh_scopes()
+		return
 	notify_stage_masks_changed()
 func get_follow_target() -> NodePath:
 	return follow_target
@@ -70,6 +78,11 @@ func set_one_time(val : bool) -> void:
 	notify_stage_masks_changed()
 func get_one_time() -> bool:
 	return one_time
+
+func set_reconstruct_allowed(val : bool) -> void:
+	reconstruct_allowed = val
+func get_reconstruct_allowed() -> bool:
+	return reconstruct_allowed
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

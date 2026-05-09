@@ -192,15 +192,11 @@ func teleport_overwrite_cam_status() -> void:
 ## Runs all effect and transition [LayerRecord]s in order of priority.
 ## [br][br]
 ## [b]NOTE[/b]: Operations happen in a set order:[br]
-## 1.) If there are no effects, return without doing anything.[br]
-## 2.) Runs all effects in order of priority.[br]
-## 3.) If there are no transitions, call [method teleport_cam_status] and return.[br]
-## 4.) Runs all transitions in order of priority.[br]
-## 5.) Call [method align_cam_position].
+## 1.) Runs all effects in order of priority.[br]
+## 2.) If there are no transitions, call [method teleport_cam_status] and return.[br]
+## 3.) Runs all transitions in order of priority.[br]
+## 4.) Call [method align_cam_position].
 func run_tick(delta: float) -> void:
-	if _effect_storage.is_empty():
-		return
-	
 	run_effects(delta, _target_state)
 	if _transition_storage.is_empty():
 		teleport_cam_status()

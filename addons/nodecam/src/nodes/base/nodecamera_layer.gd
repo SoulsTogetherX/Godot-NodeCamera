@@ -98,32 +98,18 @@ func _register() -> void:
 #endregion
 
 
-#region Scope Methods
-func _register_scope(scope : NodeCameraExecutionScope) -> void:
-	_scopes.append(scope)
-	added_to_scope(scope)
-func _unregister_scope(scope : NodeCameraExecutionScope) -> void:
-	_scopes.erase(scope)
-	removed_from_scope(scope)
-
-## A virtual method called when this [NodeCameraLayer] is added to the
-## given execution [param scope].
-func added_to_scope(scope : NodeCameraExecutionScope) -> void:
-	pass
-## A virtual method called when this [NodeCameraLayer] is removed from the
-## given execution [param scope].
-func removed_from_scope(scope : NodeCameraExecutionScope) -> void:
-	pass
-#endregion
-
-
-#region Private Scope Methods
+#region Flag Methods
 func _flag_priority_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in _scopes:
 		scope.flag_reorder_layer(self, old)
 func _flag_camera_mask_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in _scopes:
 		scope.flag_camera_mask_changed(self, old)
+
+## Flags all active cached scopes to be recreated.
+func flag_refresh_scopes() -> void:
+	for scope : NodeCameraExecutionScope in _scopes:
+		scope.flag_construct_scope()
 #endregion
 
 
@@ -137,20 +123,20 @@ func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 
-#region Public Methods (Accessors)
+#region Accessor Methods
 ## Returns the current scope of the [color=#D6D000][b]Runtime Method[/b][/color].
 ## [br][br]
 ## [b]Note[/b]: This method can only be called in a
 ## [color=#D6D000][b]Runtime Method[/b][/color]. Undefined behavior otherwise.
 ## [br][br]
 ## [b]Note[/b]: Freeing the returned value may cause an engine crash.
-func get_scope() -> NodeCameraExecutionScope:
+func get_active_scope() -> NodeCameraExecutionScope:
 	return _scope
 ## Returns all scopes this layer is currently active in.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
-func get_active_scopes() -> Array[NodeCameraExecutionScope]:
-	return _scopes
+func get_parent_scopes() -> Array[NodeCameraExecutionScope]:
+	return _scopes.duplicate()
 
 func set_disabled(val : bool) -> void:
 	if val == disabled:

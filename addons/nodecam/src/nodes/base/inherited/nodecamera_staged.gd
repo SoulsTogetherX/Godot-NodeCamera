@@ -33,30 +33,30 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 #endregion
 
 
-#region Public Scope Methods
+#region Public Flag Methods
 ## Forces all active [NodeCameraExecutionScope]s to advance any [LayerRecord]s,
 ## featuring this [NodeCameraStaged], one stage forward.
 ## [br][br]
-## Also see: [method NodeCameraLayer.get_active_scopes].
+## Also see: [method NodeCameraLayer.get_parent_scopes].
 func notify_advance_stage() -> void:
-	for scope : NodeCameraExecutionScope in get_active_scopes():
+	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_advance_stage(self)
 ## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
 ## of any [LayerRecord]s featuring this [NodeCameraStaged].
 ## [br][br]
-## Also see: [method NodeCameraLayer.get_active_scopes].
+## Also see: [method NodeCameraLayer.get_parent_scopes].
 func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in get_active_scopes():
+	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_overwrite_stage(self, stage)
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this
 ## [NodeCameraStaged]'s stage masks have changed.
 ## [br][br]
-## Also see: [method NodeCameraLayer.get_active_scopes],
+## Also see: [method NodeCameraLayer.get_parent_scopes],
 ## [method get_needed_process_stages], [method get_needed_linger_stages],
 ## and [method get_needed_change_stages].
 func notify_stage_masks_changed() -> void:
-	for scope : NodeCameraExecutionScope in get_active_scopes():
+	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_stage_mask_changed(self)
 	stage_masks_updated.emit()
 #endregion

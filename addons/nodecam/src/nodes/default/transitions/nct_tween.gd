@@ -20,9 +20,10 @@ func transition_stage_changed(
 	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
-	prints(target.position, current.position, target, current)
 	if _tween:
 		_tween.kill()
+	if stage == LAYER_STAGES.HAULTED:
+		return
 	
 	_tween = create_tween()
 	_tween.set_ease(ease_type)
@@ -68,7 +69,7 @@ func transition_stage_changed(
 			current, "far", target.far, duration
 		)
 	
-	_tween.chain().tween_callback(get_scope().flag_advance_stage.bind(self))
+	_tween.chain().tween_callback(get_active_scope().flag_advance_stage.bind(self))
 #endregion
 
 
@@ -76,7 +77,7 @@ func transition_stage_changed(
 func get_needed_linger_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
 func get_needed_change_stages() -> PackedInt32Array:
-	return [LAYER_STAGES.RUNNING]
+	return [LAYER_STAGES.RUNNING, LAYER_STAGES.HAULTED]
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

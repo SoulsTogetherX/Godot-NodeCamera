@@ -146,7 +146,7 @@ func is_layer_registered(layer : NodeCameraLayer) -> bool:
 #endregion
 
 
-#region Public Methods (Accessor)
+#region Accessor Methods
 ## Returns an array of all registered [NodeCameraHost]s.
 func get_hosts() -> Array[NodeCameraHost]:
 	return _scope_array_by_host.keys()

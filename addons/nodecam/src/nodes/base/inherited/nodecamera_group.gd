@@ -6,6 +6,8 @@ class_name NodeCameraGroup extends NodeCameraLayer
 
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
+
+var _implemented_scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
@@ -40,7 +42,15 @@ func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
 #endregion
 
 
-#region Private Scope Methods
+#region Scope Methods
+func _implement_scope(scope : NodeCameraExecutionScope) -> void:
+	_implemented_scopes.append(scope)
+func _unimplement_scope(scope : NodeCameraExecutionScope) -> void:
+	_implemented_scopes.erase(scope)
+#endregion
+
+
+#region Private Scope Add Methods
 ## Implement this method to return an array of [NodeCameraLayer] nodes
 ## that is used when this [NodeCameraGroup]'s [param scope] is first constructed.
 func _get_allowed_layers(scope : NodeCameraExecutionScope) -> Array[NodeCameraLayer]:
@@ -61,7 +71,8 @@ func _allow_layer(
 ## [method NodeCameraExecutionScope.flag_advance_stage], and
 ## [method NodeCameraExecutionScope.flag_overwrite_stage] to add the layer.
 ## [br][br]
-## Also see [method _allow_layer] and [method NodeCameraLayer.get_scope].
+## Also see [method _allow_layer], [method NodeCameraLayer.get_active_scope],
+## and [method NodeCameraLayer.get_parent_scopes]
 func _allow_auto_add() -> bool:
 	return true
 #endregion
@@ -114,7 +125,13 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 #endregion
 
 
-#region Public Methods (Accessor)
+#region Accessor Methods
+## Returns all scopes this layer is currently implementing.
+## [br][br]
+## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
+func get_implemented_scopes() -> Array[NodeCameraExecutionScope]:
+	return _implemented_scopes.duplicate()
+
 ## Returns the layer storage used by this node.
 ## [br][br]
 ## Also see [method get_layer_storage].

@@ -15,7 +15,7 @@ enum DIRTY_FLAGS {
 	UNPAUSE_LAYER				= 1 << 6, ## Flags the scope to unpause a layer's execution.
 	STAGE_CHANGED				= 1 << 7, ## Flags the scope to change a layer's stage.
 	STAGE_MASK_CHANGED			= 1 << 8, ## Flags the scope to change a layer's record's stage masks.
-	MULTI_TICK_MASK_CHANGED		= 1 << 9, ## Flags the scope to change a layer's usage (effect, transition, both, or neither).
+	MULTI_TICK_MASK_CHANGED		= 1 << 9, ## Flags the scope to change a layer's usage (effect, transition, both, or neither)
 }
 
 ## The bitwise flags for [LayerRecord] stages.
@@ -68,6 +68,10 @@ func _init(
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
+		if _container_record:
+			(_container_record.layer as NodeCameraGroup)._unimplement_scope(self)
+		
+		_layer_storage.unregister_scope(self)
 		_host_scope._force_hault_records(self)
 		_clear_scope()
 		_effect_storage.free()
@@ -80,12 +84,16 @@ func _settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
 	if _layer_storage == storage:
 		return
 	if _layer_storage != null:
+		_layer_storage.unregister_scope(self)
+		
 		if _layer_storage.layer_added.is_connected(flag_add_layer):
 			_layer_storage.layer_added.disconnect(flag_add_layer)
 		_layer_storage.layer_removed.disconnect(flag_remove_layer)
 	
 	_layer_storage = storage
 	if _layer_storage != null:
+		_layer_storage.register_scope(self)
+		
 		if !_container_record || _container_record.layer._allow_auto_add():
 			_layer_storage.layer_added.connect(flag_add_layer)
 		_layer_storage.layer_removed.connect(flag_remove_layer)
@@ -402,7 +410,6 @@ func _clear_scope() -> void:
 	_transition_storage.clear()
 	
 	for record : LayerRecord in _record_by_layer.values():
-		record.layer._unregister_scope(self)
 		record.free()
 	_record_by_layer.clear()
 
@@ -412,7 +419,6 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	var record : LayerRecord = _record_by_layer.get(layer, null)
 	if record == null:
 		return TICK_TYPE.NONE
-	layer._unregister_scope(self)
 	
 	if record.tick_mask & TICK_TYPE.EFFECTS:
 		_effect_storage.remove(record, layer.priority)
@@ -443,8 +449,6 @@ func _add_layer(
 ) -> int:
 	if _record_by_layer.has(layer):
 		return TICK_TYPE.NONE
-	layer._register_scope(self)
-	
 	var record := _construct_record(layer, init_stage)
 	if record == null:
 		return TICK_TYPE.NONE
@@ -570,7 +574,11 @@ func _construct_multi_record(
 	
 	record.scope._force_rebuild_scope(init_stage)
 	record.tick_mask = layer._get_tick_mask(record.scope)
+	if record.tick_mask == TICK_TYPE.NONE:
+		record.free()
+		return null
 	
+	layer._implement_scope(record.scope)
 	return record
 
 func _get_stage_mask(stages : PackedInt32Array) -> int:

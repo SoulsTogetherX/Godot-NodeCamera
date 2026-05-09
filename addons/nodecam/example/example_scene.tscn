@@ -16,6 +16,7 @@ size = Vector2(41, 488)
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
+position = Vector2(-253, -100)
 ignore_rotation = false
 limit_enabled = false
 
@@ -73,11 +74,11 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 
 [node name="NodeCameraEffect" type="Node" parent="NodeCameraGroup" unique_id=206962324]
 script = ExtResource("4_4bahi")
-follow_target = NodePath("../../Player")
-priority = 1
+one_time = true
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="NodeCameraTransition" type="Node" parent="NodeCameraGroup" unique_id=1096935604]
 script = ExtResource("5_e6yeu")
-duration = 2.0
+duration = 0.2
+priority = -1
 metadata/_custom_type_script = "uid://bbiihjq16tho2"
