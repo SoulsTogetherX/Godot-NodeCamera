@@ -41,4 +41,14 @@ func _get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
 	return TICK_TYPE.EFFECTS
 #endregion
 
+
+#region Public Methods (Stages)
+func get_needed_process_stages() -> PackedInt32Array:
+	return []
+func get_needed_linger_stages() -> PackedInt32Array:
+	return []
+func get_needed_change_stages() -> PackedInt32Array:
+	return []
+#endregion
+
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

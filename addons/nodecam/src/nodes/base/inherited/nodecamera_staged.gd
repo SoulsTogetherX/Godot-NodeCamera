@@ -66,6 +66,7 @@ func notify_stage_masks_changed() -> void:
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
 ## for the process [color=#D6D000][b]Runtime Method[/b][/color]. All stages returned
 ## here will also be treated as returned by [method get_needed_linger_stages] as well.
+## Ignores [code]LAYER_STAGES.HAULTED[/code].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
 ## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
@@ -75,6 +76,7 @@ func get_needed_process_stages() -> PackedInt32Array:
 ## to stall when reached, requiring an external stage change, [method advance_stage],
 ## or [method overwrite_stage] to be called. All stages returned by
 ## [method get_needed_process_stages] will also be treated as returned here as well.
+## Ignores [code]LAYER_STAGES.HAULTED[/code].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
 ## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].

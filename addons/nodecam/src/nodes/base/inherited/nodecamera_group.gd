@@ -42,42 +42,6 @@ func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
 #endregion
 
 
-#region Scope Methods
-func _implement_scope(scope : NodeCameraExecutionScope) -> void:
-	_implemented_scopes.append(scope)
-func _unimplement_scope(scope : NodeCameraExecutionScope) -> void:
-	_implemented_scopes.erase(scope)
-#endregion
-
-
-#region Private Scope Add Methods
-## Implement this method to return an array of [NodeCameraLayer] nodes
-## that is used when this [NodeCameraGroup]'s [param scope] is first constructed.
-func _get_allowed_layers(scope : NodeCameraExecutionScope) -> Array[NodeCameraLayer]:
-	return scope.get_registered_layers()
-
-## Implement this method to return if the given [param layer] should be added
-## to the [NodeCameraGroup]'s [param scope]. This method is called for every
-## addition, 
-func _allow_layer(
-	layer : NodeCameraLayer, scope : NodeCameraExecutionScope
-) -> bool:
-	return true
-
-## Implement this method to return if this [NodeCameraGroup]'s [param scope]
-## should automatically add new [NodeCameraLayer] when they are registered
-## as children to this [NodeCameraGroup] layer. If you return [code]false[/code],
-## make sure to use [method NodeCameraExecutionScope.flag_add_layer],
-## [method NodeCameraExecutionScope.flag_advance_stage], and
-## [method NodeCameraExecutionScope.flag_overwrite_stage] to add the layer.
-## [br][br]
-## Also see [method _allow_layer], [method NodeCameraLayer.get_active_scope],
-## and [method NodeCameraLayer.get_parent_scopes]
-func _allow_auto_add() -> bool:
-	return true
-#endregion
-
-
 #region Virtual Methods (Overwritable)
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can be
@@ -108,8 +72,7 @@ func process_transition(
 ## Call this method to register [param layer] to this [NodeCameraGroup], later
 ## attempted to add to all attached scopes for this [NodeCameraGroup].
 ## [br][br]
-## Also see [method get_layer_storage], [method _get_allowed_layers],
-## [method _allow_layer], and [method _allow_auto_add].
+## Also see [method get_layer_storage].
 func register_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.register_layer(layer)
 	if _layer_storage.size() == 1 && !disabled:
@@ -131,8 +94,13 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 ## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
 func get_implemented_scopes() -> Array[NodeCameraExecutionScope]:
 	return _implemented_scopes.duplicate()
+## Returns if this layer is not currently implementing any scope.
+func without_implemented_scopes() -> bool:
+	return _implemented_scopes.is_empty()
 
 ## Returns the layer storage used by this node.
+## [br][br]
+## [b]NOTE[/b]: Freeing this may cause an engine to crash.
 ## [br][br]
 ## Also see [method get_layer_storage].
 func get_layer_storage() -> NodeCameraLayerStorage:

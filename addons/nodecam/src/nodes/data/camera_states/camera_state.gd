@@ -17,6 +17,10 @@ class_name NodeCameraState extends Object
 ## [NodeCameraState].
 @abstract
 func set_camera(cam : Node) -> void
+## An abstract method for getting the current camera of this
+## [NodeCameraState].
+@abstract
+func get_camera() -> Node
 
 ## An abstract method for setting all values, of this [NodeCameraState],
 ## with the values of the given camera.

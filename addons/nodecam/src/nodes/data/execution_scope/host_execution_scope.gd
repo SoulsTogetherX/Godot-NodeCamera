@@ -64,12 +64,6 @@ func _free_camera_states() -> void:
 #endregion
 
 
-#region Dirty Operations Methods
-func _add_check(layer : NodeCameraLayer) -> bool:
-	return true
-#endregion
-
-
 #region Layer State Methods
 func _sync_layer_stage(
 	record : StagedLayerRecord, update_start : bool = false
@@ -97,10 +91,7 @@ func _sync_layer_stage(
 		return record.scope._remove_layer(layer)
 	if record.stage & process_mask:
 		return record.scope._set_pause_layer(record, false)
-	else:
-		record.scope._set_pause_layer(record, true)
-	
-	return TICK_TYPE.NONE
+	return record.scope._set_pause_layer(record, true)
 func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void:
 	if layer is NodeCameraEffect:
 		layer.effect_stage_changed(_target_state, stage)
@@ -118,9 +109,31 @@ func _advance_stage_record(record : LayerRecord) -> int:
 	if record is MultiLayerRecord:
 		return _propagate_call(record.layer, record.scope, _advance_stage)
 	if record.stage == LAYER_STAGES.HAULTED:
-		return TICK_TYPE.NONE
+		return record.scope._remove_layer(record.layer)
 	
 	record.stage >>= 1
+	return _sync_layer_stage(record, true)
+
+func _advance_to_stage(
+	layer : NodeCameraLayer, scope : NodeCameraExecutionScope,
+	stage : LAYER_STAGES
+) -> int:
+	return _advance_stage_record(scope.get_record(layer))
+func _advance_to_stage_record(
+	record : LayerRecord, stage : LAYER_STAGES
+) -> int:
+	if record == null:
+		return TICK_TYPE.NONE
+	if record is MultiLayerRecord:
+		return _propagate_call(
+			record.layer, record.scope, _advance_to_stage_record.bind(stage)
+		)
+	if record.stage == LAYER_STAGES.HAULTED:
+		return record.scope._remove_layer(record.layer)
+	if record.stage <= stage:
+		return TICK_TYPE.NONE
+	
+	record.stage = stage
 	return _sync_layer_stage(record, true)
 
 func _overwrite_stage(
@@ -128,7 +141,7 @@ func _overwrite_stage(
 	stage : LAYER_STAGES
 ) -> int:
 	var record := scope.get_record(layer)
-	if record == null && scope._add_check(layer):
+	if record == null:
 		return scope._add_layer(layer, stage)
 	return _overwrite_record_stage(record, stage)
 func _overwrite_record_stage(
@@ -146,11 +159,16 @@ func _overwrite_record_stage(
 
 
 func _propagate_call(
-	layer : NodeCameraLayer, scope : NodeCameraExecutionScope,
+	layer : NodeCameraGroup, scope : NodeCameraExecutionScope,
 	foo : Callable
 ) -> int:
 	var mask := TICK_TYPE.NONE
-	for l : NodeCameraLayer in layer._get_allowed_layers(scope):
+	if layer is NodeCameraRoutable:
+		for l : NodeCameraLayer in layer._route_to_layers():
+			mask |= foo.call(l, scope)
+		return mask
+	
+	for l : NodeCameraLayer in layer._layer_storage.get_registered():
 		mask |= foo.call(l, scope)
 	return mask
 func _force_hault_records(scope : NodeCameraExecutionScope) -> void:

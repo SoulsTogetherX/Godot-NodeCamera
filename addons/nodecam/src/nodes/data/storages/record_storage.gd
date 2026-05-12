@@ -79,6 +79,8 @@ func reorder(
 func get_flat_list() -> Array[LayerRecord]:
 	return _flat_layer_list
 ## Returns if there are no stored records in this [NodeCameraRecordStorage].
+## [br][br]
+## [b]NOTE[/b]: This is different from the size of [method get_flat_list].
 func is_empty() -> bool:
 	return _priority_record.is_empty()
 #endregion

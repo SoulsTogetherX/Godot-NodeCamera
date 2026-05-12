@@ -3,9 +3,14 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
-[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/nce_glue.gd" id="4_4bahi"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/target/nce_glue.gd" id="4_4bahi"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="4_gnvb1"]
-[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="5_e6yeu"]
+[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="5_ounfu"]
+[ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="5_wlspu"]
+[ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_lerp.gd" id="7_wlspu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ounfu"]
+size = Vector2(12882, 2294)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjovn"]
 size = Vector2(12800, 64)
@@ -13,10 +18,27 @@ size = Vector2(12800, 64)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dd2xn"]
 size = Vector2(41, 488)
 
+[sub_resource type="Curve2D" id="Curve2D_wlspu"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -451.28366, -67.80211, -261.11734, -25.107435, 261.11734, 25.107435, 317, -161, -324.47092, 65.91705, 324.47092, -65.91705, 1286, -14, -298.7785, 22.596693, 298.7785, -22.596693, 2147, -213, -378.89294, -23.680809, 378.89294, 23.680809, 3403, 4, -426.25458, -35.521214, 426.25458, 35.521214, 5007, -71, -852.50916, -29.601011, 852.50916, 29.601011, 6282, 115, -1533.688, -128.70483, 1533.688, 128.70483, 8575, 432, -627.54144, 5.9202023, 627.54144, -5.9202023, 10496, -207, -1161.8398, 79.50835, 1161.8398, -79.50835, 11871, -4, 0, 0, 0, 0, 12743, -22)
+}
+point_count = 11
+
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
+[node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1771689249]
+visible = false
+position = Vector2(5818, -765)
+shape = SubResource("RectangleShape2D_ounfu")
+
+[node name="Boundary" type="Node" parent="BoundaryShape" unique_id=55315288]
+script = ExtResource("5_ounfu")
+limits_path = NodePath("..")
+priority = 99
+metadata/_custom_type_script = "uid://soqkn57afvil"
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-253, -100)
+position = Vector2(-58.5, -238.5621)
 ignore_rotation = false
 limit_enabled = false
 
@@ -25,60 +47,66 @@ script = ExtResource("1_ypfvr")
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
-position = Vector2(-309, 0)
+position = Vector2(-126, -27)
 
-[node name="Marker2D1" type="Marker2D" parent="." unique_id=1838267585]
-position = Vector2(-253, -100)
+[node name="CollideFolder" type="Node2D" parent="." unique_id=1124007653]
 
-[node name="Marker2D2" type="Marker2D" parent="." unique_id=37789107]
-position = Vector2(318, -101)
-
-[node name="Ground" type="StaticBody2D" parent="." unique_id=1754714095]
+[node name="Ground" type="StaticBody2D" parent="CollideFolder" unique_id=1754714095]
 position = Vector2(5819, 0)
 
-[node name="Icon" type="Sprite2D" parent="Ground" unique_id=700369569]
+[node name="Icon" type="Sprite2D" parent="CollideFolder/Ground" unique_id=700369569]
 position = Vector2(0, 31.999998)
 scale = Vector2(100, 0.5)
 texture = ExtResource("2_kx3cl")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1105704032]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollideFolder/Ground" unique_id=1105704032]
 position = Vector2(0, 32)
 shape = SubResource("RectangleShape2D_tjovn")
 
-[node name="WallLeft" type="StaticBody2D" parent="." unique_id=1056871921]
+[node name="WallLeft" type="StaticBody2D" parent="CollideFolder" unique_id=1056871921]
 
-[node name="Icon" type="Sprite2D" parent="WallLeft" unique_id=319747572]
+[node name="Icon" type="Sprite2D" parent="CollideFolder/WallLeft" unique_id=319747572]
 position = Vector2(-604, -173.5)
 scale = Vector2(0.34374994, 3.8203123)
 texture = ExtResource("2_kx3cl")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft" unique_id=534309366]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollideFolder/WallLeft" unique_id=534309366]
 position = Vector2(-604.5, -174)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="WallRight" type="StaticBody2D" parent="." unique_id=846993260]
+[node name="WallRight" type="StaticBody2D" parent="CollideFolder" unique_id=846993260]
 position = Vector2(12240, 66)
 
-[node name="Icon" type="Sprite2D" parent="WallRight" unique_id=909395695]
+[node name="Icon" type="Sprite2D" parent="CollideFolder/WallRight" unique_id=909395695]
 position = Vector2(0, -245.50002)
 scale = Vector2(0.34374994, 3.8203123)
 texture = ExtResource("2_kx3cl")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=24809213]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollideFolder/WallRight" unique_id=24809213]
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
+
+[node name="Path2D" type="Path2D" parent="." unique_id=298158886]
+position = Vector2(-42, -111)
+curve = SubResource("Curve2D_wlspu")
 
 [node name="NodeCameraGroup" type="Node" parent="." unique_id=483301273]
 script = ExtResource("4_gnvb1")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="NodeCameraEffect" type="Node" parent="NodeCameraGroup" unique_id=206962324]
+[node name="Glue" type="Node" parent="NodeCameraGroup" unique_id=206962324]
 script = ExtResource("4_4bahi")
-one_time = true
+follow_target = NodePath("../../Player")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="NodeCameraTransition" type="Node" parent="NodeCameraGroup" unique_id=1096935604]
-script = ExtResource("5_e6yeu")
-duration = 0.2
-priority = -1
+[node name="Path" type="Node" parent="NodeCameraGroup" unique_id=494989742]
+script = ExtResource("5_wlspu")
+path_node = NodePath("../../Path2D")
+priority = 1
 metadata/_custom_type_script = "uid://bbiihjq16tho2"
+
+[node name="Lerp" type="Node" parent="NodeCameraGroup" unique_id=1603441254]
+script = ExtResource("7_wlspu")
+_op_mask = 2
+disabled = true
+metadata/_custom_type_script = "uid://d0offmj7e061w"

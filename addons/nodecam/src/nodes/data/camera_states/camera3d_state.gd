@@ -4,10 +4,10 @@ class_name NodeCamera3DState extends NodeCameraState
 ## The [NodeCameraState] class extension for [Camera3D] nodes.
 
 #region External Variables
-## The expected [member Node3D.position] of the [Camera3D].
-@export var position : Vector3:
-	set = set_position,
-	get = get_position
+## The expected [member Node3D.global_position] of the [Camera3D].
+@export var global_position : Vector3:
+	set = set_global_position,
+	get = get_global_position
 ## The expected [member Node3D.rotation] of the [Camera3D].
 @export var rotation : Vector3:
 	set = set_rotation,
@@ -50,10 +50,10 @@ var _rotation : Vector3
 
 
 #region Public Accessor Methods
-func set_position(val : Vector3) -> void:
-	position = val 
-func get_position() -> Vector3:
-	return position
+func set_global_position(val : Vector3) -> void:
+	global_position = val 
+func get_global_position() -> Vector3:
+	return global_position
 
 func set_rotation(val : Vector3) -> void:
 	_rotation = val 
@@ -95,16 +95,21 @@ func get_far() -> float:
 
 
 #region Public Helper Methods
-## An method for setting the current [Camera2D] of this
+## An method for setting the current [Camera3D] of this
 ## [NodeCameraState].
 func set_camera(cam : Node) -> void:
 	if cam is Node3D:
 		camera = cam
 		apply_status()
+## An method for setting the current [Camera3D] of this
+## [NodeCameraState].
+func get_camera() -> Node:
+	return camera
+
 ## A method for setting all values, of this [NodeCamera3DState],
 ## with the values of the given [Camera3D].
 func overwrite_status() -> void:
-	position = camera.position
+	global_position = camera.global_position
 	rotation = camera.rotation
 	
 	h_offset = camera.h_offset
@@ -116,7 +121,7 @@ func overwrite_status() -> void:
 ## A method for setting all values, of the given [Camera3D], with
 ## the values of this [NodeCamera3DState].
 func apply_status() -> void:
-	camera.position = position
+	camera.global_position = global_position
 	camera.rotation = rotation
 	
 	camera.h_offset = h_offset

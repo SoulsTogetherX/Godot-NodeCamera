@@ -62,7 +62,7 @@ const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
 #region Private Variables
 var _scope : NodeCameraExecutionScope
 
-var _scopes : Array[NodeCameraExecutionScope]
+var _parent_scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
@@ -100,15 +100,15 @@ func _register() -> void:
 
 #region Flag Methods
 func _flag_priority_changed(old : int) -> void:
-	for scope : NodeCameraExecutionScope in _scopes:
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_reorder_layer(self, old)
 func _flag_camera_mask_changed(old : int) -> void:
-	for scope : NodeCameraExecutionScope in _scopes:
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_camera_mask_changed(self, old)
 
 ## Flags all active cached scopes to be recreated.
 func flag_refresh_scopes() -> void:
-	for scope : NodeCameraExecutionScope in _scopes:
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_construct_scope()
 #endregion
 
@@ -136,7 +136,10 @@ func get_active_scope() -> NodeCameraExecutionScope:
 ## [br][br]
 ## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
 func get_parent_scopes() -> Array[NodeCameraExecutionScope]:
-	return _scopes.duplicate()
+	return _parent_scopes.duplicate()
+## Returns if this layer is not currently active in any scope.
+func without_parent_scopes() -> bool:
+	return _parent_scopes.is_empty()
 
 func set_disabled(val : bool) -> void:
 	if val == disabled:

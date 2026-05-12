@@ -4,10 +4,10 @@ class_name NodeCamera2DState extends NodeCameraState
 ## The [NodeCameraState] class extension for [Camera2D] nodes.
 
 #region External Variables
-## The expected [member Node2D.position] of the [Camera2D].
-@export var position : Vector2:
-	set = set_position,
-	get = get_position
+## The expected [member Node2D.global_position] of the [Camera2D].
+@export var global_position : Vector2:
+	set = set_global_position,
+	get = get_global_position
 ## The expected [member Node2D.rotation] of the [Camera2D].
 @export var rotation : float:
 	set = set_rotation,
@@ -37,10 +37,10 @@ var _rotation : float
 
 
 #region Public Accessor Methods
-func set_position(val : Vector2) -> void:
-	position = val 
-func get_position() -> Vector2:
-	return position
+func set_global_position(val : Vector2) -> void:
+	global_position = val 
+func get_global_position() -> Vector2:
+	return global_position
 
 func set_rotation(val : float) -> void:
 	_rotation = val 
@@ -72,17 +72,22 @@ func set_camera(cam : Node) -> void:
 	if cam is Node2D:
 		camera = cam
 		apply_status()
+## An method for setting the current [Camera2D] of this
+## [NodeCameraState].
+func get_camera() -> Node:
+	return camera
+
 ## A method for setting all values, of this [NodeCamera2DState],
 ## with the values of the given [Camera2D].
 func overwrite_status() -> void:
-	position = camera.position
+	global_position = camera.global_position
 	offset = camera.offset
 	zoom = camera.zoom
 	_rotation = camera.rotation
 ## A method for setting all values, of the given [Camera2D], with
 ## the values of this [NodeCamera2DState].
 func apply_status() -> void:
-	camera.position = position
+	camera.global_position = global_position
 	camera.offset = offset
 	camera.zoom = zoom
 	camera.rotation = _rotation
