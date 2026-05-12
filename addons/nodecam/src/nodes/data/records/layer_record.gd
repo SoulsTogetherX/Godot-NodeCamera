@@ -16,14 +16,14 @@ var tick_mask : int
 ## [NodeCameraExecutionScope].
 ## [br][br]
 ## [b]NOTE[/b]: This member is always [enum NodeCameraExecutionScope.LAYER_STAGES].HAULTED
-## if this [LayerRecord] is a [MultiLayerRecord].
+## if this [LayerRecord] is a [GroupLayerRecord].
 var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HAULTED
 
 ## If [code]true[/code], this record will not call the process method on effects and
 ## transitions, for the current stage.
 var paused : bool = false
 
-## The [member layer]'s local scope if this [LayerRecord] is a [MultiLayerRecord].
+## The [member layer]'s local scope if this [LayerRecord] is a [GroupLayerRecord].
 ## Otherwise, it is the [member layer]'s parent scope.
 var scope : NodeCameraExecutionScope
 #endregion

@@ -83,6 +83,10 @@ func get_flat_list() -> Array[LayerRecord]:
 ## [b]NOTE[/b]: This is different from the size of [method get_flat_list].
 func is_empty() -> bool:
 	return _priority_record.is_empty()
+## Returns if there are no stored records in this [NodeCameraRecordStorage]
+## that are not paused.
+func is_flat_list_empty() -> bool:
+	return _flat_layer_list.is_empty()
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

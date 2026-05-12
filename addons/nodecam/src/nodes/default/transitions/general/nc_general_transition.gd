@@ -2,18 +2,20 @@
 @tool
 @abstract
 class_name NodeCameraGeneralTransition extends NodeCameraTransition
+## 
 
 #region Enums
+## 
 enum CAMERA_PROPERTY {
-	POSITION	= 1 << 1,
-	ROTATION	= 1 << 2,
-	OFFSET		= 1 << 3,
-	ZOOM		= 1 << 4,
-	H_OFFSET	= 1 << 5,
-	V_OFFSET	= 1 << 6,
-	FOV			= 1 << 7,
-	NEAR		= 1 << 8,
-	FAR			= 1 << 9,
+	POSITION	= 1 << 1, ## 
+	ROTATION	= 1 << 2, ## 
+	OFFSET		= 1 << 3, ## 
+	ZOOM		= 1 << 4, ## 
+	H_OFFSET	= 1 << 5, ## 
+	V_OFFSET	= 1 << 6, ## 
+	FOV			= 1 << 7, ## 
+	NEAR		= 1 << 8, ## 
+	FAR			= 1 << 9, ## 
 }
 #endregion
 
@@ -21,6 +23,7 @@ enum CAMERA_PROPERTY {
 #region External Variables
 @export_group("Camera Properties")
 @export_subgroup("Both")
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var global_position : bool = true:
 	set(val):
@@ -28,6 +31,7 @@ var global_position : bool = true:
 		_op_mask |= int(val) * CAMERA_PROPERTY.POSITION
 	get():
 		return _op_mask & CAMERA_PROPERTY.POSITION
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var rotation : bool = true:
 	set(val):
@@ -37,6 +41,7 @@ var rotation : bool = true:
 		return _op_mask & CAMERA_PROPERTY.ROTATION
 
 @export_subgroup("Camera2D")
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var offset : bool:
 	set(val):
@@ -44,6 +49,7 @@ var offset : bool:
 		_op_mask |= int(val) * CAMERA_PROPERTY.OFFSET
 	get():
 		return _op_mask & CAMERA_PROPERTY.OFFSET
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var zoom : bool:
 	set(val):
@@ -53,6 +59,7 @@ var zoom : bool:
 		return _op_mask & CAMERA_PROPERTY.ZOOM
 
 @export_subgroup("Camera3D")
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var h_offset : bool:
 	set(val):
@@ -60,6 +67,7 @@ var h_offset : bool:
 		_op_mask |= int(val) * CAMERA_PROPERTY.H_OFFSET
 	get():
 		return _op_mask & CAMERA_PROPERTY.H_OFFSET
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var v_offset : bool:
 	set(val):
@@ -68,6 +76,7 @@ var v_offset : bool:
 	get():
 		return _op_mask & CAMERA_PROPERTY.V_OFFSET
 
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var fov : bool:
 	set(val):
@@ -75,6 +84,7 @@ var fov : bool:
 		_op_mask |= int(val) * CAMERA_PROPERTY.FOV
 	get():
 		return _op_mask & CAMERA_PROPERTY.FOV
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var near : bool:
 	set(val):
@@ -82,6 +92,7 @@ var near : bool:
 		_op_mask |= int(val) * CAMERA_PROPERTY.NEAR
 	get():
 		return _op_mask & CAMERA_PROPERTY.NEAR
+## 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var far : bool:
 	set(val):

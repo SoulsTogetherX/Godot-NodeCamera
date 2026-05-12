@@ -1,17 +1,21 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-extends NodeCameraEffect
+class_name NodeCameraEffectGlue extends NodeCameraEffect
+## An effect that sets the camera position to a given target.
 
 #region External Variables
+## 
 @export_node_path("Node2D", "Node3D")
 var follow_target : NodePath:
 	set = set_follow_target,
 	get = get_follow_target
 
+## 
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
 
+## 
 @export var reconstruct_allowed : bool = true:
 	set = set_reconstruct_allowed,
 	get = get_reconstruct_allowed

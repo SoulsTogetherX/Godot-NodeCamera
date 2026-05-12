@@ -34,14 +34,15 @@ enum TICK_TYPE {
 	NONE		= 0b00,	## This [LayerRecord] is not used for anything. Will normally be deleted soon.
 	EFFECTS		= 0b01,	## This [LayerRecord] is an effect.
 	TRANSITIONS	= 0b10,	## This [LayerRecord] is a transition.
-	BOTH		= 0b11	## This [LayerRecord] is both an effect and transition.
+	BOTH		= 0b11,	## This [LayerRecord] is both an effect and transition.
+	PARENT		= 0b100	## Unused for [LayerRecord]. Instead signals that the parent scope should have it's tick_mask checked, regardless if anything else.
 }
 #endregion
 
 
 #region Private Variables
 var _host_scope : NodeCameraHostExecutionScope
-var _container_record : MultiLayerRecord
+var _container_record : GroupLayerRecord
 var _layer_storage : NodeCameraLayerStorage
 
 var _effect_storage := NodeCameraRecordStorage.new()
@@ -59,7 +60,7 @@ var _layer_to_force_stage : Dictionary[NodeCameraLayer, int]
 
 #region Virtual Methods
 func _init(
-	host_scope : NodeCameraHostExecutionScope, container_record : MultiLayerRecord,
+	host_scope : NodeCameraHostExecutionScope, container_record : GroupLayerRecord,
 	layer_storage : NodeCameraLayerStorage
 ) -> void:
 	_host_scope = host_scope
@@ -324,6 +325,7 @@ func _handle_dirty_layers() -> void:
 		
 		if op & DIRTY_FLAGS.STAGE_CHANGED:
 			var stage := _layer_to_force_stage.get(layer, 0) # Either Advance or Overwrite
+			record = _record_by_layer.get(layer, null)
 			
 			if stage > DIRTY_FLAGS.STAGE_CHANGED:
 				# Advance Stage
@@ -333,13 +335,19 @@ func _handle_dirty_layers() -> void:
 			elif stage == DIRTY_FLAGS.STAGE_CHANGED:
 				# Advance Stage
 				rebuild_flags |= _host_scope._advance_stage_record(
-					_record_by_layer.get(layer, null)
+					record
 				)
 			else:
 				# Overwrite Stage
 				rebuild_flags |= _host_scope._overwrite_stage(layer, self, stage)
 			
+			if layer is NodeCameraGroup:
+				_update_tick_mask(record)
+			
 			if !_record_by_layer.has(layer):
+				if layer is NodeCameraGroup:
+					_flag_parent_tick_mask_changed()
+				
 				# Record was removed. We can ignore everything after.
 				continue
 		
@@ -412,7 +420,7 @@ func _construct_routable_scope(
 	init_stage : LAYER_STAGES, layers : Array[NodeCameraLayer]
 ) -> void:
 	var mask := _host_scope.get_mask()
-	var parent : NodeCameraGroup = _container_record.layer
+	var parent : NodeCameraGroup = _container_record.layer # Never null
 	
 	for layer : NodeCameraLayer in layers:
 		if !(layer.camera_mask & mask) || layer.get_parent() != parent:
@@ -457,7 +465,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	if record.paused:
 		_record_by_layer.erase(layer)
 		record.free()
-		return TICK_TYPE.NONE
+		return TICK_TYPE.PARENT
 	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)
@@ -523,7 +531,7 @@ func _update_stage_mask(record : StagedLayerRecord) -> int:
 	
 	return _host_scope._sync_layer_stage(record, true)
 
-func _update_tick_mask(record : MultiLayerRecord) -> int:
+func _update_tick_mask(record : GroupLayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	
@@ -589,7 +597,7 @@ func _construct_staged_record(
 func _construct_multi_record(
 	layer : NodeCameraGroup, init_stage : LAYER_STAGES
 ) -> LayerRecord:
-	var record := MultiLayerRecord.new()
+	var record := GroupLayerRecord.new()
 	
 	record.layer = layer
 	record.parent_scope = self
@@ -641,14 +649,27 @@ func run_transitions(
 #region Accesor Access
 ## Returns if this scope has any [LayerRecord]s classified as 'effects'.
 ## [br][br]
-## Also see [enum TICK_TYPE].
+## Also see [enum TICK_TYPE] and [method has_transitions].
 func has_effects() -> bool:
 	return !_effect_storage.is_empty()
 ## Returns if this scope has any [LayerRecord]s classified as 'transitions'.
 ## [br][br]
-## Also see [enum TICK_TYPE].
+## Also see [enum TICK_TYPE] and [method has_effects].
 func has_transitions() -> bool:
 	return !_transition_storage.is_empty()
+
+## Returns if this scope has any unpaused [LayerRecord]s classified as
+## 'effects'.
+## [br][br]
+## Also see [enum TICK_TYPE] and [method has_running_transitions].
+func has_running_effects() -> bool:
+	return !_effect_storage.is_flat_list_empty()
+## Returns if this scope has any unpaused [LayerRecord]s classified as
+## 'transitions'.
+## [br][br]
+## Also see [enum TICK_TYPE] and [method has_running_effects].
+func has_running_transitions() -> bool:
+	return !_transition_storage.is_flat_list_empty()
 
 ## Returns all [LayerRecord], classified as 'effects', in this scope.
 ## [br][br]

@@ -1,17 +1,21 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-extends NodeCameraEffect
+class_name NodeCameraEffectGroupGlue extends NodeCameraEffect
+## 
 
 #region External Variables
+## 
 @export_node_path("Node2D", "Node3D")
 var follow_targets: Array[NodePath]:
 	set = set_follow_targets,
 	get = get_follow_targets
 
+## 
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
 
+## 
 @export var reconstruct_allowed : bool = true:
 	set = set_reconstruct_allowed,
 	get = get_reconstruct_allowed

@@ -1,5 +1,5 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
-class_name MultiLayerRecord extends LayerRecord
+class_name GroupLayerRecord extends LayerRecord
 ## The [LayerRecord] class extension for [NodeCameraGroup] nodes.
 
 #region Public Variables

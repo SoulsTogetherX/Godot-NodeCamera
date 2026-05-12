@@ -68,13 +68,12 @@ func get_zoom() -> Vector2:
 #region Public Helper Methods
 ## An method for setting the current [Camera2D] of this
 ## [NodeCameraState].
-func set_camera(cam : Node) -> void:
-	if cam is Node2D:
-		camera = cam
-		apply_status()
+func set_camera(cam : Camera2D) -> void:
+	camera = cam
+	apply_status()
 ## An method for setting the current [Camera2D] of this
 ## [NodeCameraState].
-func get_camera() -> Node:
+func get_camera() -> Camera2D:
 	return camera
 
 ## A method for setting all values, of this [NodeCamera2DState],
@@ -91,6 +90,20 @@ func apply_status() -> void:
 	camera.offset = offset
 	camera.zoom = zoom
 	camera.rotation = _rotation
+
+
+##
+func duplicate() -> NodeCamera2DState:
+	var ret := NodeCamera2DState.new()
+	ret._args = _args.duplicate()
+	ret.set_camera(camera)
+	
+	ret.global_position = global_position
+	ret.offset = offset
+	ret.zoom = zoom
+	ret.rotation = _rotation
+	
+	return ret
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

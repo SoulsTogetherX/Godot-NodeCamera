@@ -7,21 +7,12 @@ class_name NodeCameraState extends Object
 
 #region External Variables
 ## A dictionary of arguments, which may be accessed or edited.
-@export var args : Dictionary[StringName, Variant]
+var _args : Dictionary[StringName, Variant]
 #endregion
 
 
 
 #region Public Helper Methods
-## An abstract method for setting the current camera of this
-## [NodeCameraState].
-@abstract
-func set_camera(cam : Node) -> void
-## An abstract method for getting the current camera of this
-## [NodeCameraState].
-@abstract
-func get_camera() -> Node
-
 ## An abstract method for setting all values, of this [NodeCameraState],
 ## with the values of the given camera.
 @abstract
@@ -30,6 +21,13 @@ func overwrite_status() -> void
 ## the values of this [NodeCameraState].
 @abstract
 func apply_status() -> void
+
+##
+func set_arg(key : StringName, val : Variant) -> void:
+	_args.set(key, val)
+##
+func get_arg(key : StringName, default : Variant) -> Variant:
+	return _args.get(key, default)
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

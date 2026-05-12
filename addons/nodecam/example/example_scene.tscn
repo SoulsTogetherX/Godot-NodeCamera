@@ -3,11 +3,14 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/player/player.tscn" id="1_eypdw"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="1_ypfvr"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/example/assets/icon.svg" id="2_kx3cl"]
+[ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="2_w3i57"]
 [ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/target/nce_glue.gd" id="4_4bahi"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="4_gnvb1"]
 [ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="5_ounfu"]
-[ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="5_wlspu"]
+[ext_resource type="Script" uid="uid://c6iavenlaggbq" path="res://addons/nodecam/example/camera_manager.gd" id="5_wlspu"]
 [ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_lerp.gd" id="7_wlspu"]
+[ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="8_uvbdg"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_tween.gd" id="10_0ufl4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ounfu"]
 size = Vector2(12882, 2294)
@@ -18,12 +21,6 @@ size = Vector2(12800, 64)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dd2xn"]
 size = Vector2(41, 488)
 
-[sub_resource type="Curve2D" id="Curve2D_wlspu"]
-_data = {
-"points": PackedVector2Array(0, 0, 0, 0, -451.28366, -67.80211, -261.11734, -25.107435, 261.11734, 25.107435, 317, -161, -324.47092, 65.91705, 324.47092, -65.91705, 1286, -14, -298.7785, 22.596693, 298.7785, -22.596693, 2147, -213, -378.89294, -23.680809, 378.89294, 23.680809, 3403, 4, -426.25458, -35.521214, 426.25458, 35.521214, 5007, -71, -852.50916, -29.601011, 852.50916, 29.601011, 6282, 115, -1533.688, -128.70483, 1533.688, 128.70483, 8575, 432, -627.54144, 5.9202023, 627.54144, -5.9202023, 10496, -207, -1161.8398, 79.50835, 1161.8398, -79.50835, 11871, -4, 0, 0, 0, 0, 12743, -22)
-}
-point_count = 11
-
 [node name="ExampleScene" type="Node2D" unique_id=148735605]
 
 [node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1771689249]
@@ -31,23 +28,61 @@ visible = false
 position = Vector2(5818, -765)
 shape = SubResource("RectangleShape2D_ounfu")
 
-[node name="Boundary" type="Node" parent="BoundaryShape" unique_id=55315288]
+[node name="CamNodesFolder" type="Node" parent="." unique_id=1350998890]
+
+[node name="Boundary" type="Node" parent="CamNodesFolder" unique_id=55315288]
 script = ExtResource("5_ounfu")
-limits_path = NodePath("..")
-priority = 99
+limits_path = NodePath("../../BoundaryShape")
+priority = -99
 metadata/_custom_type_script = "uid://soqkn57afvil"
 
+[node name="Shake" type="Node" parent="CamNodesFolder" unique_id=1073539157]
+script = ExtResource("2_w3i57")
+metadata/_custom_type_script = "uid://xbw3mcx4uq1"
+
+[node name="PlayerSelector" type="Node" parent="CamNodesFolder" unique_id=60088159]
+script = ExtResource("8_uvbdg")
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="Player1" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=512622248]
+script = ExtResource("4_gnvb1")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="GluePlayer" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=206962324]
+script = ExtResource("4_4bahi")
+follow_target = NodePath("../../../../CameraManager/Player1")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
+[node name="Lerp" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=1603441254]
+script = ExtResource("7_wlspu")
+_op_mask = 2
+metadata/_custom_type_script = "uid://d0offmj7e061w"
+
+[node name="Player2" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=2092595275]
+script = ExtResource("4_gnvb1")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="Tween" type="Node" parent="CamNodesFolder/PlayerSelector/Player2" unique_id=1779982937]
+script = ExtResource("10_0ufl4")
+trans_type = 7
+duration = 0.5
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="GluePlayer" type="Node" parent="CamNodesFolder/PlayerSelector/Player2" unique_id=854741187]
+script = ExtResource("4_4bahi")
+follow_target = NodePath("../../../../CameraManager/Player2")
+metadata/_custom_type_script = "uid://brcthb2wv72uv"
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-58.5, -238.5621)
+position = Vector2(-126, -27)
+offset = Vector2(5.593567, 9.891143)
 ignore_rotation = false
 limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
+run_in_engine = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
-
-[node name="Player" parent="." unique_id=1743147849 instance=ExtResource("1_eypdw")]
-position = Vector2(-126, -27)
 
 [node name="CollideFolder" type="Node2D" parent="." unique_id=1124007653]
 
@@ -86,27 +121,15 @@ texture = ExtResource("2_kx3cl")
 position = Vector2(0, -245.50002)
 shape = SubResource("RectangleShape2D_dd2xn")
 
-[node name="Path2D" type="Path2D" parent="." unique_id=298158886]
-position = Vector2(-42, -111)
-curve = SubResource("Curve2D_wlspu")
-
-[node name="NodeCameraGroup" type="Node" parent="." unique_id=483301273]
-script = ExtResource("4_gnvb1")
-metadata/_custom_type_script = "uid://b8n7cds782fje"
-
-[node name="Glue" type="Node" parent="NodeCameraGroup" unique_id=206962324]
-script = ExtResource("4_4bahi")
-follow_target = NodePath("../../Player")
-metadata/_custom_type_script = "uid://brcthb2wv72uv"
-
-[node name="Path" type="Node" parent="NodeCameraGroup" unique_id=494989742]
+[node name="CameraManager" type="Node2D" parent="." unique_id=670125982 node_paths=PackedStringArray("player1", "player2", "selector")]
 script = ExtResource("5_wlspu")
-path_node = NodePath("../../Path2D")
-priority = 1
-metadata/_custom_type_script = "uid://bbiihjq16tho2"
+player1 = NodePath("Player1")
+player2 = NodePath("Player2")
+selector = NodePath("../CamNodesFolder/PlayerSelector")
 
-[node name="Lerp" type="Node" parent="NodeCameraGroup" unique_id=1603441254]
-script = ExtResource("7_wlspu")
-_op_mask = 2
-disabled = true
-metadata/_custom_type_script = "uid://d0offmj7e061w"
+[node name="Player1" parent="CameraManager" unique_id=1743147849 instance=ExtResource("1_eypdw")]
+position = Vector2(-126, -27)
+
+[node name="Player2" parent="CameraManager" unique_id=364228002 instance=ExtResource("1_eypdw")]
+modulate = Color(1, 0, 0, 1)
+position = Vector2(1460, -32)

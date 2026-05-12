@@ -1,8 +1,10 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-extends NodeCameraEffect
+class_name NodeCameraEffectFollowPath extends NodeCameraEffect
+## An effect for clamping an effect to a path.
 
 #region External Variables
+## The path the effect will cling to.
 @export_node_path("Path2D", "Path3D")
 var path_node: NodePath:
 	set = set_path_node,

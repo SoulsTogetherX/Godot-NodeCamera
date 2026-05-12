@@ -2,10 +2,10 @@
 @tool
 @icon("res://addons/nodecam/assets/icons/NodeCameraSelector.svg")
 class_name NodeCameraSelector extends NodeCameraRoutable
-## 
+## A [NodeCameraRoutable] that only activates one layer at a time.
 
 #region External Variables
-##
+## The index for the layer to be selected.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var selection : int:
 	set = set_selection,
@@ -72,6 +72,7 @@ func set_selection(val : int) -> void:
 func get_selection() -> int:
 	return _selection_idx
 
+## Returns the currenly selected layer.
 func get_selected_layer() -> NodeCameraLayer:
 	return _selected_layer
 #endregion

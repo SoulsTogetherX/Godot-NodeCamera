@@ -68,6 +68,9 @@ func notify_stage_masks_changed() -> void:
 ## here will also be treated as returned by [method get_needed_linger_stages] as well.
 ## Ignores [code]LAYER_STAGES.HAULTED[/code].
 ## [br][br]
+## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
+## expected to change, use [method notify_stage_masks_changed].
+## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
 ## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
 func get_needed_process_stages() -> PackedInt32Array:
@@ -78,12 +81,18 @@ func get_needed_process_stages() -> PackedInt32Array:
 ## [method get_needed_process_stages] will also be treated as returned here as well.
 ## Ignores [code]LAYER_STAGES.HAULTED[/code].
 ## [br][br]
+## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
+## expected to change, use [method notify_stage_masks_changed].
+## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
 ## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
 func get_needed_linger_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
 ## for the state change [color=#D6D000][b]Runtime Method[/b][/color].
+## [br][br]
+## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
+## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
 ## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].

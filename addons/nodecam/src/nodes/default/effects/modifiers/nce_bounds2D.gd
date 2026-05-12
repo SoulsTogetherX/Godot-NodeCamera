@@ -1,8 +1,10 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCamera2DBoundaryEffect extends NodeCameraEffect
+## An effect for keeping a camera within a rectanglar (not rotated) bounds.
 
 #region External Variables
+## The bounds the camera is limited to staying in.
 @export_node_path("TileMapLayer", "TileMap", "CollisionShape2D")
 var limits_path: NodePath:
 	set = set_limits_path,
@@ -62,7 +64,7 @@ func process_effect(
 #region Public Methods (Stages)
 func get_needed_process_stages() -> PackedInt32Array:
 	if _limits_bounds:
-		return [LAYER_STAGES.RUNNING]
+		return [LAYER_STAGES.RUNNING, LAYER_STAGES.ENDING]
 	return []
 #endregion
 

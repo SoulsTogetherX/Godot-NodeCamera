@@ -97,13 +97,12 @@ func get_far() -> float:
 #region Public Helper Methods
 ## An method for setting the current [Camera3D] of this
 ## [NodeCameraState].
-func set_camera(cam : Node) -> void:
-	if cam is Node3D:
-		camera = cam
-		apply_status()
+func set_camera(cam : Camera3D) -> void:
+	camera = cam
+	apply_status()
 ## An method for setting the current [Camera3D] of this
 ## [NodeCameraState].
-func get_camera() -> Node:
+func get_camera() -> Camera3D:
 	return camera
 
 ## A method for setting all values, of this [NodeCamera3DState],
@@ -130,6 +129,25 @@ func apply_status() -> void:
 	camera.fov = fov
 	camera.near = near
 	camera.far = far
+
+
+##
+func duplicate() -> NodeCamera3DState:
+	var ret := NodeCamera3DState.new()
+	ret._args = _args.duplicate()
+	ret.set_camera(camera)
+	
+	ret.global_position = global_position
+	ret.rotation = rotation
+	
+	ret.h_offset = h_offset
+	ret.v_offset = v_offset
+	
+	ret.fov = fov
+	ret.near = near
+	ret.far = far
+	
+	return ret
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

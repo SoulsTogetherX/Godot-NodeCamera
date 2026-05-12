@@ -1,26 +1,33 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-extends NodeCameraEffect
+class_name NodeCameraEffectShake extends NodeCameraEffect
+## An effect for camera shake.
 
 #region External Variables
 @export_group("Base Effect")
+## The amplitude multiplier for the shake.
 @export var amplitude : float = 20.0:
 	set = set_amplitude,
 	get = get_amplitude
+## How often the shake will occur (Bigger numbers means faster).
 @export_range(0.001, 100.0, 0.001, "or_greater")
 var frequency : float = 20:
 	set = set_frequency,
 	get = get_frequency
 
 @export_group("Baises")
-@export_range(-1.0, 1.0, 0.001, "or_less", "or_greater")
+## How much in the x axis will the camera shake.
+@export_range(0.0, 1.0, 0.001, "or_greater")
 var h_bias : float = 1.0:
 	set = set_h_bias,
 	get = get_h_bias
-@export_range(-1.0, 1.0, 0.001, "or_less", "or_greater")
+## How much in the y axis will the camera shake.
+@export_range(0.0, 1.0, 0.001, "or_greater")
 var v_bias : float = 1.0:
 	set = set_v_bias,
 	get = get_v_bias
+## Rotates the coordinate plane for shake calculations. Also see
+## [member h_bias] and [member v_bias].
 @export_range(0.0, 360, 0.001, "or_less", "or_greater")
 var angle : float = 0.0:
 	set = set_angle,
@@ -28,24 +35,38 @@ var angle : float = 0.0:
 
 @export_group("Easing")
 @export_subgroup("Grow Ease")
+## The curve used for shake growth.
+## [br][br]
+## Also see [member grow_duration].
 @export var grow_curve : Curve:
 	set = set_grow_curve,
 	get = get_grow_curve
+## The duration until the growth phase of shaking is finished.
+## [br][br]
+## Also see [member grow_curve].
 @export_range(0, 1.0, 0.001, "or_greater")
 var grow_duration : float = 0.0:
 	set = set_grow_duration,
 	get = get_grow_duration
 
 @export_subgroup("Decay Ease")
+## The curve used for shake decay.
+## [br][br]
+## Also see [member decay_duration].
 @export var decay_curve : Curve:
 	set = set_decay_curve,
 	get = get_decay_curve
+## The duration until the decay phase of shaking is finished.
+## [br][br]
+## Also see [member decay_duration].
 @export_range(0, 1.0, 0.001, "or_greater")
 var decay_duration : float = 0.0:
 	set = set_decay_duration,
 	get = get_decay_duration
 
 @export_group("Extra Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's offset.
 @export var incremental : bool = false
 #endregion
 
