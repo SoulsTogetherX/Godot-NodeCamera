@@ -129,6 +129,17 @@ func apply_status() -> void:
 	camera.fov = fov
 	camera.near = near
 	camera.far = far
+##
+func assign(status : NodeCamera3DState) -> void:
+	global_position = status.global_position
+	rotation = status.rotation
+	
+	h_offset = status.h_offset
+	v_offset = status.v_offset
+	
+	fov = status.fov
+	near = status.near
+	far = status.far
 
 
 ##

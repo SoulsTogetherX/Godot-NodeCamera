@@ -70,7 +70,6 @@ func get_zoom() -> Vector2:
 ## [NodeCameraState].
 func set_camera(cam : Camera2D) -> void:
 	camera = cam
-	apply_status()
 ## An method for setting the current [Camera2D] of this
 ## [NodeCameraState].
 func get_camera() -> Camera2D:
@@ -90,6 +89,12 @@ func apply_status() -> void:
 	camera.offset = offset
 	camera.zoom = zoom
 	camera.rotation = _rotation
+##
+func assign(status : NodeCamera2DState) -> void:
+	global_position = status.global_position
+	offset = status.offset
+	zoom = status.zoom
+	_rotation = status.rotation
 
 
 ##

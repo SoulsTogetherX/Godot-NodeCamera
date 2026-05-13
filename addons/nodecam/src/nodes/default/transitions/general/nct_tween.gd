@@ -6,23 +6,15 @@ class_name NodeCameraTweenTransition extends NodeCameraGeneralTransition
 #region External Variables
 @export_group("Tween Settings")
 ## The EaseType that will be used to tween between property values.
-## [br][br]
-## Also see [Tween] and [enum Tween.EaseType].
 @export var ease_type : Tween.EaseType
 ## The TransitionType that will be used to tween between property values.
-## [br][br]
-## Also see [Tween] and [enum Tween.TransitionType].
 @export var trans_type : Tween.TransitionType
 ## The duration the tween will take until finished.
-## [br][br]
-## Also see [Tween].
-@export_range(0.001, 1.0, 0.001, "or_greater") var duration : float = 0.5
+@export_range(0.0, 1.0, 0.001, "or_greater") var duration : float = 0.5
 
 @export_group("Extra Args")
 ## The TweenProcessModethat will be used to tween between property values.
 ## This is ignored if [member manual_step] is [code]true[/code].
-## [br][br]
-## Also see [Tween] and [enum Tween.TweenProcessMode].
 @export var tween_process_mode : Tween.TweenProcessMode = Tween.TweenProcessMode.TWEEN_PROCESS_PHYSICS
 
 ## If [code]true[/code], this transition will use [method custom_step]
@@ -45,7 +37,6 @@ func _tween_transition(
 		)
 	else:
 		current.global_position = target.global_position
-	
 	
 	# 2D
 	if current is NodeCamera2DState:
@@ -131,6 +122,11 @@ func transition_stage_changed(
 		tween.kill()
 	if stage == LAYER_STAGES.HAULTED:
 		target.clear_var(self)
+		return
+	if is_zero_approx(duration):
+		target.apply_status()
+		current.overwrite_status()
+		get_active_scope().flag_advance_stage(self)
 		return
 	
 	tween = create_tween()

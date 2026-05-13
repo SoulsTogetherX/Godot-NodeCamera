@@ -5,6 +5,13 @@ class_name NodeCameraTransition extends NodeCameraStaged
 ## A [NodeCameraStaged] node used to describe the current values any relevant
 ## camera should have, while transitioning the desired values, via chaining
 ## these nodes together.
+## [br][br]
+## [color=#D6D000]NOTE[/color]: If a [NodeCameraTransition] is active, make
+## sure [color=#D6D000]at least one[/color] [NodeCameraTransition] layer is
+## transferring all desired camera properties, from 'target' to 'current',
+## in either the [method process_transition] or
+## [method transition_stage_changed] methods, [color=#D6D000]including
+## properties not being transitioned.[/color]
 
 #region Virtual Methods (User Overwrite)
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
@@ -15,7 +22,7 @@ class_name NodeCameraTransition extends NodeCameraStaged
 ## processed in an execution scope.
 ## [br][br]
 ## [b]NOTE[/b]: This method will always be called after
-## [method NodeCameraEffect.effect_stage_changed], and [method transition_stage_changed].
+## [method transition_stage_changed].
 func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
@@ -30,7 +37,7 @@ func process_transition(
 ## stage changed.
 ## [br][br]
 ## [b]NOTE[/b]: This method will always be called before
-## [method NodeCameraEffect.process_effect], and [method process_transition].
+## [method process_transition].
 func transition_stage_changed(
 	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES

@@ -55,6 +55,9 @@ func _settup_camera_states() -> void:
 	# Overwrite the states with the current camera information
 	_target_state.set_camera(cam)
 	_current_state.set_camera(cam)
+	
+	_target_state.overwrite_status()
+	_current_state.overwrite_status()
 
 func _free_camera_states() -> void:
 	if _target_state:
@@ -226,18 +229,23 @@ func teleport_overwrite_cam_status() -> void:
 ## [br][br]
 ## [b]NOTE[/b]: Operations happen in a set order:[br]
 ## 1.) Runs all effects in order of priority.[br]
-## 2.) If there are no transitions, call [method teleport_cam_status] and return.[br]
+## 2.) If there are no transitions, overwrite the 'current'
+## state with the 'target' state, then set the camera to the
+## 'target' state and return.[br]
 ## 3.) Runs all transitions in order of priority.[br]
-## 4.) Call [method align_cam_position].
+## 4.) Set the camera to be the 'current' state.
 func run_tick(delta: float) -> void:
+	if _effect_storage.is_empty():
+		return
+	
 	run_effects(delta, _target_state)
 	if _transition_storage.is_empty():
 		_target_state.apply_status()
-		_current_state.overwrite_status()
+		_current_state.assign(_target_state)
 		return
 	
 	run_transitions(delta, _target_state, _current_state)
-	align_cam_position()
+	_current_state.apply_status()
 #endregion
 
 

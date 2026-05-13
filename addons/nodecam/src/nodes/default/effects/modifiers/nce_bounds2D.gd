@@ -64,7 +64,7 @@ func process_effect(
 #region Public Methods (Stages)
 func get_needed_process_stages() -> PackedInt32Array:
 	if _limits_bounds:
-		return [LAYER_STAGES.RUNNING, LAYER_STAGES.ENDING]
+		return [LAYER_STAGES.RUNNING]
 	return []
 #endregion
 
