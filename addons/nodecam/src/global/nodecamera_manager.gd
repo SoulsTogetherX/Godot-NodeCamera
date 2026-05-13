@@ -76,9 +76,10 @@ func _insert_host_callback(host : NodeCameraHost) -> void:
 	
 	_scope_array_by_host[host] = queue
 	queue.append(host._scope)
+	_update_ticks()
 
 func _host_update_callback(host : NodeCameraHost) -> void:
-	if host._scope in _scope_array_by_host:
+	if _scope_array_by_host.has(host):
 		_scope_array_by_host[host].erase(host._scope)
 	_insert_host_callback(host)
 func _host_update_mask(host : NodeCameraHost) -> void:
@@ -99,10 +100,9 @@ func register_host(host : NodeCameraHost) -> void:
 	host.camera_mask_changed.connect(
 		_host_update_mask, CONNECT_APPEND_SOURCE_OBJECT
 	)
-	_insert_host_callback(host)
 	
 	host.get_scope().flag_construct_scope()
-	_update_ticks()
+	_insert_host_callback(host)
 	host.activate.emit()
 ## Unregisters [param host] and clears their [NodeCameraHostExecutionScope].
 func unregister_host(host : NodeCameraHost) -> void:

@@ -4,21 +4,19 @@ class_name NodeCameraEffectGlue extends NodeCameraEffect
 ## An effect that sets the camera position to a given target.
 
 #region External Variables
-## 
+## The path to the node this effect will follow.
 @export_node_path("Node2D", "Node3D")
 var follow_target : NodePath:
 	set = set_follow_target,
 	get = get_follow_target
 
-## 
+## If [code]true[/code], the layer will only set the effect's position
+## for one frame in [method effect_stage_changed]'s starting stage.
+## [br][br]
+## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
-
-## 
-@export var reconstruct_allowed : bool = true:
-	set = set_reconstruct_allowed,
-	get = get_reconstruct_allowed
 #endregion
 
 
@@ -76,11 +74,6 @@ func set_one_shot(val : bool) -> void:
 	notify_stage_masks_changed()
 func get_one_shot() -> bool:
 	return one_shot
-
-func set_reconstruct_allowed(val : bool) -> void:
-	reconstruct_allowed = val
-func get_reconstruct_allowed() -> bool:
-	return reconstruct_allowed
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

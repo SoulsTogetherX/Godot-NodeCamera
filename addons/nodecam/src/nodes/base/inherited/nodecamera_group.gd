@@ -6,8 +6,6 @@ class_name NodeCameraGroup extends NodeCameraLayer
 
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
-
-var _implemented_scopes : Array[NodeCameraExecutionScope]
 #endregion
 
 
@@ -89,15 +87,6 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 
 
 #region Accessor Methods
-## Returns all scopes this layer is currently implementing.
-## [br][br]
-## [b]NOTE[/b]: Freeing any scope returned may cause an engine to crash.
-func get_implemented_scopes() -> Array[NodeCameraExecutionScope]:
-	return _implemented_scopes.duplicate()
-## Returns if this layer is not currently implementing any scope.
-func without_implemented_scopes() -> bool:
-	return _implemented_scopes.is_empty()
-
 ## Returns the layer storage used by this node.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing this may cause an engine to crash.

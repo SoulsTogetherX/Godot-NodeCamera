@@ -134,7 +134,7 @@ func apply_status() -> void:
 ##
 func duplicate() -> NodeCamera3DState:
 	var ret := NodeCamera3DState.new()
-	ret._args = _args.duplicate()
+	ret._vars = _vars.duplicate()
 	ret.set_camera(camera)
 	
 	ret.global_position = global_position

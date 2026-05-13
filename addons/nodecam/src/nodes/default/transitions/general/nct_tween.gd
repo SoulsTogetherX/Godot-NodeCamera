@@ -1,21 +1,34 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraTweenTransition extends NodeCameraGeneralTransition
-## 
+## A general transitions that uses a tween to transition property values.
 
 #region External Variables
 @export_group("Tween Settings")
-## 
+## The EaseType that will be used to tween between property values.
+## [br][br]
+## Also see [Tween] and [enum Tween.EaseType].
 @export var ease_type : Tween.EaseType
-## 
+## The TransitionType that will be used to tween between property values.
+## [br][br]
+## Also see [Tween] and [enum Tween.TransitionType].
 @export var trans_type : Tween.TransitionType
-## 
-@export_range(0.001, 1.0, 0.001, "or_greater") var duration : float = 0.2
-#endregion
+## The duration the tween will take until finished.
+## [br][br]
+## Also see [Tween].
+@export_range(0.001, 1.0, 0.001, "or_greater") var duration : float = 0.5
 
+@export_group("Extra Args")
+## The TweenProcessModethat will be used to tween between property values.
+## This is ignored if [member manual_step] is [code]true[/code].
+## [br][br]
+## Also see [Tween] and [enum Tween.TweenProcessMode].
+@export var tween_process_mode : Tween.TweenProcessMode = Tween.TweenProcessMode.TWEEN_PROCESS_PHYSICS
 
-#region Private Variables
-var _tween : Tween
+## If [code]true[/code], this transition will use [method custom_step]
+## for tween transitions instead. Can cause issues if value is changed
+## mid-transition.
+@export var manual_step : bool = false
 #endregion
 
 
@@ -32,6 +45,7 @@ func _tween_transition(
 		)
 	else:
 		current.global_position = target.global_position
+	
 	
 	# 2D
 	if current is NodeCamera2DState:
@@ -112,32 +126,58 @@ func transition_stage_changed(
 	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
-	if _tween:
-		_tween.kill()
+	var tween : Tween = target.get_var(self, null)
+	if tween:
+		tween.kill()
 	if stage == LAYER_STAGES.HAULTED:
+		target.clear_var(self)
 		return
 	
-	_tween = create_tween()
-	_tween.set_ease(ease_type)
-	_tween.set_trans(trans_type)
+	tween = create_tween()
+	tween.set_ease(ease_type)
+	tween.set_trans(trans_type)
+	tween.set_process_mode(tween_process_mode)
 	
-	_tween.tween_method(
-		_tween_transition.bind(
-			target, current, current.duplicate()
-		),
+	if manual_step:
+		tween.pause()
+	
+	var dup : NodeCameraState = current.duplicate()
+	tween.tween_method(
+		_tween_transition.bind(target, current, dup),
 		0.0, 1.0, duration
 	)
-	_tween.tween_callback(
-		get_active_scope().flag_advance_stage.bind(self)
-	)
+	tween.tween_callback(dup.free)
+	tween.tween_callback(get_active_scope().flag_advance_stage.bind(self))
+	
+	target.set_var(self, tween)
+func process_transition(
+	delta : float, target : NodeCameraState, _current : NodeCameraState,
+	_stage : LAYER_STAGES
+) -> void:
+	(target.get_var(self) as Tween).custom_step(delta)
 #endregion
 
 
 #region Public Methods (Stages)
+func get_needed_process_stages() -> PackedInt32Array:
+	if manual_step:
+		return [LAYER_STAGES.RUNNING]
+	return []
 func get_needed_linger_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING, LAYER_STAGES.HAULTED]
+#endregion
+
+
+#region Accessor Methods
+func set_manual_step(val : bool) -> void:
+	if val == manual_step:
+		return
+	manual_step = val
+	notify_stage_masks_changed()
+func get_manual_step() -> bool:
+	return manual_step
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

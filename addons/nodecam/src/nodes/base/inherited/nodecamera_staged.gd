@@ -10,6 +10,11 @@ signal stage_masks_updated
 #endregion
 
 
+#region External Variables
+@export var inital_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+#endregion
+
+
 
 #region Public Methods (Stage Helpers)
 ## Flags the current node to have it's stage advanced one forward. Only

@@ -1,15 +1,17 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraLerpTransition extends NodeCameraGeneralTransition
-## 
+## A general transitions that uses lerp to transition property values.
 
 #region External Variables
-## 
+## The lerp factor used.
 @export_range(0, 1, 0.001) var factor : float = 0.05
 
-## 
+## If [code]true[/code], this layer will hault if [b]ALL[/b]
+## transitioning properties are within [member threshold] distance.
 @export var auto_hault : bool = true
-## 
+## The distance [b]ALL[/b] transitioning properties need to be within
+## for this layer to hault. Also see [member auto_hault].
 @export_range(0, 10.0, 0.001) var threshold : float = 1.0
 #endregion
 

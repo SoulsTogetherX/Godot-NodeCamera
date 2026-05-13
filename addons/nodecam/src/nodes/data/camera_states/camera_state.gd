@@ -6,8 +6,10 @@ class_name NodeCameraState extends Object
 ## [NodeCameraEffect] and [NodeCameraTransition] nodes.
 
 #region External Variables
-## A dictionary of arguments, which may be accessed or edited.
-var _args : Dictionary[StringName, Variant]
+## A dictionary of varables, which may be accessed or edited.
+## The key is ment to be the layer using the varable. If you need multiple
+## variables for a single layer, consider an inner class or dictionary.
+var _vars : Dictionary[NodeCameraLayer, Variant]
 #endregion
 
 
@@ -22,12 +24,15 @@ func overwrite_status() -> void
 @abstract
 func apply_status() -> void
 
-##
-func set_arg(key : StringName, val : Variant) -> void:
-	_args.set(key, val)
-##
-func get_arg(key : StringName, default : Variant) -> Variant:
-	return _args.get(key, default)
+## Sets a variable for the [param layer] to freely use.
+func set_var(layer : NodeCameraLayer, val : Variant = null) -> void:
+	_vars.set(layer, val)
+## Gets a variable [param layer] previously set.
+func get_var(layer : NodeCameraLayer, default : Variant = null) -> Variant:
+	return _vars.get(layer, default)
+## Clears a variable [param layer] previously set, preventing memory leaks.
+func clear_var(layer : NodeCameraLayer) -> void:
+	_vars.erase(layer)
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

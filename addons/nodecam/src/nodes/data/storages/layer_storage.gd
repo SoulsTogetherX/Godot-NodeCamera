@@ -44,7 +44,9 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 		return
 	
 	layer._parent_scopes = []
-	_layers.remove_at(_layers.bsearch_custom(layer, _priority_check))
+	# Since different layers can have same priorities, we need
+	# to look through entire array.
+	_layers.erase(layer)
 	
 	layer_removed.emit(layer)
 	layer.deactivated.emit()

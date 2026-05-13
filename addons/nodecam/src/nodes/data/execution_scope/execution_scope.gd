@@ -27,6 +27,12 @@ enum LAYER_STAGES {
 	RUNNING		= 1 << 2,	## [LayerRecord] is running it's execution.
 	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
 }
+## [b]For internal use only[/b].
+## [br][br]
+## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals
+## that the layer should use the stage [member NodeCameraStaged.inital_stage]
+## by default on creation.
+const LAYER_STAGES_INHERITED := 0b0
 
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither).
@@ -35,8 +41,13 @@ enum TICK_TYPE {
 	EFFECTS		= 0b01,	## This [LayerRecord] is an effect.
 	TRANSITIONS	= 0b10,	## This [LayerRecord] is a transition.
 	BOTH		= 0b11,	## This [LayerRecord] is both an effect and transition.
-	PARENT		= 0b100	## Unused for [LayerRecord]. Instead signals that the parent scope should have it's tick_mask checked, regardless if anything else.
 }
+## [b]For internal use only[/b].
+## [br][br]
+## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals
+## that the parent scope should have it's tick_mask checked
+## regardless of anything else.
+const TICK_TYPE_PARENT = 0b100
 #endregion
 
 
@@ -71,7 +82,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		if is_instance_valid(_layer_storage):
 			_layer_storage.unregister_scope(self)
-			_host_scope._force_hault_records(self)
+		_host_scope._force_hault_records(self)
 		
 		_clear_scope()
 		_effect_storage.free()
@@ -81,26 +92,12 @@ func _notification(what: int) -> void:
 
 #region Initialize Methods
 func _settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
-	if _layer_storage == storage:
-		return
-	if _layer_storage != null:
-		_layer_storage.unregister_scope(self)
-		
-		if _layer_storage.layer_added.is_connected(flag_add_layer):
-			_layer_storage.layer_added.disconnect(flag_add_layer)
-		if _layer_storage.layer_removed.is_connected(flag_remove_layer):
-			_layer_storage.layer_removed.disconnect(flag_remove_layer)
-	
 	_layer_storage = storage
 	if _layer_storage != null:
 		_layer_storage.register_scope(self)
 		
-		if (
-			self is NodeCameraHostExecutionScope ||
-			!(_container_record.layer is NodeCameraRoutable)
-		):
-			_layer_storage.layer_added.connect(flag_add_layer)
-			_layer_storage.layer_removed.connect(flag_remove_layer)
+		_layer_storage.layer_added.connect(flag_add_layer)
+		_layer_storage.layer_removed.connect(flag_remove_layer)
 #endregion
 
 
@@ -303,7 +300,7 @@ func _handle_dirty_layers() -> void:
 		_clear_dirty_flags()
 		return
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CHANGED:
-		_force_rebuild_scope(LAYER_STAGES.STARTING)
+		_force_rebuild_scope(LAYER_STAGES_INHERITED)
 		_clear_dirty_flags()
 		_flag_parent_tick_mask_changed()
 		return
@@ -378,8 +375,8 @@ func _handle_dirty_layers() -> void:
 				_record_by_layer.get(layer, null), true
 			)
 	
-	_force_rebuild_flat_lists(rebuild_flags)
 	if rebuild_flags:
+		_force_rebuild_flat_lists(rebuild_flags)
 		_flag_parent_tick_mask_changed()
 	
 	_clear_dirty_flags()
@@ -423,7 +420,7 @@ func _construct_routable_scope(
 	var parent : NodeCameraGroup = _container_record.layer # Never null
 	
 	for layer : NodeCameraLayer in layers:
-		if !(layer.camera_mask & mask) || layer.get_parent() != parent:
+		if !(layer.camera_mask & mask) || !_layer_storage.is_layer_registered(layer):
 			continue
 		_add_layer(layer, init_stage)
 func _construct_group_scope(init_stage : LAYER_STAGES) -> void:
@@ -465,7 +462,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	if record.paused:
 		_record_by_layer.erase(layer)
 		record.free()
-		return TICK_TYPE.PARENT
+		return TICK_TYPE_PARENT
 	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)
@@ -473,7 +470,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	return mask
 
 func _add_layer(
-	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> int:
 	if _record_by_layer.has(layer):
 		return TICK_TYPE.NONE
@@ -559,7 +556,7 @@ func _update_tick_mask(record : GroupLayerRecord) -> int:
 
 #region Helper Methods
 func _construct_record(
-	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES.STARTING
+	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
 	var record : LayerRecord
 	if layer is NodeCameraStaged:
@@ -568,12 +565,16 @@ func _construct_record(
 		record = _construct_multi_record(layer, init_stage)
 	return record
 func _construct_staged_record(
-	layer : NodeCameraStaged, init_stage : LAYER_STAGES
+	layer : NodeCameraStaged, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
 	var record := StagedLayerRecord.new()
 	record.layer = layer
-	record.stage = init_stage
 	record.scope = self
+	
+	if init_stage == LAYER_STAGES_INHERITED:
+		record.stage = layer.inital_stage
+	else:
+		record.stage = init_stage
 	
 	record.set_masks(
 		_get_stage_mask(layer.get_needed_process_stages()),
@@ -595,7 +596,7 @@ func _construct_staged_record(
 		record.tick_mask = TICK_TYPE.TRANSITIONS
 	return record
 func _construct_multi_record(
-	layer : NodeCameraGroup, init_stage : LAYER_STAGES
+	layer : NodeCameraGroup, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
 	var record := GroupLayerRecord.new()
 	

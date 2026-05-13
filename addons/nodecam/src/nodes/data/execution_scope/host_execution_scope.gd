@@ -23,7 +23,7 @@ func _init(
 	_settup_layer_storage(layer_storage)
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
-		_free_camera_states()
+		_free_camera_states.call_deferred()
 #endregion
 
 
@@ -49,8 +49,8 @@ func _settup_camera_states() -> void:
 		return
 	
 	# Args record is referenced in both camera states
-	_target_state._args = {}
-	_current_state._args = _target_state._args
+	_target_state._vars = {}
+	_current_state._vars = _target_state._vars
 	
 	# Overwrite the states with the current camera information
 	_target_state.set_camera(cam)
@@ -218,7 +218,8 @@ func teleport_overwrite_cam_status() -> void:
 func run_tick(delta: float) -> void:
 	run_effects(delta, _target_state)
 	if _transition_storage.is_empty():
-		teleport_cam_status()
+		_target_state.apply_status()
+		_current_state.overwrite_status()
 		return
 	
 	run_transitions(delta, _target_state, _current_state)
