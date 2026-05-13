@@ -29,7 +29,7 @@ signal camera_mask_changed
 ## The bitwise flags for [LayerRecord] stages. Also see
 ## [enum NodeCameraExecutionScope.LAYER_STAGES].
 ## [br][br]
-## Stages go in order: [code]STARTING > RUNNING > ENDING > HAULTED[/code].
+## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
 const LAYER_STAGES	= NodeCameraExecutionScope.LAYER_STAGES
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither). Also see

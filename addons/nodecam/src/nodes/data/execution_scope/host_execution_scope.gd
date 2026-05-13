@@ -82,7 +82,7 @@ func _sync_layer_stage(
 		_force_stage_change(layer, record.stage)
 	
 	if !(record.stage & linger_mask):
-		while record.stage > LAYER_STAGES.HAULTED:
+		while record.stage > LAYER_STAGES.HALTED:
 			record.stage >>= 1
 			if record.stage & changed_mask:
 				_force_stage_change(layer, record.stage)
@@ -90,7 +90,7 @@ func _sync_layer_stage(
 			if record.stage & linger_mask:
 				break
 	
-	if record.stage == LAYER_STAGES.HAULTED:
+	if record.stage == LAYER_STAGES.HALTED:
 		return record.scope._remove_layer(layer)
 	if record.stage & process_mask:
 		return record.scope._set_pause_layer(record, false)
@@ -109,7 +109,7 @@ func _advance_stage_record(record : LayerRecord) -> int:
 		return _propagate_call_record(
 			record, _advance_stage_record
 		)
-	if record.stage == LAYER_STAGES.HAULTED:
+	if record.stage == LAYER_STAGES.HALTED:
 		return record.scope._remove_layer(record.layer)
 	
 	record.stage >>= 1
@@ -124,7 +124,7 @@ func _advance_to_stage_record(
 		return _propagate_call_record(
 			record, _advance_to_stage_record.bind(stage)
 		)
-	if record.stage == LAYER_STAGES.HAULTED:
+	if record.stage == LAYER_STAGES.HALTED:
 		return record.scope._remove_layer(record.layer)
 	if record.stage <= stage:
 		return TICK_TYPE.NONE
@@ -189,14 +189,14 @@ func _propagate_call_record(
 	#scope._force_rebuild_flat_lists(mask)
 	return mask
 
-func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
+func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
-			record.stage != LAYER_STAGES.HAULTED &&
+			record.stage != LAYER_STAGES.HALTED &&
 			record is StagedLayerRecord &&
-			(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HAULTED
+			(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HALTED
 		):
-			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HAULTED)
+			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HALTED)
 #endregion
 
 

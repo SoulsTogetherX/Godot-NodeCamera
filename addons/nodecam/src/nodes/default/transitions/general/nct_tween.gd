@@ -120,7 +120,7 @@ func transition_stage_changed(
 	var tween : Tween = target.get_var(self, null)
 	if tween:
 		tween.kill()
-	if stage == LAYER_STAGES.HAULTED:
+	if stage == LAYER_STAGES.HALTED:
 		target.clear_var(self)
 		return
 	if is_zero_approx(duration):
@@ -162,7 +162,7 @@ func get_needed_process_stages() -> PackedInt32Array:
 func get_needed_linger_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
 func get_needed_change_stages() -> PackedInt32Array:
-	return [LAYER_STAGES.RUNNING, LAYER_STAGES.HAULTED]
+	return [LAYER_STAGES.RUNNING, LAYER_STAGES.HALTED]
 #endregion
 
 

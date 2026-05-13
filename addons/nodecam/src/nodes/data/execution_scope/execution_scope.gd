@@ -21,9 +21,9 @@ enum DIRTY_FLAGS {
 
 ## The bitwise flags for [LayerRecord] stages.
 ## [br][br]
-## Stages go in order: [code]STARTING > RUNNING > ENDING > HAULTED[/code].
+## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
 enum LAYER_STAGES {
-	HAULTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
+	HALTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
 	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
 	RUNNING		= 1 << 2,	## [LayerRecord] is running it's execution.
 	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
@@ -85,7 +85,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		if is_instance_valid(_layer_storage):
 			_layer_storage.unregister_scope(self)
-		_host_scope._force_hault_records(self)
+		_host_scope._force_halt_records(self)
 		
 		_clear_scope()
 		_effect_storage.free()
@@ -301,7 +301,7 @@ func _flag_request(op : DIRTY_FLAGS) -> void:
 # Flag Handler Overhead
 func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.STRUCTURE_CLEARED:
-		_host_scope._force_hault_records(self)
+		_host_scope._force_halt_records(self)
 		_clear_scope()
 		_force_rebuild_flat_lists(TICK_TYPE.BOTH)
 		_clear_dirty_flags()
@@ -470,11 +470,11 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 		_transition_storage.remove(record, layer.priority)
 	
 	if (
-		record.stage != LAYER_STAGES.HAULTED &&
+		record.stage != LAYER_STAGES.HALTED &&
 		record is StagedLayerRecord &&
-		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HAULTED
+		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HALTED
 	):
-		_host_scope._force_stage_change(layer, LAYER_STAGES.HAULTED)
+		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
 	
 	if record.paused:
 		_record_by_layer.erase(layer)
@@ -603,7 +603,7 @@ func _construct_staged_record(
 		return null
 	
 	_host_scope._sync_layer_stage(record, true)
-	if record.stage == LAYER_STAGES.HAULTED:
+	if record.stage == LAYER_STAGES.HALTED:
 		record.free()
 		return null
 	

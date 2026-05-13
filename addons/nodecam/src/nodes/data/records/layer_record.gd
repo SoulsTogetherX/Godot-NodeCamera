@@ -15,9 +15,9 @@ var tick_mask : int
 ## The current stage this [LayerRecord] is in within the current
 ## [NodeCameraExecutionScope].
 ## [br][br]
-## [b]NOTE[/b]: This member is always [enum NodeCameraExecutionScope.LAYER_STAGES].HAULTED
+## [b]NOTE[/b]: This member is always [enum NodeCameraExecutionScope.LAYER_STAGES].HALTED
 ## if this [LayerRecord] is a [GroupLayerRecord].
-var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HAULTED
+var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HALTED
 
 ## If [code]true[/code], this record will not call the process method on effects and
 ## transitions, for the current stage.

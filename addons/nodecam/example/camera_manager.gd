@@ -35,12 +35,12 @@ func _input(event: InputEvent) -> void:
 		_uses_bounary = !_uses_bounary
 		boundary.notify_overwrite_stage(
 			NodeCameraStaged.LAYER_STAGES.STARTING if _uses_bounary
-			else NodeCameraStaged.LAYER_STAGES.HAULTED
+			else NodeCameraStaged.LAYER_STAGES.HALTED
 		)
 	elif event.is_action_pressed("Shake"):
 		_uses_shake = !_uses_shake
 		shake.notify_overwrite_stage(
 			NodeCameraStaged.LAYER_STAGES.STARTING if _uses_shake
-			else NodeCameraStaged.LAYER_STAGES.HAULTED
+			else NodeCameraStaged.LAYER_STAGES.HALTED
 		)
 #endregion

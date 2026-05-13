@@ -52,7 +52,8 @@ func clear() -> void:
 ## Rebuilds the flatlist according to the data already stored.
 func rebuild() -> void:
 	_flat_layer_list.clear()
-	for priority : int in _priority_record:
+	for i : int in range(_priority_record.size() - 1, -1, -1):
+		var priority := _priority_record[i]
 		var bucket: Array = _priority_buckets[priority]
 		for record: LayerRecord in bucket:
 			if !record.paused:

@@ -7,11 +7,11 @@ class_name NodeCameraLerpTransition extends NodeCameraGeneralTransition
 ## The lerp factor used.
 @export_range(0, 1, 0.001) var factor : float = 0.05
 
-## If [code]true[/code], this layer will hault if [b]ALL[/b]
+## If [code]true[/code], this layer will halt if [b]ALL[/b]
 ## transitioning properties are within [member threshold] distance.
-@export var auto_hault : bool = true
+@export var auto_halt : bool = true
 ## The distance [b]ALL[/b] transitioning properties need to be within
-## for this layer to hault. Also see [member auto_hault].
+## for this layer to halt. Also see [member auto_halt].
 @export_range(0, 10.0, 0.001) var threshold : float = 1.0
 #endregion
 
@@ -130,7 +130,7 @@ func process_transition(
 		else:
 			current.far = target.far
 	
-	if disable_check && auto_hault:
+	if disable_check && auto_halt:
 		advance_stage()
 #endregion
 

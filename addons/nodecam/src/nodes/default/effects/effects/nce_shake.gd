@@ -149,7 +149,7 @@ func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	_stage_time = 0.0
-	if stage == LAYER_STAGES.HAULTED:
+	if stage == LAYER_STAGES.HALTED:
 		_delta_time = 0.0
 #endregion
 
@@ -165,7 +165,7 @@ func get_needed_process_stages() -> PackedInt32Array:
 	return ret
 func get_needed_change_stages() -> PackedInt32Array:
 	var ret : PackedInt32Array = [
-		LAYER_STAGES.RUNNING, LAYER_STAGES.HAULTED
+		LAYER_STAGES.RUNNING, LAYER_STAGES.HALTED
 	]
 	if grow_curve != null && !is_zero_approx(grow_duration):
 		ret.append(LAYER_STAGES.STARTING)
