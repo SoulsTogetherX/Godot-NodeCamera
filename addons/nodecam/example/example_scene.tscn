@@ -81,12 +81,13 @@ _op_mask = 6
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(1460, -99.5)
+position = Vector2(-58.5, -99.5)
 ignore_rotation = false
 limit_enabled = false
 
 [node name="GoCamera2DHost" type="Node" parent="Camera2D" unique_id=1680543711]
 script = ExtResource("1_ypfvr")
+run_in_engine = true
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="CollideFolder" type="Node2D" parent="." unique_id=1124007653]

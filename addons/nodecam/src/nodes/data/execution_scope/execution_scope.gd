@@ -6,16 +6,17 @@ class_name NodeCameraExecutionScope extends Object
 #region Enums
 ## The dirty operation bitflags used for batch mutations.
 enum DIRTY_FLAGS {
-	STRUCTURE_CHANGED			= 1 << 0, ## Flags the scope structure to be recreated.
-	STRUCTURE_CLEARED			= 1 << 1, ## Flags the scope to be freed.
-	REMOVE_LAYER				= 1 << 2, ## Flags the scope to remove a layer.
-	REORDER_LAYER				= 1 << 3, ## Flags the scope to change a layer's priority.
-	ADD_LAYER					= 1 << 4, ## Flags the scope to remove a layer.
-	PAUSE_LAYER					= 1 << 5, ## Flags the scope to pause a layer's execution.
-	UNPAUSE_LAYER				= 1 << 6, ## Flags the scope to unpause a layer's execution.
-	STAGE_CHANGED				= 1 << 7, ## Flags the scope to change a layer's stage.
-	STAGE_MASK_CHANGED			= 1 << 8, ## Flags the scope to change a layer's record's stage masks.
-	TICK_MASK_CHANGED		= 1 << 9, ## Flags the scope to change a layer's usage (effect, transition, both, or neither)
+	STRUCTURE_CHANGED			= 1 << 0,	## Flags the scope structure to be recreated.
+	STRUCTURE_CLEARED			= 1 << 1,	## Flags the scope to be freed.
+	REMOVE_LAYER				= 1 << 2,	## Flags the scope to remove a layer.
+	REORDER_LAYER				= 1 << 3,	## Flags the scope to change a layer's priority.
+	ADD_LAYER					= 1 << 4,	## Flags the scope to remove a layer.
+	PAUSE_LAYER					= 1 << 5,	## Flags the scope to pause a layer's execution.
+	UNPAUSE_LAYER				= 1 << 6,	## Flags the scope to unpause a layer's execution.
+	STAGE_CHANGED				= 1 << 7,	## Flags the scope to change a layer's stage.
+	STAGE_MASK_CHANGED			= 1 << 8,	## Flags the scope to change a layer's record's stage masks.
+	TICK_MASK_CHANGED			= 1 << 9,	## Flags the scope to change a layer's usage (effect, transition, both, or neither)
+	TICK_MASK_CHANGED_DIRECT	= 1 << 10,	## Flags the scope to rebuild it's flatlists (effect, transition, both, or neither)
 }
 
 ## The bitwise flags for [LayerRecord] stages.
@@ -62,6 +63,8 @@ var _transition_storage := NodeCameraRecordStorage.new()
 var _record_by_layer : Dictionary[NodeCameraLayer, LayerRecord]
 
 var _dirty_mask : int
+var _direct_tick_mask_change : int
+
 var _layer_to_dirty_op : Dictionary[NodeCameraLayer, int]
 var _layer_to_old_priority : Dictionary[NodeCameraLayer, int]
 var _layer_to_force_stage : Dictionary[NodeCameraLayer, int]
@@ -278,6 +281,14 @@ func flag_tick_mask_changed(layer : NodeCameraGroup) -> void:
 	) | DIRTY_FLAGS.TICK_MASK_CHANGED
 	_flag_request(DIRTY_FLAGS.TICK_MASK_CHANGED)
 
+## Flags this scope to update it's flatlists. Only used internally.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func flag_tick_mask_direct_changed(tick : TICK_TYPE) -> void:
+	if tick == TICK_TYPE.NONE: return
+	_direct_tick_mask_change |= tick
+	_flag_request(DIRTY_FLAGS.TICK_MASK_CHANGED_DIRECT)
+
 
 func _flag_request(op : DIRTY_FLAGS) -> void:
 	if _dirty_mask == 0:
@@ -326,8 +337,8 @@ func _handle_dirty_layers() -> void:
 			
 			if stage > DIRTY_FLAGS.STAGE_CHANGED:
 				# Advance Stage
-				rebuild_flags |= _host_scope._advance_to_stage(
-					layer, self, stage & ~DIRTY_FLAGS.STAGE_CHANGED
+				rebuild_flags |= _host_scope._advance_to_stage_record(
+					record, stage & ~DIRTY_FLAGS.STAGE_CHANGED
 				)
 			elif stage == DIRTY_FLAGS.STAGE_CHANGED:
 				# Advance Stage
@@ -336,7 +347,9 @@ func _handle_dirty_layers() -> void:
 				)
 			else:
 				# Overwrite Stage
-				rebuild_flags |= _host_scope._overwrite_stage(layer, self, stage)
+				rebuild_flags |= _host_scope._overwrite_stage(
+					layer, self, stage
+				)
 			
 			if layer is NodeCameraGroup:
 				_update_tick_mask(record)
@@ -375,6 +388,9 @@ func _handle_dirty_layers() -> void:
 				_record_by_layer.get(layer, null), true
 			)
 	
+	if _dirty_mask & DIRTY_FLAGS.TICK_MASK_CHANGED_DIRECT:
+		rebuild_flags |= _direct_tick_mask_change
+	
 	if rebuild_flags:
 		_force_rebuild_flat_lists(rebuild_flags)
 		_flag_parent_tick_mask_changed()
@@ -384,6 +400,7 @@ func _clear_dirty_flags() -> void:
 	_layer_to_dirty_op.clear()
 	_layer_to_old_priority.clear()
 	_layer_to_force_stage.clear()
+	_direct_tick_mask_change = 0
 	_dirty_mask = 0
 func _flag_parent_tick_mask_changed() -> void:
 	if !_container_record:

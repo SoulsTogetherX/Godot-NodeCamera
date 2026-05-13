@@ -99,34 +99,27 @@ func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void
 		layer.transition_stage_changed(_target_state, _current_state, stage)
 
 
-func _advance_stage(
-	layer : NodeCameraLayer, scope : NodeCameraExecutionScope
-) -> int:
-	return _advance_stage_record(scope.get_record(layer))
 func _advance_stage_record(record : LayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is GroupLayerRecord:
-		return _propagate_call(record.layer, record.scope, _advance_stage)
+		return _propagate_call_record(
+			record, _advance_stage_record
+		)
 	if record.stage == LAYER_STAGES.HAULTED:
 		return record.scope._remove_layer(record.layer)
 	
 	record.stage >>= 1
 	return _sync_layer_stage(record, true)
 
-func _advance_to_stage(
-	layer : NodeCameraLayer, scope : NodeCameraExecutionScope,
-	stage : LAYER_STAGES
-) -> int:
-	return _advance_to_stage_record(scope.get_record(layer), stage)
 func _advance_to_stage_record(
 	record : LayerRecord, stage : LAYER_STAGES
 ) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is GroupLayerRecord:
-		return _propagate_call(
-			record.layer, record.scope, _advance_to_stage.bind(stage)
+		return _propagate_call_record(
+			record, _advance_to_stage_record.bind(stage)
 		)
 	if record.stage == LAYER_STAGES.HAULTED:
 		return record.scope._remove_layer(record.layer)
@@ -150,8 +143,9 @@ func _overwrite_record_stage(
 	if record == null:
 		return TICK_TYPE.NONE
 	if record is GroupLayerRecord:
-		record.parent_scope.flag_tick_mask_changed(record.layer)
-		return _propagate_call(record.layer, record.scope, _overwrite_stage.bind(stage))
+		return _propagate_call(
+			record.layer, record.scope, _overwrite_stage.bind(stage)
+		)
 	if record.stage == stage:
 		return TICK_TYPE.NONE
 	
@@ -171,7 +165,27 @@ func _propagate_call(
 		for l : NodeCameraLayer in layer._layer_storage.get_registered():
 			mask |= foo.call(l, scope)
 	
+	#scope.flag_tick_mask_direct_changed(mask)
+	scope._force_rebuild_flat_lists(mask)
 	return mask
+func _propagate_call_record(
+	record : LayerRecord, foo : Callable
+) -> int:
+	var mask := TICK_TYPE.NONE
+	var layer := record.layer
+	var scope := record.scope
+	
+	if layer is NodeCameraRoutable:
+		for l : NodeCameraLayer in layer._route_to_layers():
+			mask |= foo.call(scope.get_record(l))
+	else:
+		for l : NodeCameraLayer in layer._layer_storage.get_registered():
+			mask |= foo.call(scope.get_record(l))
+	
+	scope.flag_tick_mask_direct_changed(mask)
+	#scope._force_rebuild_flat_lists(mask)
+	return mask
+
 func _force_hault_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
