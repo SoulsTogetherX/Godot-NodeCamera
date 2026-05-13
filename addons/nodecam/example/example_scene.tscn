@@ -49,6 +49,7 @@ shape = SubResource("RectangleShape2D_ounfu")
 script = ExtResource("5_ounfu")
 limits_path = NodePath("../../BoundaryShape")
 priority = -100
+camera_mask = 0
 metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="Shake" type="Node" parent="CamNodesFolder" unique_id=1073539157]
@@ -72,7 +73,6 @@ metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Lerp" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=1127496162]
 script = ExtResource("7_wlspu")
-auto_halt = null
 inital_stage = 1
 metadata/_custom_type_script = "uid://d0offmj7e061w"
 
@@ -94,7 +94,7 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-58.5, -242.5)
+position = Vector2(-126, -27)
 ignore_rotation = false
 process_callback = 0
 limit_enabled = false

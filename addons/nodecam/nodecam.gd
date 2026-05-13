@@ -22,11 +22,9 @@ func _disable_plugin() -> void:
 #endregion
 
 
-
 #region Virtual Methods (Type Creation)
 func _enter_tree():
 	var scripts := _get_all_files(SRC_DIR)
-	
 	for script_path : String in scripts:
 		var script := load(script_path)
 		var script_name : StringName = script.get_global_name()
@@ -39,7 +37,6 @@ func _enter_tree():
 		)
 func _exit_tree():
 	var scripts := _get_all_files(SRC_DIR)
-	
 	for script_path : String in scripts:
 		var script_name = script_path.get_file().get_basename()
 		remove_custom_type(script_name)

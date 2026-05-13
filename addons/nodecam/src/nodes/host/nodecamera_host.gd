@@ -48,7 +48,7 @@ enum CALLBACK_MODES {
 ## [br][br]
 ## [b]NOTE[/b]: This [NodeCameraHost] only processes [NodeCameraLayer] that share
 ## one or more layers, checked via a bitwise 'and' operation.
-@export var camera_mask : int = 1:
+@export_flags_avoidance var camera_mask : int = 1:
 	set = set_camera_mask,
 	get = get_camera_mask
 
