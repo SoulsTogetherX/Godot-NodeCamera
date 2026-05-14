@@ -14,6 +14,7 @@ const LAYER_NAMES_SETTING_BASE = "addons/nodecam/layer_names"
 
 #region Private Variables
 var _interface_plugin : NodeCameraInspectorPlugin
+var _export_plugin : NodeCameraExportPlugin
 #endregion
 
 
@@ -45,6 +46,10 @@ func _enter_tree():
 	_interface_plugin = NodeCameraInspectorPlugin.new()
 	add_inspector_plugin(_interface_plugin)
 	
+	# Export Plugin
+	_export_plugin = NodeCameraExportPlugin.new()
+	add_export_plugin(_export_plugin)
+	
 	# Node Scripts
 	var scripts := _get_all_files(SRC_DIR)
 	for script_path : String in scripts:
@@ -63,6 +68,11 @@ func _exit_tree():
 	if _interface_plugin:
 		remove_inspector_plugin(_interface_plugin)
 		_interface_plugin = null
+	
+	# Export Plugin
+	if _export_plugin:
+		remove_export_plugin(_export_plugin)
+		_export_plugin = null
 	
 	# Node Scripts
 	var scripts := _get_all_files(SRC_DIR)
