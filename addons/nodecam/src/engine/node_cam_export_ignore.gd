@@ -9,6 +9,8 @@ const PLUGIN_NAME := "NodeCameraExportPlugin"
 const ASSETS_DIR := "res://addons/nodecam/assets/"
 ## Local path to examples directory.
 const EXAMPLES_DIR := "res://addons/nodecam/example/"
+## Local path to engine directory.
+const ENGINE_DIR := "res://addons/nodecam/src/engine/"
 #endregion
 
 
@@ -25,5 +27,7 @@ func _export_file(
 	if path.begins_with(ASSETS_DIR):
 		skip()
 	if path.begins_with(EXAMPLES_DIR):
+		skip()
+	if path.begins_with(ENGINE_DIR):
 		skip()
 #endregion
