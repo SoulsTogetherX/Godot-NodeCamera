@@ -4,13 +4,17 @@ class_name NodeCameraMaskGrid extends Control
 ## Godot's Github[/url].
 
 #region Signals
+## Emitted when a flag changes.
 signal flag_changed(flag: int)
+## Emitted when a layer name has been changed.
 signal rename_confirmed(layer_id: int, new_name: String)
 #endregion
 
 
 #region Constants
+## The index of a default empty hover.
 const HOVERED_INDEX_NONE := -1
+## Invaild characters to check.
 const INVALID_NAME_CHARS := ["/", "\\", ":"]
 #endregion
 
@@ -33,16 +37,24 @@ var _layer_rename: PopupMenu
 
 
 #region Public Variables
+## If [code]true[/code], this property is read only.
 var read_only: bool = false
+## Signifies this grid should expand itself next redraw.
 var expanded: bool = false
+## The current value of the property.
 var value: int = 0
 
+## The stored names of every layers.
 var names: Array[String] = []
+## The stored tooltips of every layers.
 var tooltips: Array[String] = []
 
+## Number of horizontal buttons for each layer group.
 var layer_group_size: int = 4
+## The number of layers allowed for each camera mask.
 var layer_count: int = 32
 
+## The number of rows currently expanded.
 var expansion_rows: int = 0
 #endregion
 
@@ -400,6 +412,7 @@ func _update_flag(p_replace: bool) -> void:
 
 
 #region Accessor Methods
+## Sets the inital data of this grid.
 func set_data(
 	p_names: Array[String], p_tooltips: Array[String],
 	p_layer_group_size: int, p_layer_count: int
@@ -412,13 +425,16 @@ func set_data(
 	update_minimum_size()
 	queue_redraw()
 
+## Sets the [member read_only] property of the grid.
 func set_read_only(p_read_only: bool) -> void:
 	read_only = p_read_only
 	queue_redraw()
+## Sets a flag value of the grid.
 func set_flag(p_flag: int) -> void:
 	value = p_flag & 0xffffffff
 	queue_redraw()
 
+## Gets the current grid size.
 func get_grid_size() -> Vector2:
 	var theme := EditorInterface.get_editor_theme()
 	var font: Font = theme.get_font("font", "Label")

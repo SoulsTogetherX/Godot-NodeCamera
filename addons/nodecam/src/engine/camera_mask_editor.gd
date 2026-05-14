@@ -4,9 +4,12 @@ class_name NodeCameraMaskProperty extends EditorProperty
 ## Godot's Github[/url].
 
 #region Constants
+## Number of horizontal buttons for each layer group.
 const LAYER_GROUP_SIZE : int = 4
+## The number of layers allowed for each camera mask.
 const LAYER_COUNT : int = 32
 
+## The base path for all camera mask layer names.
 const BASE_NAME : String = "addons/nodecam/layer_names"
 #endregion
 
@@ -134,6 +137,7 @@ func _menu_pressed(p_menu: int) -> void:
 
 
 #region Public Helper Methods
+## Sets up the bitmask grid.
 func setup() -> void:
 	var names: Array[String] = []
 	var tooltips: Array[String] = []
@@ -154,11 +158,15 @@ func setup() -> void:
 
 
 #region Layer Name Accessor Methods
+## Sets the name of the layer [param p_index], stored in
+## [ProjectSettings].
 func set_layer_name(p_index: int, p_name: String) -> void:
 	var property_name := "%s/layer_%d" % [BASE_NAME, p_index + 1]
 	ProjectSettings.set_setting(property_name, p_name)
 	ProjectSettings.save()
 	setup()
+## Gets the name of the layer [param p_index], stored in
+## [ProjectSettings].
 func get_layer_name(p_index: int) -> String:
 	var property_name := "%s/layer_%d" % [BASE_NAME, p_index + 1]
 	if ProjectSettings.has_setting(property_name):
