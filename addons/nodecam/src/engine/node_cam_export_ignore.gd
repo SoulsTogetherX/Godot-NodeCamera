@@ -2,6 +2,9 @@
 class_name NodeCameraExportPlugin extends EditorExportPlugin
 
 #region Constants
+## The name of this plugin.
+const PLUGIN_NAME := "NodeCameraExportPlugin"
+
 ## Local path to assets directory.
 const ASSETS_DIR := "res://addons/nodecam/assets/"
 ## Local path to examples directory.
@@ -11,6 +14,9 @@ const EXAMPLES_DIR := "res://addons/nodecam/example/"
 
 
 #region Virtual Methods
+func _get_name() -> String:
+	return PLUGIN_NAME
+
 func _export_file(
 	path: String,
 	type: String,
