@@ -49,7 +49,6 @@ shape = SubResource("RectangleShape2D_ounfu")
 script = ExtResource("5_ounfu")
 limits_path = NodePath("../../BoundaryShape")
 priority = -100
-camera_mask = 0
 metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="Shake" type="Node" parent="CamNodesFolder" unique_id=1073539157]
@@ -59,33 +58,33 @@ metadata/_custom_type_script = "uid://xbw3mcx4uq1"
 
 [node name="PlayerSelector" type="Node" parent="CamNodesFolder" unique_id=60088159]
 script = ExtResource("8_uvbdg")
-priority = 100
+priority = 4
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
-[node name="Player1" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=2092595275]
+[node name="Player1" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=938517445]
 script = ExtResource("4_gnvb1")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="GluePlayer1" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=206962324]
+[node name="GluePlayer1" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=1624574720]
 script = ExtResource("4_4bahi")
 follow_target = NodePath("../../../../CameraManager/Player1")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Lerp" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=1127496162]
+[node name="Lerp" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=471463075]
 script = ExtResource("7_wlspu")
 inital_stage = 1
 metadata/_custom_type_script = "uid://d0offmj7e061w"
 
-[node name="Player3" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=512622248]
+[node name="Player2" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=512622248]
 script = ExtResource("4_gnvb1")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="GluePlayer2" type="Node" parent="CamNodesFolder/PlayerSelector/Player3" unique_id=854741187]
+[node name="GluePlayer2" type="Node" parent="CamNodesFolder/PlayerSelector/Player2" unique_id=854741187]
 script = ExtResource("4_4bahi")
 follow_target = NodePath("../../../../CameraManager/Player2")
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
-[node name="Tween" type="Node" parent="CamNodesFolder/PlayerSelector/Player3" unique_id=1779982937]
+[node name="Tween" type="Node" parent="CamNodesFolder/PlayerSelector/Player2" unique_id=1779982937]
 script = ExtResource("10_0ufl4")
 trans_type = 7
 tween_process_mode = 1
@@ -94,7 +93,7 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-126, -27)
+position = Vector2(-86, -99.5)
 ignore_rotation = false
 process_callback = 0
 limit_enabled = false

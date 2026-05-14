@@ -44,18 +44,19 @@ const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
 @export var priority : int:
 	set = set_priority,
 	get = get_priority
-## Provides a filter mask. NodeCamera nodes can exist in one or more of 32 layers.
-## [br][br]
-## [b]NOTE[/b]: This [NodeCameraLayer] is only processed by [NodeCameraHost] that
-## share one or more layers, checked via a bitwise 'and' operation.
-@export_flags_avoidance var camera_mask : int = 1:
-	set = set_camera_mask,
-	get = get_camera_mask
 
 ## If [code]true[/code], this [NodeCameraLayer] will forcibly unregister.
 @export var disabled : bool:
 	set = set_disabled,
 	get = get_disabled
+
+## Provides a filter mask. NodeCamera nodes can exist in one or more of 32 layers.
+## [br][br]
+## [b]NOTE[/b]: This [NodeCameraLayer] is only processed by [NodeCameraHost] that
+## share one or more layers, checked via a bitwise 'and' operation.
+@export var camera_mask : int = 1:
+	set = set_camera_mask,
+	get = get_camera_mask
 #endregion
 
 

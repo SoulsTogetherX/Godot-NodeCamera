@@ -44,13 +44,6 @@ enum CALLBACK_MODES {
 @export var callback_mode : CALLBACK_MODES = CALLBACK_MODES.PHYSICS:
 	set = set_callback_mode,
 	get = get_callback_mode
-## Provides a filter mask. NodeCamera nodes can exist in one or more of 32 layers.
-## [br][br]
-## [b]NOTE[/b]: This [NodeCameraHost] only processes [NodeCameraLayer] that share
-## one or more layers, checked via a bitwise 'and' operation.
-@export_flags_avoidance var camera_mask : int = 1:
-	set = set_camera_mask,
-	get = get_camera_mask
 
 ## If [code]true[/code], this [NodeCameraHost] will forcibly unregister.
 @export var disabled : bool:
@@ -61,6 +54,14 @@ enum CALLBACK_MODES {
 @export var run_in_engine : bool:
 	set = set_run_in_engine,
 	get = get_run_in_engine
+
+## Provides a filter mask. NodeCamera nodes can exist in one or more of 32 layers.
+## [br][br]
+## [b]NOTE[/b]: This [NodeCameraHost] only processes [NodeCameraLayer] that share
+## one or more layers, checked via a bitwise 'and' operation.
+@export var camera_mask : int = 1:
+	set = set_camera_mask,
+	get = get_camera_mask
 #endregion
 
 

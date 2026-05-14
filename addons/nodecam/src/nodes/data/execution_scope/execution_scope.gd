@@ -25,7 +25,7 @@ enum DIRTY_FLAGS {
 enum LAYER_STAGES {
 	HALTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
 	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
-	RUNNING		= 1 << 2,	## [LayerRecord] is running it's execution.
+	RUNNING		= 1 << 2,	## [LayerRecord] is running its execution.
 	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
 }
 ## [b]For internal use only[/b].
