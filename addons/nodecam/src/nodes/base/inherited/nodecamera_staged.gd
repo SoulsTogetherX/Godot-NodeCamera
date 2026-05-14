@@ -79,12 +79,27 @@ func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
 ## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
 ## of any [LayerRecord]s featuring this [NodeCameraStaged].
 ## [br][br]
+## [b]NOTE[/b]: if there are no active parent scopes for this layer,
+## [method NodeCameraExecutionScope.flag_overwrite_stage] will be
+## called on the closest active [NodeCameraGroup] instead.
+## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
+## [method get_closest_active_scripts],
 ## [enum NodeCameraExecutionScope.LAYER_STAGES], and
 ## [method overwrite_stage].
-func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
-		scope.flag_overwrite_stage(self, stage)
+func notify_overwrite_stage(
+	stage : LAYER_STAGES, parent_overwrite : bool = true
+) -> void:
+	var layer := get_closest_active_layer()
+	if layer == null:
+		return
+	if layer == self:
+		for scope : NodeCameraExecutionScope in get_parent_scopes():
+			scope.flag_overwrite_stage(self, stage)
+		return
+	for scope : NodeCameraExecutionScope in layer._parent_scopes:
+		scope.flag_overwrite_stage(layer, stage)
+	
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this
 ## [NodeCameraStaged]'s stage masks have changed.

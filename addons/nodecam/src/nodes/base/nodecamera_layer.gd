@@ -99,6 +99,17 @@ func _register() -> void:
 #endregion
 
 
+#region Private Methods (Helper)
+func _vaild_route(
+	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
+) -> bool:
+	return (
+		!(parent_layer is NodeCameraRoutable) ||
+		layer in parent_layer._route_to_layers()
+	)
+#endregion
+
+
 #region Flag Methods
 func _flag_priority_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
@@ -141,6 +152,32 @@ func get_parent_scopes() -> Array[NodeCameraExecutionScope]:
 ## Returns if this layer is not currently active in any scope.
 func without_parent_scopes() -> bool:
 	return _parent_scopes.is_empty()
+
+## Goes down the tree and returns the closest layer with a non-empty
+## array of [NodeCameraExecutionScope]s parents.
+## [br][br]
+## Alse see [method get_parent_scopes] and
+## [method without_parent_scopes].
+func get_closest_active_layer() -> NodeCameraLayer:
+	if (
+		!without_parent_scopes() &&
+		_vaild_route(self, (get_parent() as NodeCameraGroup))
+	):
+		return self
+	
+	var parent_layer : NodeCameraGroup = null
+	var layer : NodeCameraGroup = (get_parent() as NodeCameraGroup)
+	while layer != null:
+		parent_layer = (layer.get_parent() as NodeCameraGroup)
+		if !_vaild_route(layer, parent_layer):
+			return null
+		
+		# Always breaks before reaching a host execution scope
+		if !layer.without_parent_scopes():
+			break
+		layer = parent_layer
+	
+	return layer
 
 func set_disabled(val : bool) -> void:
 	if val == disabled:

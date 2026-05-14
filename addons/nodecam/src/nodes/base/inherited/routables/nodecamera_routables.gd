@@ -90,27 +90,11 @@ func flag_route_layers_changed() -> void:
 	if !is_node_ready():
 		push_warning("Calling 'flag_route_layers_changed' before ready can cause issues. Try call_deffered instead.")
 	
-	if (
-		!without_parent_scopes() &&
-		_vaild_route(self, (get_parent() as NodeCameraGroup))
-	):
-		_direct_route_changed()
+	var layer := get_closest_active_layer()
+	if !layer:
 		return
-	_cached_routed_layers = _route_to_layers()
-	
-	var parent_layer : NodeCameraGroup = null
-	var layer : NodeCameraGroup = self
-	while layer != null:
-		parent_layer = (layer.get_parent() as NodeCameraGroup)
-		if !_vaild_route(layer, parent_layer):
-			return
-		
-		# Always breaks before reaching a host execution scope
-		if !layer.without_parent_scopes():
-			break
-		layer = parent_layer
-	
-	if layer == null:
+	if layer == self:
+		_direct_route_changed()
 		return
 	for scope : NodeCameraExecutionScope in layer._parent_scopes:
 		scope.flag_overwrite_stage(layer, start_stage)

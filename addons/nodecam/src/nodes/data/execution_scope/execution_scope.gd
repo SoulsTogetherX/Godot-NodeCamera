@@ -126,6 +126,7 @@ func flag_remove_layer(layer : NodeCameraLayer) -> void:
 ## Flags this scope to add [param layer] next mutation batch.
 func flag_add_layer(layer : NodeCameraLayer) -> void:
 	if !layer: return
+	if !_layer_storage.is_layer_registered(layer): return
 	if !(_host_scope.get_mask() & layer.camera_mask): return
 	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
@@ -251,6 +252,7 @@ func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
 	if !layer: return
+	if !_layer_storage.is_layer_registered(layer): return
 	if !(_host_scope.get_mask() & layer.camera_mask): return
 	
 	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
