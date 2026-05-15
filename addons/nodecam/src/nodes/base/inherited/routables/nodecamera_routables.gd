@@ -6,12 +6,12 @@ class_name NodeCameraRoutable extends NodeCameraGroup
 ## deactivating and reactivating child layers, via manipulating their stages.
 
 #region External Variables
-## The stage any layer will be overwriten to if activated.
+## The stage any layer will be overwriten to if routed to.
 ## [br][br]
 ## Also see [method NodeCameraExecutionScope.flag_overwrite_stage].
 @export 
 var start_stage : LAYER_STAGES = LAYER_STAGES.STARTING
-## The stage any layer will be advanced to if deativated.
+## The stage any layer will be advanced to if routed away from.
 ## [br][br]
 ## Also see [method NodeCameraExecutionScope.flag_advance_to_stage].
 @export 

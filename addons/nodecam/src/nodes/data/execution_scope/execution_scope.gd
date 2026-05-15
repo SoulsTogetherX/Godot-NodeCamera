@@ -576,8 +576,18 @@ func _list_construct(
 ) -> int:
 	if list.is_empty():
 		return TICK_TYPE.NONE
+	
+	if stage == LAYER_STAGES_INHERITED:
+		var layer := list.front()
+		if layer is NodeCameraStaged:
+			stage = layer.inital_stage
+		else:
+			stage = LAYER_STAGES.STARTING
+	
 	if list.size() == 1:
 		return _host_scope._overwrite_stage(list[0], self, stage)
+	
+	
 	
 	var idx : int = list.size() - 1
 	var scope : NodeCameraExecutionScope = self

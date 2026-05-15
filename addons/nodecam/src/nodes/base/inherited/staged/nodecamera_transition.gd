@@ -6,12 +6,10 @@ class_name NodeCameraTransition extends NodeCameraStaged
 ## camera should have, while transitioning the desired values, via chaining
 ## these nodes together.
 ## [br][br]
-## [color=#D6D000]NOTE[/color]: If a [NodeCameraTransition] is active, make
-## sure [color=#D6D000]at least one[/color] [NodeCameraTransition] layer is
-## transferring all desired camera properties, from 'target' to 'current',
-## in either the [method process_transition] or
-## [method transition_stage_changed] methods, [color=#D6D000]including
-## properties not being transitioned.[/color]
+## [color=#D6D000]NOTE[/color]: If at least one [NodeCameraTransition]
+## [color=#D6D000]is active[/color], the camera will entirely rely on the
+## transition's output result. This will cause any camera property, not
+## updated by at least one [NodeCameraTransition], to be ignored.
 
 #region Virtual Methods (User Overwrite)
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All

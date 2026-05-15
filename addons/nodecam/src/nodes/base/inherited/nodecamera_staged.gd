@@ -11,7 +11,7 @@ class_name NodeCameraStaged extends NodeCameraLayer
 ## [br][br]
 ## Use methods like
 ## [method NodeCameraExecutionScope.flag_overwrite_stage] if you
-## want different behavior.
+## want to add this layer with a different starting stage.
 @export var inital_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 #endregion
 
@@ -123,7 +123,7 @@ func notify_stage_masks_changed() -> void:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_process_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
@@ -136,7 +136,7 @@ func get_needed_process_stages() -> PackedInt32Array:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_linger_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
@@ -146,7 +146,7 @@ func get_needed_linger_stages() -> PackedInt32Array:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_change_stages() -> PackedInt32Array:
 	return []
 #endregion
