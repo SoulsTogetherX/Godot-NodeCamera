@@ -68,14 +68,14 @@ enum CALLBACK_MODES {
 #region Private Variables
 var _camera : Node
 
-var _scope : NodeCameraHostExecutionScope = NodeCameraHostExecutionScope.new(
-	self, NodeCameraManager.get_layer_storage()
-)
+var _scope := NodeCameraHostExecutionScope.new(self)
 #endregion
 
 
 
 #region Virtual Methods (Engine)
+func _init() -> void:
+	_scope.settup_layer_storage(NodeCameraManager.get_layer_storage())
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_ENTER_TREE:

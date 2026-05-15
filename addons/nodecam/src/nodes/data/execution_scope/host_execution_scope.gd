@@ -13,14 +13,10 @@ var _current_state : NodeCameraState
 
 
 #region Virtual Methods
-func _init(
-	host : NodeCameraHost, layer_storage : NodeCameraLayerStorage
-) -> void:
+func _init(host : NodeCameraHost) -> void:
 	_host = host
 	_host_scope = self
 	_container_record = null
-	
-	_settup_layer_storage(layer_storage)
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_free_camera_states.call_deferred()

@@ -5,12 +5,13 @@ class_name NodeCameraStaged extends NodeCameraLayer
 ## A [NodeCameraLayer] node for any layer affected by stages. Namely
 ## [NodeCameraEffect] and [NodeCameraTransition].
 
-#region Signals
-signal stage_masks_updated
-#endregion
-
 
 #region External Variables
+## The inital stage this layer will start at, if added normally.
+## [br][br]
+## Use methods like
+## [method NodeCameraExecutionScope.flag_overwrite_stage] if you
+## want different behavior.
 @export var inital_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 #endregion
 
@@ -59,8 +60,8 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 ## featuring this [NodeCameraStaged], one stage forward.
 ## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method advance_stage].
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_stage() -> void:
 	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_advance_stage(self)
@@ -71,34 +72,33 @@ func notify_advance_stage() -> void:
 ## Stages go in the order of [code]STARTING > RUNNING > ENDING > HALTED
 ## [/code][br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method advance_to_stage].
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
 	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_advance_to_stage(self, stage)
 ## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
-## of any [LayerRecord]s featuring this [NodeCameraStaged].
-## [br][br]
-## [b]NOTE[/b]: if there are no active parent scopes for this layer,
-## [method NodeCameraExecutionScope.flag_overwrite_stage] will be
-## called on the closest active [NodeCameraGroup] instead.
+## of any [LayerRecord]s featuring this [NodeCameraStaged], assuming
+## it is possible.
 ## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [method get_closest_active_scripts],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method overwrite_stage].
+## [method NodeCameraLayer.get_closest_active_scripts],
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_overwrite_stage(
 	stage : LAYER_STAGES, parent_overwrite : bool = true
 ) -> void:
-	var layer := get_closest_active_layer()
-	if layer == null:
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
 		return
+	
+	var layer := layers.back()
 	if layer == self:
 		for scope : NodeCameraExecutionScope in get_parent_scopes():
 			scope.flag_overwrite_stage(self, stage)
 		return
 	for scope : NodeCameraExecutionScope in layer._parent_scopes:
-		scope.flag_overwrite_stage(layer, stage)
+		scope.flag_list_construct_overwrite(layers, stage)
 	
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this
@@ -110,7 +110,6 @@ func notify_overwrite_stage(
 func notify_stage_masks_changed() -> void:
 	for scope : NodeCameraExecutionScope in get_parent_scopes():
 		scope.flag_stage_mask_changed(self)
-	stage_masks_updated.emit()
 #endregion
 
 

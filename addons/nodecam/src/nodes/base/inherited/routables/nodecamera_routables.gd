@@ -90,9 +90,11 @@ func flag_route_layers_changed() -> void:
 	if !is_node_ready():
 		push_warning("Calling 'flag_route_layers_changed' before ready can cause issues. Try call_deffered instead.")
 	
-	var layer := get_closest_active_layer()
-	if !layer:
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
 		return
+	
+	var layer := layers.back()
 	if layer == self:
 		_direct_route_changed()
 		return
