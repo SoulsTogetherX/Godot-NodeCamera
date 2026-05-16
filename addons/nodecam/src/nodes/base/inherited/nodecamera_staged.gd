@@ -92,14 +92,13 @@ func notify_overwrite_stage(
 	if layers.is_empty():
 		return
 	
-	var layer := layers.back()
-	if layer == self:
+	var l := layers.back()
+	if l == self:
 		for scope : NodeCameraExecutionScope in _parent_scopes:
 			scope.flag_overwrite_stage(self, stage)
 		return
-	for scope : NodeCameraExecutionScope in layer._parent_scopes:
-		scope.flag_overwrite_stage(layers.back(), stage)
-		#scope.flag_list_construct_overwrite(layers, stage)
+	for scope : NodeCameraExecutionScope in l._parent_scopes:
+		scope.flag_list_construct(layers, stage)
 	
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this

@@ -65,17 +65,6 @@ func _direct_route_changed() -> void:
 			scope.flag_advance_to_stage(old, end_stage)
 		for new : NodeCameraLayer in unique_new:
 			scope.flag_overwrite_stage(new, start_stage)
-
-func _vaild_route(
-	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
-) -> bool:
-	return (
-		parent_layer &&
-		(layer.camera_mask & parent_layer.camera_mask) && (
-			!(parent_layer is NodeCameraRoutable) ||
-			parent_layer._route_to_layers().has(layer)
-		)
-	)
 #endregion
 
 

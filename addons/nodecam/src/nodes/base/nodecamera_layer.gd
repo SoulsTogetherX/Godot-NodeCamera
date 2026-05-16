@@ -100,20 +100,6 @@ func _register() -> void:
 #endregion
 
 
-#region Private Methods (Helper)
-func _vaild_route(
-	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
-) -> bool:
-	return (
-		(layer.camera_mask & parent_layer.camera_mask) &&
-		(
-			!(parent_layer is NodeCameraRoutable) ||
-			parent_layer._route_to_layers().has(layer)
-		)
-	)
-#endregion
-
-
 #region Flag Methods
 func _flag_priority_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
@@ -129,8 +115,7 @@ func _flag_camera_mask_changed(old : int) -> void:
 			scope.flag_camera_mask_changed(self, old)
 		return
 	for scope : NodeCameraExecutionScope in l._parent_scopes:
-		#scope.flag_add_layer(layers.back())
-		scope.flag_list_construct_overwrite(layers, old)
+		scope.flag_list_construct(layers)
 
 ## Flags all active cached scopes to be recreated.
 func flag_refresh_scopes() -> void:
@@ -198,7 +183,10 @@ func get_closest_active_layer_list() -> Array[NodeCameraLayer]:
 		if !layer.without_parent_scopes():
 			break
 		
-		if !layer._parent_group || !_vaild_route(layer, layer._parent_group):
+		if (
+			!layer._parent_group ||
+			!NodeCameraManager.vaild_route(layer._parent_group, layer)
+		):
 			return []
 		layer = layer._parent_group
 	return ret

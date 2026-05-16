@@ -24,6 +24,23 @@ func _notification(what: int) -> void:
 #endregion
 
 
+#region Global Methods (Helper)
+## Returns if [param parent_layer] is currently routing to the child
+## layer [param layer]. Only works for direct pairings. Used internally.
+func vaild_route(
+	parent_layer : NodeCameraGroup, layer : NodeCameraLayer
+) -> bool:
+	return (
+		(layer.camera_mask & parent_layer.camera_mask) &&
+		layer._parent_group == parent_layer &&
+		(
+			!(parent_layer is NodeCameraRoutable) ||
+			parent_layer._route_to_layers().has(layer)
+		)
+	)
+#endregion
+
+
 #region Private Methods (Tick Hosts)
 func _process_tick() -> void:
 	var delta := get_process_delta_time()

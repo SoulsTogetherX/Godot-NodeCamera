@@ -180,20 +180,9 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 ## [NodeCameraGroup] node. The final layer will start with it's
 ## [member NodeCameraLayer.inital_stage].
 func flag_list_construct(
-	layers : Array[NodeCameraLayer]
+	layers : Array[NodeCameraLayer], stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> void:
-	return
 	_layers_list_overwrite.append([layers, LAYER_STAGES_INHERITED])
-	_flag_request(DIRTY_FLAGS.LIST_CONSTRUCT)
-## Flags this scope to construct children records/scope via the given
-## layers. Previous layers must a child layer of next layer in the
-## array. Due to this, all but the first layer, in the list, must be a
-## [NodeCameraGroup] node. The final layer will be overwriten with
-## the stage [param stage].
-func flag_list_construct_overwrite(
-	layers : Array[NodeCameraLayer], stage : LAYER_STAGES
-) -> void:
-	_layers_list_overwrite.append([layers, stage])
 	_flag_request(DIRTY_FLAGS.LIST_CONSTRUCT)
 
 ## Flags this scope to pause [param layer] next mutation batch.
@@ -418,9 +407,9 @@ func _handle_dirty_layers() -> void:
 	
 	if _dirty_mask & DIRTY_FLAGS.LIST_CONSTRUCT:
 		for data : Array in _layers_list_overwrite:
-			var list : Array[NodeCameraLayer] = data[0]
+			var layers : Array[NodeCameraLayer] = data[0]
 			var stage : LAYER_STAGES = data[1]
-			rebuild_flags |= _list_construct(list, stage)
+			rebuild_flags |= _list_construct(layers, stage)
 	
 	if _dirty_mask & DIRTY_FLAGS.TICK_MASK_CHANGED_DIRECT:
 		rebuild_flags |= _direct_tick_mask_change
@@ -507,8 +496,7 @@ func _add_layer(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> int:
 	if _container_record:
-		var l := _container_record.layer
-		if !(layer.camera_mask & l.camera_mask):
+		if !NodeCameraManager.vaild_route(_container_record.layer, layer):
 			return TICK_TYPE.NONE
 	elif !(layer.camera_mask & _host_scope.get_mask()):
 		return TICK_TYPE.NONE
@@ -557,52 +545,6 @@ func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 	return record.tick_mask
 
 
-# List Layer Construct Methods
-func _list_construct(
-	p_layers : Array[NodeCameraLayer], stage : LAYER_STAGES
-) -> int:
-	if p_layers.is_empty():
-		return TICK_TYPE.NONE
-	
-	if p_layers.size() == 1:
-		return _host_scope._overwrite_stage(p_layers[0], self, stage)
-	
-	return _list_construct_recusive(
-		p_layers, p_layers.size() - 1, stage
-	)
-func _list_construct_recusive(
-	p_layers : Array[NodeCameraLayer], idx : int,
-	stage : LAYER_STAGES
-) -> int:
-	var l := p_layers[idx]
-	if idx == 0:
-		return _add_layer(l)
-	
-	var record := GroupLayerRecord.new()
-	record.layer = l
-	record.parent_scope = self
-	record.scope = NodeCameraExecutionScope.new(
-		_host_scope, record
-	)
-	record.scope.settup_layer_storage(l.get_layer_storage())
-	
-	record.tick_mask = record.scope._list_construct_recusive(
-		p_layers, idx - 1, stage
-	)
-	
-	if record.tick_mask == TICK_TYPE.NONE:
-		return TICK_TYPE.NONE
-	
-	if record.tick_mask & TICK_TYPE.EFFECTS:
-		_effect_storage.add(record, l.priority)
-	if record.tick_mask & TICK_TYPE.TRANSITIONS:
-		_transition_storage.add(record, l.priority)
-	
-	_record_by_layer.set(l, record)
-	record.scope._force_rebuild_flat_lists(record.tick_mask)
-	return record.tick_mask
-
-
 # Update Layer Masks Methods
 func _update_stage_mask(record : StagedLayerRecord) -> int:
 	if record == null:
@@ -640,6 +582,72 @@ func _update_tick_mask(record : GroupLayerRecord) -> int:
 		return _remove_layer(record.layer)
 	record.tick_mask = new_mask
 	return mask_diff
+#endregion
+
+
+#region Dirty Operations Methods (List Layer Construct)
+func _list_construct(
+	p_layers : Array[NodeCameraLayer], stage : LAYER_STAGES
+) -> int:
+	if p_layers.is_empty():
+		return TICK_TYPE.NONE
+	
+	if p_layers.size() == 1:
+		return _host_scope._overwrite_stage(p_layers[0], self, stage)
+	
+	var idx := p_layers.size() - 1
+	var scope : NodeCameraExecutionScope = self
+	var record : LayerRecord = get_record(p_layers[idx])
+	while idx > 0:
+		record = scope.get_record(p_layers[idx])
+		if record == null:
+			break
+		
+		scope = record.scope
+		idx -= 1
+	
+	return scope._list_construct_recusive(
+		p_layers, idx, stage
+	)
+func _list_climb_recusive(
+	p_layers : Array[NodeCameraLayer], idx : int,
+	stage : LAYER_STAGES
+) -> int:
+	return idx
+func _list_construct_recusive(
+	p_layers : Array[NodeCameraLayer], idx : int,
+	stage : LAYER_STAGES
+) -> int:
+	var l := p_layers[idx]
+	if idx == 0:
+		return _add_layer(l)
+	
+	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
+		return TICK_TYPE.NONE
+	
+	var record := GroupLayerRecord.new()
+	record.layer = l
+	record.parent_scope = self
+	record.scope = NodeCameraExecutionScope.new(
+		_host_scope, record
+	)
+	record.scope.settup_layer_storage(l.get_layer_storage())
+	
+	record.tick_mask = record.scope._list_construct_recusive(
+		p_layers, idx - 1, stage
+	)
+	if record.tick_mask == TICK_TYPE.NONE:
+		record.free()
+		return TICK_TYPE.NONE
+	
+	if record.tick_mask & TICK_TYPE.EFFECTS:
+		_effect_storage.add(record, l.priority)
+	if record.tick_mask & TICK_TYPE.TRANSITIONS:
+		_transition_storage.add(record, l.priority)
+	
+	_record_by_layer.set(l, record)
+	record.scope._force_rebuild_flat_lists(record.tick_mask)
+	return record.tick_mask
 #endregion
 
 
