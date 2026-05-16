@@ -69,6 +69,7 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="GluePlayer1" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=1624574720]
 script = ExtResource("4_4bahi")
 follow_target = NodePath("../../../../CameraManager/Player1")
+camera_mask = 0
 metadata/_custom_type_script = "uid://brcthb2wv72uv"
 
 [node name="Lerp" type="Node" parent="CamNodesFolder/PlayerSelector/Player1" unique_id=471463075]
@@ -94,7 +95,8 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-86, -242.5)
+position = Vector2(-35.091805, -225.39003)
+offset = Vector2(-15.908197, -17.10997)
 ignore_rotation = false
 process_callback = 0
 limit_enabled = false

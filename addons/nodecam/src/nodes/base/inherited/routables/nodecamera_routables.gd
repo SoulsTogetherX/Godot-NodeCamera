@@ -36,7 +36,9 @@ func _notification(what: int) -> void:
 
 #region Private Routing Methods
 func _direct_route_changed() -> void:
+	var new_layers := _route_to_layers()
 	var implemented_scopes : Array[NodeCameraExecutionScope]
+	
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		var record := scope.get_record(self)
 		if record == null:
@@ -45,9 +47,9 @@ func _direct_route_changed() -> void:
 		implemented_scopes.append(record.scope)
 	
 	if implemented_scopes.is_empty():
+		_cached_routed_layers = new_layers
 		return
 	
-	var new_layers := _route_to_layers()
 	var unique_old : Array[NodeCameraLayer] = _cached_routed_layers.filter(
 		func(l : NodeCameraLayer):
 			return !new_layers.has(l)
@@ -68,8 +70,11 @@ func _vaild_route(
 	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
 ) -> bool:
 	return (
-		!(parent_layer is NodeCameraRoutable) ||
-		layer in parent_layer._route_to_layers()
+		parent_layer &&
+		(layer.camera_mask & parent_layer.camera_mask) && (
+			!(parent_layer is NodeCameraRoutable) ||
+			parent_layer._route_to_layers().has(layer)
+		)
 	)
 #endregion
 

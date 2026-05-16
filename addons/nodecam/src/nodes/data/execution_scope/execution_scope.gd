@@ -34,7 +34,7 @@ enum LAYER_STAGES {
 ## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals
 ## that the layer should use the stage [member NodeCameraStaged.inital_stage]
 ## by default on creation.
-const LAYER_STAGES_INHERITED := 0b0
+const LAYER_STAGES_INHERITED := 1 << 4
 
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither).
@@ -132,8 +132,6 @@ func flag_remove_layer(layer : NodeCameraLayer) -> void:
 ## Flags this scope to add [param layer] next mutation batch.
 func flag_add_layer(layer : NodeCameraLayer) -> void:
 	if !layer: return
-	if !_layer_storage.is_layer_registered(layer): return
-	if !(_host_scope.get_mask() & layer.camera_mask): return
 	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
 		# Can't remove and add
@@ -184,6 +182,7 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 func flag_list_construct(
 	layers : Array[NodeCameraLayer]
 ) -> void:
+	return
 	_layers_list_overwrite.append([layers, LAYER_STAGES_INHERITED])
 	_flag_request(DIRTY_FLAGS.LIST_CONSTRUCT)
 ## Flags this scope to construct children records/scope via the given
@@ -279,8 +278,6 @@ func flag_overwrite_stage(
 	layer : NodeCameraLayer, stage : LAYER_STAGES
 ) -> void:
 	if !layer: return
-	if !_layer_storage.is_layer_registered(layer): return
-	if !(_host_scope.get_mask() & layer.camera_mask): return
 	
 	_layer_to_dirty_op[layer] = _layer_to_dirty_op.get(
 		layer, 0
@@ -462,31 +459,15 @@ func _force_rebuild_flat_lists(tick_mask : int) -> void:
 
 func _construct_scope(init_stage : LAYER_STAGES) -> void:
 	_clear_scope()
-	if _container_record:
-		var layer := _container_record.layer
-		if layer is NodeCameraRoutable:
-			_construct_routable_scope(init_stage, layer._route_to_layers())
-			return
-	_construct_group_scope(init_stage)
-func _construct_routable_scope(
-	init_stage : LAYER_STAGES, layers : Array[NodeCameraLayer]
-) -> void:
-	var mask := _host_scope.get_mask()
-	var parent : NodeCameraGroup = _container_record.layer # Never null
+	var layers : Array[NodeCameraLayer]
+	
+	if _container_record && (_container_record.layer is NodeCameraRoutable):
+		layers = _container_record.layer._route_to_layers()
+	else:
+		layers = _layer_storage.get_registered()
 	
 	for layer : NodeCameraLayer in layers:
-		if !(layer.camera_mask & mask) || !_layer_storage.is_layer_registered(layer):
-			continue
 		_add_layer(layer, init_stage)
-func _construct_group_scope(init_stage : LAYER_STAGES) -> void:
-	var mask := _host_scope.get_mask()
-	var layers := _layer_storage.get_registered() # Already Priority Sorted
-	
-	for layer : NodeCameraLayer in layers:
-		if !(layer.camera_mask & mask):
-			continue
-		_add_layer(layer, init_stage)
-
 func _clear_scope() -> void:
 	_effect_storage.clear()
 	_transition_storage.clear()
@@ -508,8 +489,7 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 		_transition_storage.remove(record, layer.priority)
 	
 	if (
-		record.stage != LAYER_STAGES.HALTED &&
-		record is StagedLayerRecord &&
+		record.stage != LAYER_STAGES.HALTED && record is StagedLayerRecord &&
 		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HALTED
 	):
 		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
@@ -526,6 +506,13 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 func _add_layer(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> int:
+	if _container_record:
+		var l := _container_record.layer
+		if !(layer.camera_mask & l.camera_mask):
+			return TICK_TYPE.NONE
+	elif !(layer.camera_mask & _host_scope.get_mask()):
+		return TICK_TYPE.NONE
+	
 	if _record_by_layer.has(layer):
 		return TICK_TYPE.NONE
 	var record := _construct_record(layer, init_stage)
@@ -572,109 +559,20 @@ func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 
 # List Layer Construct Methods
 func _list_construct(
-	list : Array[NodeCameraLayer], stage : LAYER_STAGES
+	p_layers : Array[NodeCameraLayer], stage : LAYER_STAGES
 ) -> int:
-	if list.is_empty():
+	if p_layers.is_empty():
 		return TICK_TYPE.NONE
 	
-	if stage == LAYER_STAGES_INHERITED:
-		var layer := list.front()
-		if layer is NodeCameraStaged:
-			stage = layer.inital_stage
-		else:
-			stage = LAYER_STAGES.STARTING
+	if p_layers.size() == 1:
+		return _host_scope._overwrite_stage(p_layers[0], self, stage)
 	
-	if list.size() == 1:
-		return _host_scope._overwrite_stage(list[0], self, stage)
+	var idx := p_layers.size() - 1
+	print(p_layers)
 	
 	
 	
-	var idx : int = list.size() - 1
-	var scope : NodeCameraExecutionScope = self
-	var record : GroupLayerRecord
-	
-	var layer_peek := list[idx]
-	# Traverses tree if execution scopes already exist.
-	while scope.has_record(layer_peek):
-		record = scope.get_record(layer_peek)
-		scope = record.scope
-		
-		idx -= 1
-		layer_peek = list[idx]
-		
-		if idx == 0:
-			# If reached the end and found layer, then just overwrite
-			# it plainly.
-			scope.flag_overwrite_stage(layer_peek, stage)
-			return TICK_TYPE.NONE
-	
-	var records : Array[GroupLayerRecord]
-	idx -= 1
-	
-	# Creates new execution scopes to reach target layer
-	while idx > 0:
-		if (
-			!(layer_peek is NodeCameraGroup) ||
-			!_list_construct_check_layer_vaildity(layer_peek, list[idx])
-		):
-			_list_construct_free_records(records)
-			return TICK_TYPE.NONE
-		
-		record = GroupLayerRecord.new()
-		record.layer = list[idx]
-		record.parent_scope = scope
-		record.scope = NodeCameraExecutionScope.new(
-			_host_scope, record
-		)
-		records.append(record)
-		
-		layer_peek = list[idx]
-		scope = record.scope
-		idx -= 1
-	
-	if (
-		!(layer_peek is NodeCameraGroup) ||
-		!_list_construct_check_layer_vaildity(layer_peek, list[idx])
-	):
-		_list_construct_free_records(records)
-		return TICK_TYPE.NONE
-	
-	var tick_mask := _host_scope._overwrite_stage(list[idx], scope, stage)
-	# These records are temporary. Properly free them.
-	if tick_mask == TICK_TYPE.NONE:
-		_list_construct_free_records(records)
-		return TICK_TYPE.NONE
-	
-	
-	# These records are staying. Properly register them.
-	for rec : GroupLayerRecord in records:
-		rec.tick_mask = tick_mask
-		rec.scope.settup_layer_storage(rec.layer.get_layer_storage())
-		rec.parent_scope._list_construct_add_record(rec)
-	return tick_mask
-func _list_construct_add_record(record : LayerRecord) -> void:
-	if record.tick_mask & TICK_TYPE.EFFECTS:
-		_effect_storage.add(record, record.layer.priority)
-	if record.tick_mask & TICK_TYPE.TRANSITIONS:
-		_transition_storage.add(record, record.layer.priority)
-	
-	_record_by_layer.set(record.layer, record)
-	_force_rebuild_flat_lists(record.tick_mask)
-func _list_construct_check_layer_vaildity(
-	layer_peek : NodeCameraGroup, layer_check : NodeCameraLayer
-) -> bool:
-	if !(layer_peek.camera_mask & layer_check.camera_mask):
-		return false
-	
-	if layer_peek is NodeCameraRoutable:
-		if layer_check in layer_peek._route_to_layers():
-			return true
-	elif layer_peek._layer_storage.is_layer_registered(layer_check):
-		return true
-	return false
-func _list_construct_free_records(records : Array[GroupLayerRecord]) -> void:
-	for rec : GroupLayerRecord in records:
-		rec.free()
+	return TICK_TYPE.NONE
 
 
 # Update Layer Masks Methods
@@ -763,7 +661,6 @@ func _construct_multi_record(
 	layer : NodeCameraGroup, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
 	var record := GroupLayerRecord.new()
-	
 	record.layer = layer
 	record.parent_scope = self
 	record.scope = NodeCameraExecutionScope.new(

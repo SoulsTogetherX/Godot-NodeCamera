@@ -83,7 +83,7 @@ func _host_update_callback(host : NodeCameraHost) -> void:
 		_scope_array_by_host[host].erase(host._scope)
 	_insert_host_callback(host)
 func _host_update_mask(host : NodeCameraHost) -> void:
-	host.get_scope().flag_structure_changed()
+	host.get_scope().flag_construct_scope()
 #endregion
 
 
@@ -115,7 +115,7 @@ func unregister_host(host : NodeCameraHost) -> void:
 	host.camera_mask_changed.disconnect(
 		_host_update_mask
 	)
-	if host in _scope_array_by_host:
+	if _scope_array_by_host.has(host):
 		_scope_array_by_host[host].erase(host._scope)
 		_scope_array_by_host.erase(host)
 	

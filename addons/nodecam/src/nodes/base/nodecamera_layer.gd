@@ -64,6 +64,7 @@ const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
 var _scope : NodeCameraExecutionScope
 
 var _parent_scopes : Array[NodeCameraExecutionScope]
+var _parent_group : NodeCameraGroup
 #endregion
 
 
@@ -83,16 +84,16 @@ func _notification(what: int) -> void:
 
 #region Private Methods (Register)
 func _unregister() -> void:
-	var parent := get_parent()
-	
-	if parent is NodeCameraGroup:
-		parent.unregister_layer(self)
+	if _parent_group != null:
+		_parent_group.unregister_layer(self)
+		_parent_group = null
 		return
 	NodeCameraManager.unregister_layer(self)
 func _register() -> void:
 	var parent := get_parent()
 	
 	if parent is NodeCameraGroup:
+		_parent_group = parent
 		parent.register_layer(self)
 		return
 	NodeCameraManager.register_layer(self)
@@ -103,11 +104,12 @@ func _register() -> void:
 func _vaild_route(
 	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
 ) -> bool:
-	if !(layer.camera_mask & parent_layer.camera_mask):
-		return false
 	return (
-		!(parent_layer is NodeCameraRoutable) ||
-		layer in parent_layer._route_to_layers()
+		(layer.camera_mask & parent_layer.camera_mask) &&
+		(
+			!(parent_layer is NodeCameraRoutable) ||
+			parent_layer._route_to_layers().has(layer)
+		)
 	)
 #endregion
 
@@ -117,8 +119,17 @@ func _flag_priority_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_reorder_layer(self, old)
 func _flag_camera_mask_changed(old : int) -> void:
-	for scope : NodeCameraExecutionScope in _parent_scopes:
-		scope.flag_camera_mask_changed(self, old)
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
+		return
+	
+	var l := layers.back()
+	if l == self:
+		for scope : NodeCameraExecutionScope in _parent_scopes:
+			scope.flag_camera_mask_changed(self, old)
+		return
+	for scope : NodeCameraExecutionScope in l._parent_scopes:
+		scope.flag_list_construct_overwrite(layers, old)
 
 ## Flags all active cached scopes to be recreated.
 func flag_refresh_scopes() -> void:
@@ -176,27 +187,19 @@ func get_closest_active_layer() -> NodeCameraLayer:
 ## Alse see [method get_closest_active_layer],
 ## [method get_parent_scopes], and [method without_parent_scopes].
 func get_closest_active_layer_list() -> Array[NodeCameraLayer]:
-	if (
-		!without_parent_scopes() &&
-		_vaild_route(self, (get_parent() as NodeCameraGroup))
-	):
-		return [self]
-	
-	var parent_layer : NodeCameraGroup = null
-	var layer : NodeCameraGroup = (get_parent() as NodeCameraGroup)
-	var ret : Array[NodeCameraLayer] = [self, layer]
+	var layer : NodeCameraLayer = self
+	var ret : Array[NodeCameraLayer] = []
 	
 	while layer != null:
-		parent_layer = (layer.get_parent() as NodeCameraGroup)
-		if !_vaild_route(layer, parent_layer):
-			return []
+		ret.push_back(layer)
 		
 		# Always breaks before reaching a host execution scope
 		if !layer.without_parent_scopes():
 			break
-		layer = parent_layer
-		ret.push_back(layer)
-	
+		
+		if !layer._parent_group || !_vaild_route(layer, layer._parent_group):
+			return []
+		layer = layer._parent_group
 	return ret
 #endregion
 
@@ -238,6 +241,11 @@ func set_camera_mask(val : int) -> void:
 	camera_mask_changed.emit()
 func get_camera_mask() -> int:
 	return camera_mask
+
+## Returns the [NodeCameraGroup] running this layer. If [code]null[/code]
+## is returned, then this layer is either outside the tree or top-level.
+func get_parent_layer() -> NodeCameraGroup:
+	return _parent_group
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

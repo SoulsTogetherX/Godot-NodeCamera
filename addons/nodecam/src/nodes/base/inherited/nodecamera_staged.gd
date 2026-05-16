@@ -63,7 +63,7 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 ## [method overwrite_stage], and
 ## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_stage() -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_stage(self)
 ## Forces all active [NodeCameraExecutionScope]sto overwrite the stage
 ## of any [LayerRecord]s, featuring this [NodeCameraStaged], assuming
@@ -75,7 +75,7 @@ func notify_advance_stage() -> void:
 ## [method overwrite_stage], and
 ## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_to_stage(self, stage)
 ## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
 ## of any [LayerRecord]s featuring this [NodeCameraStaged], assuming
@@ -94,7 +94,7 @@ func notify_overwrite_stage(
 	
 	var layer := layers.back()
 	if layer == self:
-		for scope : NodeCameraExecutionScope in get_parent_scopes():
+		for scope : NodeCameraExecutionScope in _parent_scopes:
 			scope.flag_overwrite_stage(self, stage)
 		return
 	for scope : NodeCameraExecutionScope in layer._parent_scopes:
@@ -108,7 +108,7 @@ func notify_overwrite_stage(
 ## [method get_needed_process_stages], [method get_needed_linger_stages],
 ## and [method get_needed_change_stages].
 func notify_stage_masks_changed() -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_stage_mask_changed(self)
 #endregion
 
