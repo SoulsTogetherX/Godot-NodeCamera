@@ -177,8 +177,8 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 ## Flags this scope to construct children records/scope via the given
 ## layers. Previous layers must a child layer of next layer in the
 ## array. Due to this, all but the first layer, in the list, must be a
-## [NodeCameraGroup] node. The final layer will start with it's
-## [member NodeCameraLayer.inital_stage].
+## [NodeCameraGroup] node. The final layer will start with the
+## stage [param stage].
 func flag_list_construct(
 	layers : Array[NodeCameraLayer], stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> void:
@@ -593,7 +593,7 @@ func _list_construct(
 		return TICK_TYPE.NONE
 	
 	if p_layers.size() == 1:
-		return _host_scope._overwrite_stage(p_layers[0], self, stage)
+		return _add_layer(p_layers[0], stage)
 	
 	var idx := p_layers.size() - 1
 	var scope : NodeCameraExecutionScope = self
@@ -620,7 +620,7 @@ func _list_construct_recusive(
 ) -> int:
 	var l := p_layers[idx]
 	if idx == 0:
-		return _add_layer(l)
+		return _add_layer(l, stage)
 	
 	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
 		return TICK_TYPE.NONE
