@@ -567,12 +567,40 @@ func _list_construct(
 	if p_layers.size() == 1:
 		return _host_scope._overwrite_stage(p_layers[0], self, stage)
 	
-	var idx := p_layers.size() - 1
-	#prints(p_layers, get_record(p_layers.front()))
+	return _list_construct_recusive(
+		p_layers, p_layers.size() - 1, stage
+	)
+func _list_construct_recusive(
+	p_layers : Array[NodeCameraLayer], idx : int,
+	stage : LAYER_STAGES
+) -> int:
+	var l := p_layers[idx]
+	if idx == 0:
+		return _add_layer(l)
 	
-	#var tick_mask := _add_layer(p_layers.front())
+	var record := GroupLayerRecord.new()
+	record.layer = l
+	record.parent_scope = self
+	record.scope = NodeCameraExecutionScope.new(
+		_host_scope, record
+	)
+	record.scope.settup_layer_storage(l.get_layer_storage())
 	
-	return _add_layer(p_layers[idx], stage)
+	record.tick_mask = record.scope._list_construct_recusive(
+		p_layers, idx - 1, stage
+	)
+	
+	if record.tick_mask == TICK_TYPE.NONE:
+		return TICK_TYPE.NONE
+	
+	if record.tick_mask & TICK_TYPE.EFFECTS:
+		_effect_storage.add(record, l.priority)
+	if record.tick_mask & TICK_TYPE.TRANSITIONS:
+		_transition_storage.add(record, l.priority)
+	
+	_record_by_layer.set(l, record)
+	record.scope._force_rebuild_flat_lists(record.tick_mask)
+	return record.tick_mask
 
 
 # Update Layer Masks Methods
