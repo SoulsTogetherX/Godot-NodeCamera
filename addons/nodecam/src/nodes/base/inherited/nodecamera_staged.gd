@@ -98,7 +98,8 @@ func notify_overwrite_stage(
 			scope.flag_overwrite_stage(self, stage)
 		return
 	for scope : NodeCameraExecutionScope in layer._parent_scopes:
-		scope.flag_list_construct_overwrite(layers, stage)
+		scope.flag_overwrite_stage(layers.back(), stage)
+		#scope.flag_list_construct_overwrite(layers, stage)
 	
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this

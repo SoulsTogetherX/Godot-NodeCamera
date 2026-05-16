@@ -568,11 +568,11 @@ func _list_construct(
 		return _host_scope._overwrite_stage(p_layers[0], self, stage)
 	
 	var idx := p_layers.size() - 1
-	print(p_layers)
+	#prints(p_layers, get_record(p_layers.front()))
 	
+	#var tick_mask := _add_layer(p_layers.front())
 	
-	
-	return TICK_TYPE.NONE
+	return _add_layer(p_layers[idx], stage)
 
 
 # Update Layer Masks Methods

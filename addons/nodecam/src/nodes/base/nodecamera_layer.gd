@@ -129,7 +129,8 @@ func _flag_camera_mask_changed(old : int) -> void:
 			scope.flag_camera_mask_changed(self, old)
 		return
 	for scope : NodeCameraExecutionScope in l._parent_scopes:
-		scope.flag_list_construct_overwrite(layers, old)
+		scope.flag_add_layer(layers.back())
+		#scope.flag_list_construct_overwrite(layers, old)
 
 ## Flags all active cached scopes to be recreated.
 func flag_refresh_scopes() -> void:
