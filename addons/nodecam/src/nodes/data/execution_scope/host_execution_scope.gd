@@ -13,14 +13,10 @@ var _current_state : NodeCameraState
 
 
 #region Virtual Methods
-func _init(
-	host : NodeCameraHost, layer_storage : NodeCameraLayerStorage
-) -> void:
+func _init(host : NodeCameraHost) -> void:
 	_host = host
 	_host_scope = self
 	_container_record = null
-	
-	_settup_layer_storage(layer_storage)
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_free_camera_states.call_deferred()
@@ -124,6 +120,8 @@ func _advance_to_stage_record(
 		return _propagate_call_record(
 			record, _advance_to_stage_record.bind(stage)
 		)
+	if stage == LAYER_STAGES_INHERITED:
+		stage = record.layer.inital_stage
 	if record.stage == LAYER_STAGES.HALTED:
 		return record.scope._remove_layer(record.layer)
 	if record.stage <= stage:
@@ -149,6 +147,8 @@ func _overwrite_record_stage(
 		return _propagate_call(
 			record.layer, record.scope, _overwrite_stage.bind(stage)
 		)
+	if stage == LAYER_STAGES_INHERITED:
+		stage = record.layer.inital_stage
 	if record.stage == stage:
 		return TICK_TYPE.NONE
 	
@@ -168,8 +168,7 @@ func _propagate_call(
 		for l : NodeCameraLayer in layer._layer_storage.get_registered():
 			mask |= foo.call(l, scope)
 	
-	#scope.flag_tick_mask_direct_changed(mask)
-	scope._force_rebuild_flat_lists(mask)
+	scope.flag_tick_mask_direct_changed(mask)
 	return mask
 func _propagate_call_record(
 	record : LayerRecord, foo : Callable
@@ -186,7 +185,6 @@ func _propagate_call_record(
 			mask |= foo.call(scope.get_record(l))
 	
 	scope.flag_tick_mask_direct_changed(mask)
-	#scope._force_rebuild_flat_lists(mask)
 	return mask
 
 func _force_halt_records(scope : NodeCameraExecutionScope) -> void:

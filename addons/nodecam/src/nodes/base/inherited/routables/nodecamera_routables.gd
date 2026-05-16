@@ -6,12 +6,12 @@ class_name NodeCameraRoutable extends NodeCameraGroup
 ## deactivating and reactivating child layers, via manipulating their stages.
 
 #region External Variables
-## The stage any layer will be overwriten to if activated.
+## The stage any layer will be overwriten to if routed to.
 ## [br][br]
 ## Also see [method NodeCameraExecutionScope.flag_overwrite_stage].
 @export 
 var start_stage : LAYER_STAGES = LAYER_STAGES.STARTING
-## The stage any layer will be advanced to if deativated.
+## The stage any layer will be advanced to if routed away from.
 ## [br][br]
 ## Also see [method NodeCameraExecutionScope.flag_advance_to_stage].
 @export 
@@ -36,7 +36,9 @@ func _notification(what: int) -> void:
 
 #region Private Routing Methods
 func _direct_route_changed() -> void:
+	var new_layers := _route_to_layers()
 	var implemented_scopes : Array[NodeCameraExecutionScope]
+	
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		var record := scope.get_record(self)
 		if record == null:
@@ -45,9 +47,9 @@ func _direct_route_changed() -> void:
 		implemented_scopes.append(record.scope)
 	
 	if implemented_scopes.is_empty():
+		_cached_routed_layers = new_layers
 		return
 	
-	var new_layers := _route_to_layers()
 	var unique_old : Array[NodeCameraLayer] = _cached_routed_layers.filter(
 		func(l : NodeCameraLayer):
 			return !new_layers.has(l)
@@ -63,14 +65,6 @@ func _direct_route_changed() -> void:
 			scope.flag_advance_to_stage(old, end_stage)
 		for new : NodeCameraLayer in unique_new:
 			scope.flag_overwrite_stage(new, start_stage)
-
-func _vaild_route(
-	layer : NodeCameraLayer, parent_layer : NodeCameraGroup
-) -> bool:
-	return (
-		!(parent_layer is NodeCameraRoutable) ||
-		layer in parent_layer._route_to_layers()
-	)
 #endregion
 
 
@@ -90,27 +84,13 @@ func flag_route_layers_changed() -> void:
 	if !is_node_ready():
 		push_warning("Calling 'flag_route_layers_changed' before ready can cause issues. Try call_deffered instead.")
 	
-	if (
-		!without_parent_scopes() &&
-		_vaild_route(self, (get_parent() as NodeCameraGroup))
-	):
-		_direct_route_changed()
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
 		return
-	_cached_routed_layers = _route_to_layers()
 	
-	var parent_layer : NodeCameraGroup = null
-	var layer : NodeCameraGroup = self
-	while layer != null:
-		parent_layer = (layer.get_parent() as NodeCameraGroup)
-		if !_vaild_route(layer, parent_layer):
-			return
-		
-		# Always breaks before reaching a host execution scope
-		if !layer.without_parent_scopes():
-			break
-		layer = parent_layer
-	
-	if layer == null:
+	var layer := layers.back()
+	if layer == self:
+		_direct_route_changed()
 		return
 	for scope : NodeCameraExecutionScope in layer._parent_scopes:
 		scope.flag_overwrite_stage(layer, start_stage)

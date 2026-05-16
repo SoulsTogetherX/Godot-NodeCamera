@@ -5,12 +5,13 @@ class_name NodeCameraStaged extends NodeCameraLayer
 ## A [NodeCameraLayer] node for any layer affected by stages. Namely
 ## [NodeCameraEffect] and [NodeCameraTransition].
 
-#region Signals
-signal stage_masks_updated
-#endregion
-
 
 #region External Variables
+## The inital stage this layer will start at, if added normally.
+## [br][br]
+## Use methods like
+## [method NodeCameraExecutionScope.flag_overwrite_stage] if you
+## want to add this layer with a different starting stage.
 @export var inital_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 #endregion
 
@@ -59,10 +60,10 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 ## featuring this [NodeCameraStaged], one stage forward.
 ## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method advance_stage].
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_stage() -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_stage(self)
 ## Forces all active [NodeCameraExecutionScope]sto overwrite the stage
 ## of any [LayerRecord]s, featuring this [NodeCameraStaged], assuming
@@ -71,20 +72,34 @@ func notify_advance_stage() -> void:
 ## Stages go in the order of [code]STARTING > RUNNING > ENDING > HALTED
 ## [/code][br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method advance_to_stage].
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
 func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_to_stage(self, stage)
 ## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
-## of any [LayerRecord]s featuring this [NodeCameraStaged].
+## of any [LayerRecord]s featuring this [NodeCameraStaged], assuming
+## it is possible.
 ## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [enum NodeCameraExecutionScope.LAYER_STAGES], and
-## [method overwrite_stage].
-func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
-		scope.flag_overwrite_stage(self, stage)
+## [method NodeCameraLayer.get_closest_active_scripts],
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
+func notify_overwrite_stage(
+	stage : LAYER_STAGES, parent_overwrite : bool = true
+) -> void:
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
+		return
+	
+	var l := layers.back()
+	if l == self:
+		for scope : NodeCameraExecutionScope in _parent_scopes:
+			scope.flag_overwrite_stage(self, stage)
+		return
+	for scope : NodeCameraExecutionScope in l._parent_scopes:
+		scope.flag_list_construct(layers, stage)
+	
 
 ## Forces all active [NodeCameraExecutionScope]s to notify this
 ## [NodeCameraStaged]'s stage masks have changed.
@@ -93,9 +108,8 @@ func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
 ## [method get_needed_process_stages], [method get_needed_linger_stages],
 ## and [method get_needed_change_stages].
 func notify_stage_masks_changed() -> void:
-	for scope : NodeCameraExecutionScope in get_parent_scopes():
+	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_stage_mask_changed(self)
-	stage_masks_updated.emit()
 #endregion
 
 
@@ -109,7 +123,7 @@ func notify_stage_masks_changed() -> void:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_process_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
@@ -122,7 +136,7 @@ func get_needed_process_stages() -> PackedInt32Array:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_linger_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraExecutionScope.LAYER_STAGES]
@@ -132,7 +146,7 @@ func get_needed_linger_stages() -> PackedInt32Array:
 ## expected to change, use [method notify_stage_masks_changed].
 ## [br][br]
 ## [b]NOTE[/b]: This method is called every time the node is freshly added to a scope.
-## See [signal NodeCameraLayer.activated] and [method NodeCameraLayer.added_to_scope].
+## See [signal NodeCameraLayer.activated].
 func get_needed_change_stages() -> PackedInt32Array:
 	return []
 #endregion

@@ -40,6 +40,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1771689249]
+visible = false
 position = Vector2(5818, -878)
 shape = SubResource("RectangleShape2D_ounfu")
 
@@ -58,7 +59,6 @@ metadata/_custom_type_script = "uid://xbw3mcx4uq1"
 
 [node name="PlayerSelector" type="Node" parent="CamNodesFolder" unique_id=60088159]
 script = ExtResource("8_uvbdg")
-priority = 4
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
 [node name="Player1" type="Node" parent="CamNodesFolder/PlayerSelector" unique_id=938517445]
@@ -93,7 +93,8 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-86, -99.5)
+position = Vector2(-35.091805, -82.39003)
+offset = Vector2(-15.908197, -17.10997)
 ignore_rotation = false
 process_callback = 0
 limit_enabled = false

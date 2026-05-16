@@ -24,6 +24,23 @@ func _notification(what: int) -> void:
 #endregion
 
 
+#region Global Methods (Helper)
+## Returns if [param parent_layer] is currently routing to the child
+## layer [param layer]. Only works for direct pairings. Used internally.
+func vaild_route(
+	parent_layer : NodeCameraGroup, layer : NodeCameraLayer
+) -> bool:
+	return (
+		(layer.camera_mask & parent_layer.camera_mask) &&
+		layer._parent_group == parent_layer &&
+		(
+			!(parent_layer is NodeCameraRoutable) ||
+			parent_layer._route_to_layers().has(layer)
+		)
+	)
+#endregion
+
+
 #region Private Methods (Tick Hosts)
 func _process_tick() -> void:
 	var delta := get_process_delta_time()
@@ -83,7 +100,7 @@ func _host_update_callback(host : NodeCameraHost) -> void:
 		_scope_array_by_host[host].erase(host._scope)
 	_insert_host_callback(host)
 func _host_update_mask(host : NodeCameraHost) -> void:
-	host.get_scope().flag_structure_changed()
+	host.get_scope().flag_construct_scope()
 #endregion
 
 
@@ -115,7 +132,7 @@ func unregister_host(host : NodeCameraHost) -> void:
 	host.camera_mask_changed.disconnect(
 		_host_update_mask
 	)
-	if host in _scope_array_by_host:
+	if _scope_array_by_host.has(host):
 		_scope_array_by_host[host].erase(host._scope)
 		_scope_array_by_host.erase(host)
 	
