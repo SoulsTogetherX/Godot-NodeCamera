@@ -36,13 +36,11 @@ func _cache_follow_node() -> void:
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	prints(1, name)
 	target.global_position = _follow_node.position
 
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	prints(2, name)
 	target.global_position = _follow_node.position
 #endregion
 
