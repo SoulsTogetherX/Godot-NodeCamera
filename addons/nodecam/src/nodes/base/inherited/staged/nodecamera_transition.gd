@@ -43,10 +43,4 @@ func transition_stage_changed(
 	pass
 #endregion
 
-
-#region Tick Methods
-func _get_tick_mask(_param_scope : NodeCameraExecutionScope) -> int:
-	return TICK_TYPE.TRANSITIONS
-#endregion
-
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

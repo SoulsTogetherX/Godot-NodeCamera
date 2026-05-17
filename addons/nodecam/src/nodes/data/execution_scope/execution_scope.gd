@@ -429,10 +429,11 @@ func _clear_dirty_flags() -> void:
 func _flag_parent_tick_mask_changed() -> void:
 	if !_container_record:
 		return
-	var layer := _container_record.layer
-	if _container_record.tick_mask == layer._get_tick_mask(self):
+	if _container_record.tick_mask == cal_tick_mask():
 		return
-	_container_record.parent_scope.flag_tick_mask_changed(layer)
+	_container_record.parent_scope.flag_tick_mask_changed(
+		_container_record.layer
+	)
 
 
 # Scope Rebuild Methods
@@ -551,9 +552,9 @@ func _update_stage_mask(record : StagedLayerRecord) -> int:
 		return TICK_TYPE.NONE
 	
 	record.set_masks(
-		_get_stage_mask(record.layer.get_needed_process_stages()),
-		_get_stage_mask(record.layer.get_needed_linger_stages()),
-		_get_stage_mask(record.layer.get_needed_change_stages())
+		_cal_stage_mask(record.layer.get_needed_process_stages()),
+		_cal_stage_mask(record.layer.get_needed_linger_stages()),
+		_cal_stage_mask(record.layer.get_needed_change_stages())
 	)
 	if record.packed_masks == 0:
 		return _remove_layer(record.layer)
@@ -564,7 +565,7 @@ func _update_tick_mask(record : GroupLayerRecord) -> int:
 		return TICK_TYPE.NONE
 	
 	var priority := record.layer.priority
-	var new_mask : int = record.layer._get_tick_mask(record.scope)
+	var new_mask : int = record.scope.cal_tick_mask()
 	var mask_diff := record.tick_mask ^ new_mask
 	
 	if mask_diff & TICK_TYPE.EFFECTS:
@@ -621,7 +622,6 @@ func _list_construct_recusive(
 	var l := p_layers[idx]
 	if idx == 0:
 		return _add_layer(l, stage)
-	
 	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
 		return TICK_TYPE.NONE
 	
@@ -660,7 +660,7 @@ func _construct_record(
 	if layer is NodeCameraStaged:
 		record = _construct_staged_record(layer, init_stage)
 	elif layer is NodeCameraGroup:
-		record = _construct_multi_record(layer, init_stage)
+		record = _construct_group_record(layer, init_stage)
 	return record
 func _construct_staged_record(
 	layer : NodeCameraStaged, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
@@ -675,9 +675,9 @@ func _construct_staged_record(
 		record.stage = init_stage
 	
 	record.set_masks(
-		_get_stage_mask(layer.get_needed_process_stages()),
-		_get_stage_mask(layer.get_needed_linger_stages()),
-		_get_stage_mask(layer.get_needed_change_stages())
+		_cal_stage_mask(layer.get_needed_process_stages()),
+		_cal_stage_mask(layer.get_needed_linger_stages()),
+		_cal_stage_mask(layer.get_needed_change_stages())
 	)
 	if record.packed_masks == 0:
 		record.free()
@@ -693,7 +693,7 @@ func _construct_staged_record(
 	else:
 		record.tick_mask = TICK_TYPE.TRANSITIONS
 	return record
-func _construct_multi_record(
+func _construct_group_record(
 	layer : NodeCameraGroup, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
 	var record := GroupLayerRecord.new()
@@ -705,13 +705,13 @@ func _construct_multi_record(
 	record.scope.settup_layer_storage(layer.get_layer_storage())
 	
 	record.scope._force_rebuild_scope(init_stage)
-	record.tick_mask = layer._get_tick_mask(record.scope)
+	record.tick_mask = record.scope.cal_tick_mask()
 	if record.tick_mask == TICK_TYPE.NONE:
 		record.free()
 		return null
 	return record
 
-func _get_stage_mask(stages : PackedInt32Array) -> int:
+func _cal_stage_mask(stages : PackedInt32Array) -> int:
 	var mask : int = 0
 	for stage : int in stages:
 		mask |= stage
@@ -798,6 +798,24 @@ func get_record(layer : NodeCameraLayer) -> LayerRecord:
 ## Returns all [NodeCameraLayer] registered to this scope.
 func get_registered_layers() -> Array[NodeCameraLayer]:
 	return _layer_storage.get_registered().duplicate()
+
+## Returns the tick mask of this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func get_tick_mask() -> int:
+	return _container_record.tick_mask
+## Freshly calculates and returns the tick mask of this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func cal_tick_mask() -> int:
+	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
+	
+	if has_effects():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
+	if has_transitions():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
+	
+	return mask
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

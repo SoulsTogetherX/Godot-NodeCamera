@@ -46,7 +46,7 @@ shape = SubResource("RectangleShape2D_ounfu")
 
 [node name="CamNodesFolder" type="Node" parent="." unique_id=1350998890]
 
-[node name="Boundary" type="Node" parent="CamNodesFolder" unique_id=55315288]
+[node name="BoundaryEffect" type="Node" parent="CamNodesFolder" unique_id=504084344]
 script = ExtResource("5_ounfu")
 limits_path = NodePath("../../BoundaryShape")
 priority = -100
@@ -93,8 +93,8 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-35.091805, -82.39003)
-offset = Vector2(-15.908197, -17.10997)
+position = Vector2(-69.137054, -105.503944)
+offset = Vector2(18.13705, 6.0039473)
 ignore_rotation = false
 process_callback = 0
 limit_enabled = false
@@ -147,7 +147,7 @@ script = ExtResource("5_wlspu")
 player1 = NodePath("Player1")
 player2 = NodePath("Player2")
 player_selector = NodePath("../CamNodesFolder/PlayerSelector")
-boundary = NodePath("../CamNodesFolder/Boundary")
+boundary = NodePath("../CamNodesFolder/BoundaryEffect")
 shake = NodePath("../CamNodesFolder/Shake")
 
 [node name="Player1" parent="CameraManager" unique_id=1743147849 instance=ExtResource("1_eypdw")]

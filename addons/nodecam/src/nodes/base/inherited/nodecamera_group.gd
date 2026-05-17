@@ -27,19 +27,6 @@ func _register() -> void:
 #endregion
 
 
-#region Private Tick Methods
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
-	
-	if param_scope.has_effects():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
-	if param_scope.has_transitions():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
-	
-	return mask
-#endregion
-
-
 #region Virtual Methods (Overwritable)
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can be

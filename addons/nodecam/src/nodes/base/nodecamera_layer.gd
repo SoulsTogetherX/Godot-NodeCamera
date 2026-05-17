@@ -117,20 +117,12 @@ func _flag_camera_mask_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in l._parent_scopes:
 		scope.flag_list_construct(layers)
 
-## Flags all active cached scopes to be recreated.
+## Flags all active parent scopes to be recreated.
+## [br][br]
+## Does nothing if this node is not active.
 func flag_refresh_scopes() -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_construct_scope()
-#endregion
-
-
-#region Tick Methods
-## An abstract method that determines the classification of this
-## [NodeCameraLayer].
-## [br][br]
-## Also see: [enum NodeCameraExecutionScope.TICK_TYPE].
-@abstract
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 
