@@ -4,6 +4,19 @@ A Godot 4.5 addon camera controller addon, allowing for dynamically changeable c
 
 This is the GDScript Version, used for prototyping features. A C++ Engine Extension will be coded after prototyping is finished.
 
+## Media
+
+The following video showcases a few notable features of the addon. Please turn on subtitles.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=EjMZcCF5LAg">
+    <img src="./logo.png" alt="Node Camera Beta 0.9.1 showcase - Godot 4 Addon (Slient)">
+    <div align="center">
+      https://www.youtube.com/watch?v=EjMZcCF5LAg
+    </div>
+  </a>
+</p>
+
 ## How To Use
 
 ### Node Basics
