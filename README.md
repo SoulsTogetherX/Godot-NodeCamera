@@ -11,9 +11,11 @@ The following video showcases a few notable features of the addon. Please turn o
 <p align="center">
   <a href="https://www.youtube.com/watch?v=EjMZcCF5LAg">
     <img src="./logo.png" alt="Node Camera Beta 0.9.1 showcase - Godot 4 Addon (Slient)">
-    <div align="center">
-      https://www.youtube.com/watch?v=EjMZcCF5LAg
-    </div>
+  </a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=EjMZcCF5LAg">
+    https://www.youtube.com/watch?v=EjMZcCF5LAg
   </a>
 </p>
 
