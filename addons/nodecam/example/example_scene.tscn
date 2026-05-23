@@ -93,7 +93,7 @@ inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=323092021]
-position = Vector2(-69.137054, -105.503944)
+position = Vector2(-66.64026, -110.17378)
 offset = Vector2(18.13705, 6.0039473)
 ignore_rotation = false
 process_callback = 0

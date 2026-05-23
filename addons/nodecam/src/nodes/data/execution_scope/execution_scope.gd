@@ -628,10 +628,7 @@ func _list_construct_recusive(
 ) -> int:
 	var l := p_layers[idx]
 	if idx == 0:
-		var mask := _add_layer(l, stage)
-		if mask & TICK_TYPE.PAUSE:
-			return TICK_TYPE.NONE
-		return mask
+		return _add_layer(l, stage)
 	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
 		return TICK_TYPE.NONE
 	
@@ -656,7 +653,8 @@ func _list_construct_recusive(
 		_transition_storage.add(record, l.priority)
 	
 	_record_by_layer.set(l, record)
-	record.scope._force_rebuild_flat_lists(record.tick_mask)
+	if !(record.tick_mask & TICK_TYPE.PAUSE):
+		record.scope._force_rebuild_flat_lists(record.tick_mask)
 	return record.tick_mask
 #endregion
 
@@ -713,19 +711,24 @@ func _construct_staged_record(
 func _construct_group_record(
 	layer : NodeCameraGroup, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> LayerRecord:
+	
 	var record := GroupLayerRecord.new()
 	record.layer = layer
 	record.parent_scope = self
-	record.scope = NodeCameraExecutionScope.new(
-		_host_scope, record
-	)
-	record.scope.settup_layer_storage(layer.get_layer_storage())
 	
-	record.scope._force_rebuild_scope(init_stage)
-	record.tick_mask = record.scope.cal_tick_mask()
+	var scope := NodeCameraExecutionScope.new(_host_scope, record)
+	record.scope = scope
+	scope.settup_layer_storage(layer.get_layer_storage())
+	
+	scope._force_rebuild_scope(init_stage)
+	record.tick_mask = scope.cal_tick_mask()
 	if record.tick_mask == TICK_TYPE.NONE:
 		record.free()
 		return null
+	
+	if !scope.has_running_effects() && !scope.has_running_transitions():
+		record.tick_mask |= TICK_TYPE.PAUSE
+	
 	return record
 
 func _cal_stage_mask(stages : PackedInt32Array) -> int:
