@@ -35,21 +35,21 @@ enum LAYER_STAGES {
 ## that the layer should use the stage [member NodeCameraStaged.inital_stage]
 ## by default on creation.
 const LAYER_STAGES_INHERITED := 1 << 4
+## [b]For internal use only[/b].
+## [br][br]
+## A [enum TICK_TYPE] bit unused for [LayerRecord]. Used as a mask
+## for all vaild [enum LAYER_STAGES],
+const LAYER_STAGES_ALL := 0b1111
 
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither).
 enum TICK_TYPE {
-	NONE		= 0b00,	## This [LayerRecord] is not used for anything. Will normally be deleted soon.
-	EFFECTS		= 0b01,	## This [LayerRecord] is an effect.
-	TRANSITIONS	= 0b10,	## This [LayerRecord] is a transition.
-	BOTH		= 0b11,	## This [LayerRecord] is both an effect and transition.
+	NONE		= 0b000,	## This [LayerRecord] is not used for anything. Will normally be deleted soon.
+	EFFECTS		= 0b001,	## This [LayerRecord] is an effect.
+	TRANSITIONS	= 0b010,	## This [LayerRecord] is a transition.
+	BOTH		= 0b011,	## This [LayerRecord] is both an effect and transition.
+	PAUSE		= 0b100,	## This [LayerRecord] is paused and will not be called via any process method.
 }
-## [b]For internal use only[/b].
-## [br][br]
-## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals
-## that the parent scope should have it's tick_mask checked
-## regardless of anything else.
-const TICK_TYPE_PARENT = 0b100
 #endregion
 
 
@@ -369,12 +369,9 @@ func _handle_dirty_layers() -> void:
 				)
 			
 			if layer is NodeCameraGroup:
-				_update_tick_mask(record)
+				rebuild_flags |= _update_tick_mask(record)
 			
 			if !_record_by_layer.has(layer):
-				if layer is NodeCameraGroup:
-					_flag_parent_tick_mask_changed()
-				
 				# Record was removed. We can ignore everything after.
 				continue
 		
@@ -414,7 +411,7 @@ func _handle_dirty_layers() -> void:
 	if _dirty_mask & DIRTY_FLAGS.TICK_MASK_CHANGED_DIRECT:
 		rebuild_flags |= _direct_tick_mask_change
 	
-	if rebuild_flags:
+	if rebuild_flags & ~TICK_TYPE.PAUSE:
 		_force_rebuild_flat_lists(rebuild_flags)
 		_flag_parent_tick_mask_changed()
 	
@@ -480,14 +477,14 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	
 	if (
 		record.stage != LAYER_STAGES.HALTED && record is StagedLayerRecord &&
-		(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HALTED
+		get_changed_mask(record) & LAYER_STAGES.HALTED
 	):
 		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
 	
-	if record.paused:
+	if record.tick_mask & TICK_TYPE.PAUSE:
 		_record_by_layer.erase(layer)
 		record.free()
-		return TICK_TYPE_PARENT
+		return TICK_TYPE.NONE
 	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)
@@ -515,7 +512,7 @@ func _add_layer(
 	
 	_record_by_layer.set(layer, record)
 	
-	if record.paused:
+	if record.tick_mask & TICK_TYPE.PAUSE:
 		return TICK_TYPE.NONE
 	return record.tick_mask
 func _reorder_layer(layer : NodeCameraLayer) -> int:
@@ -530,7 +527,7 @@ func _reorder_layer(layer : NodeCameraLayer) -> int:
 	if record.tick_mask & TICK_TYPE.TRANSITIONS:
 		_transition_storage.reorder(record, layer.priority, old_priority)
 	
-	if record.paused:
+	if record.tick_mask & TICK_TYPE.PAUSE:
 		return TICK_TYPE.NONE
 	return record.tick_mask
 
@@ -539,10 +536,10 @@ func _reorder_layer(layer : NodeCameraLayer) -> int:
 func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
-	if record.paused == pause:
+	if !(record.tick_mask ^ (int(pause) << 2)):
 		return TICK_TYPE.NONE
 	
-	record.paused = pause
+	record.tick_mask ^= TICK_TYPE.PAUSE
 	return record.tick_mask
 
 
@@ -551,7 +548,8 @@ func _update_stage_mask(record : StagedLayerRecord) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	
-	record.set_masks(
+	_set_masks(
+		record,
 		_cal_stage_mask(record.layer.get_needed_process_stages()),
 		_cal_stage_mask(record.layer.get_needed_linger_stages()),
 		_cal_stage_mask(record.layer.get_needed_change_stages())
@@ -581,6 +579,15 @@ func _update_tick_mask(record : GroupLayerRecord) -> int:
 	
 	if new_mask == TICK_TYPE.NONE:
 		return _remove_layer(record.layer)
+	
+	var expected_pause := int(!has_running_effects() && !has_running_transitions()) << 2
+	if record.tick_mask ^ expected_pause:
+		# Pause Changed
+		new_mask |= expected_pause
+	elif record.tick_mask & TICK_TYPE.PAUSE:
+		# Is paused and stays paused.
+		return TICK_TYPE.NONE
+	
 	record.tick_mask = new_mask
 	return mask_diff
 #endregion
@@ -621,7 +628,10 @@ func _list_construct_recusive(
 ) -> int:
 	var l := p_layers[idx]
 	if idx == 0:
-		return _add_layer(l, stage)
+		var mask := _add_layer(l, stage)
+		if mask & TICK_TYPE.PAUSE:
+			return TICK_TYPE.NONE
+		return mask
 	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
 		return TICK_TYPE.NONE
 	
@@ -652,6 +662,12 @@ func _list_construct_recusive(
 
 
 #region Helper Methods
+func _set_masks(
+	record : StagedLayerRecord, process : int,
+	linger : int, changed : int
+) -> void:
+	record.packed_masks = (process << 8) | (process << 4) | (linger << 4) | changed
+
 # Record Construction Methods
 func _construct_record(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
@@ -674,7 +690,8 @@ func _construct_staged_record(
 	else:
 		record.stage = init_stage
 	
-	record.set_masks(
+	_set_masks(
+		record,
 		_cal_stage_mask(layer.get_needed_process_stages()),
 		_cal_stage_mask(layer.get_needed_linger_stages()),
 		_cal_stage_mask(layer.get_needed_change_stages())
@@ -689,9 +706,9 @@ func _construct_staged_record(
 		return null
 	
 	if layer is NodeCameraEffect:
-		record.tick_mask = TICK_TYPE.EFFECTS
+		record.tick_mask |= TICK_TYPE.EFFECTS
 	else:
-		record.tick_mask = TICK_TYPE.TRANSITIONS
+		record.tick_mask |= TICK_TYPE.TRANSITIONS
 	return record
 func _construct_group_record(
 	layer : NodeCameraGroup, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
@@ -745,7 +762,50 @@ func run_transitions(
 #endregion
 
 
-#region Accesor Access
+#region Accesor Record Tick Methods
+## Returns the tick mask of this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func get_tick_mask() -> int:
+	return _container_record.tick_mask
+## Freshly calculates and returns the tick mask of this scope.
+## [br][br]
+## Also see [enum TICK_TYPE].
+func cal_tick_mask() -> int:
+	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
+	
+	if has_effects():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
+	if has_transitions():
+		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
+	
+	return mask
+#endregion
+
+
+#region Accesor Record Stage Methods
+## Gets the mask of stages the layer should have it's process_stage method
+## called (every relevant frame after inital change).
+## [br][br]
+## Alsos see [method set_masks].
+func get_process_mask(record : StagedLayerRecord) -> int:
+	return (record.packed_masks >> 8) & LAYER_STAGES_ALL
+## Gets the mask of stages the layer stays at (unless otherwise requested).
+## All process stages are considered linger stages by default.
+## [br][br]
+## Alsos see [method get_process_mask] and [method set_masks].
+func get_linger_mask(record : StagedLayerRecord) -> int:
+	return (record.packed_masks >> 4) & LAYER_STAGES_ALL
+## Gets the mask of stages the layer should have it's process_stage method
+## called (once at inital change).
+## [br][br]
+## Alsos see [method set_masks].
+func get_changed_mask(record : StagedLayerRecord) -> int:
+	return record.packed_masks & LAYER_STAGES_ALL
+#endregion
+
+
+#region Accesor Methods
 ## Returns if this scope has any [LayerRecord]s classified as 'effects'.
 ## [br][br]
 ## Also see [enum TICK_TYPE] and [method has_transitions].
@@ -798,24 +858,6 @@ func get_record(layer : NodeCameraLayer) -> LayerRecord:
 ## Returns all [NodeCameraLayer] registered to this scope.
 func get_registered_layers() -> Array[NodeCameraLayer]:
 	return _layer_storage.get_registered().duplicate()
-
-## Returns the tick mask of this scope.
-## [br][br]
-## Also see [enum TICK_TYPE].
-func get_tick_mask() -> int:
-	return _container_record.tick_mask
-## Freshly calculates and returns the tick mask of this scope.
-## [br][br]
-## Also see [enum TICK_TYPE].
-func cal_tick_mask() -> int:
-	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
-	
-	if has_effects():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
-	if has_transitions():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
-	
-	return mask
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

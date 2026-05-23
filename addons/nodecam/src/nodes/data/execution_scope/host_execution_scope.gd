@@ -70,9 +70,9 @@ func _sync_layer_stage(
 	var layer : NodeCameraStaged = record.layer
 	layer._scope = record.scope
 	
-	var process_mask := record.get_process_mask()
-	var linger_mask := record.get_linger_mask()
-	var changed_mask := record.get_changed_mask()
+	var process_mask := get_process_mask(record)
+	var linger_mask := get_linger_mask(record)
+	var changed_mask := get_changed_mask(record)
 	
 	if update_start && record.stage & changed_mask:
 		_force_stage_change(layer, record.stage)
@@ -192,7 +192,7 @@ func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 		if (
 			record.stage != LAYER_STAGES.HALTED &&
 			record is StagedLayerRecord &&
-			(record as StagedLayerRecord).get_changed_mask() & LAYER_STAGES.HALTED
+			get_changed_mask(record) & LAYER_STAGES.HALTED
 		):
 			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HALTED)
 #endregion

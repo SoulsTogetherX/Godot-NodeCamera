@@ -37,9 +37,6 @@ func _remove_from_bucket(record: LayerRecord, priority : int) -> void:
 	if bucket.is_empty():
 		_priority_buckets.erase(priority)
 		_priority_record.erase(priority)
-
-func _check_if_paused(record : LayerRecord) -> bool:
-	return record.paused
 #endregion
 
 
@@ -56,7 +53,7 @@ func rebuild() -> void:
 		var priority := _priority_record[i]
 		var bucket: Array = _priority_buckets[priority]
 		for record: LayerRecord in bucket:
-			if !record.paused:
+			if !(record.tick_mask & NodeCameraExecutionScope.TICK_TYPE.PAUSE):
 				_flat_layer_list.append(record)
 
 ## Add [param record], with [param priority], to the [NodeCameraRecordStorage].
