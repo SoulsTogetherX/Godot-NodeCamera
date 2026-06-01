@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraLerpTransition extends NodeCameraGeneralTransition
-## A general transitions that uses lerp to transition property values.
+class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
+## A general transition that uses lerp to transition property values.
 
 #region External Variables
 ## The lerp factor used.

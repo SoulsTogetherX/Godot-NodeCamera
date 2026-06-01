@@ -129,7 +129,8 @@ func apply_status() -> void:
 	camera.fov = fov
 	camera.near = near
 	camera.far = far
-##
+## A method to reassign all values to match the given
+## [NodeCamera3DState].
 func assign(status : NodeCamera3DState) -> void:
 	global_position = status.global_position
 	rotation = status.rotation
@@ -142,7 +143,7 @@ func assign(status : NodeCamera3DState) -> void:
 	far = status.far
 
 
-##
+## Returns a duplicate of the current [NodeCamera3DState].
 func duplicate() -> NodeCamera3DState:
 	var ret := NodeCamera3DState.new()
 	ret._vars = _vars.duplicate()

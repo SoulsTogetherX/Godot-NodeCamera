@@ -12,6 +12,10 @@ class_name NodeCamera2DState extends NodeCameraState
 @export var rotation : float:
 	set = set_rotation,
 	get = get_rotation
+## The expected [member Node2D.rotation_degrees] of the [Camera2D].
+@export var rotation_degrees : float:
+	set = set_rotation_degrees,
+	get = get_rotation_degrees
 
 ## The expected [member Camera2D.offset] of the [Camera2D].
 @export var offset : Vector2:
@@ -89,7 +93,8 @@ func apply_status() -> void:
 	camera.offset = offset
 	camera.zoom = zoom
 	camera.rotation = _rotation
-##
+## A method to reassign all values to match the given
+## [NodeCamera2DState].
 func assign(status : NodeCamera2DState) -> void:
 	global_position = status.global_position
 	offset = status.offset
@@ -97,7 +102,7 @@ func assign(status : NodeCamera2DState) -> void:
 	_rotation = status.rotation
 
 
-##
+## Returns a duplicate of the current [NodeCamera2DState].
 func duplicate() -> NodeCamera2DState:
 	var ret := NodeCamera2DState.new()
 	ret._vars = _vars.duplicate()

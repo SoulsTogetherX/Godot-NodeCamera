@@ -6,21 +6,21 @@ class_name NodeCameraEffectZoom extends NodeCameraEffect
 #region External Variables
 @export_group("2D")
 ## The static [member Camera2D.zoom] value for [Camera2D] nodes.
-@export var zoom : Vector2:
+@export_custom(PROPERTY_HINT_LINK, "") var zoom := Vector2(1.0, 1.0):
 	set = set_zoom,
 	get = get_zoom
 
 @export_group("3D")
 ## The static [member Camera3D.fov] value for [Camera3D] nodes.
-@export var fov : float:
+@export var fov : float = 75.0:
 	set = set_fov,
 	get = get_fov
 ## The static [member Camera3D.near] value for [Camera3D] nodes.
-@export var near : float:
+@export var near : float = 0.05:
 	set = set_near,
 	get = get_near
 ## The static [member Camera3D.far] value for [Camera3D] nodes.
-@export var far : float:
+@export var far : float = 4000.0:
 	set = set_far,
 	get = get_far
 

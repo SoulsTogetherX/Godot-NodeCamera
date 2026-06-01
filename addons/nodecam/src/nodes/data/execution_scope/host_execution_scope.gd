@@ -191,7 +191,7 @@ func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
 			record.stage != LAYER_STAGES.HALTED &&
-			record is StagedLayerRecord &&
+			record is StagedLayerRecord && record.layer &&
 			get_changed_mask(record) & LAYER_STAGES.HALTED
 		):
 			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HALTED)

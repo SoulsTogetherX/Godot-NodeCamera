@@ -481,11 +481,6 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 	):
 		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
 	
-	if record.tick_mask & TICK_TYPE.PAUSE:
-		_record_by_layer.erase(layer)
-		record.free()
-		return TICK_TYPE.NONE
-	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)
 	record.free()
@@ -536,7 +531,9 @@ func _reorder_layer(layer : NodeCameraLayer) -> int:
 func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
-	if !(record.tick_mask ^ (int(pause) << 2)):
+	
+	var pause_test := int(pause) << 2
+	if !((record.tick_mask ^ pause_test) & pause_test):
 		return TICK_TYPE.NONE
 	
 	record.tick_mask ^= TICK_TYPE.PAUSE

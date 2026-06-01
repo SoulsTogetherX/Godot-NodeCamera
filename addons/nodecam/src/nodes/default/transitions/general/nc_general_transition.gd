@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 @abstract
-class_name NodeCameraGeneralTransition extends NodeCameraTransition
+class_name NodeCameraTransitionGeneral extends NodeCameraTransition
 ## An abstract base for general transitions, which may affect any
 ## property in [NodeCamera2DState] and [NodeCamera3DState] objects.
 ## [br][br]
@@ -39,7 +39,7 @@ var global_position : bool = true:
 ## If [code]true[/code], this transition is expected to transition
 ## the rotation property.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
-var rotation : bool = true:
+var rotation : bool = false:
 	set(val):
 		_op_mask &= ~CAMERA_PROPERTY.ROTATION
 		_op_mask |= int(val) * CAMERA_PROPERTY.ROTATION

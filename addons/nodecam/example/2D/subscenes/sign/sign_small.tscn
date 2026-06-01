@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dhnh2fd6y17mo"]
+
+[ext_resource type="Texture2D" uid="uid://bp8dhks7pwd1v" path="res://addons/nodecam/assets/examples/2D/other/ZoomSignSmall.png" id="1_ntiyf"]
+[ext_resource type="Script" uid="uid://kxv0p1otmwld" path="res://addons/nodecam/example/2D/subscripts/sign_zoom.gd" id="2_v0ufy"]
+[ext_resource type="Script" uid="uid://43ebgvvbo4w" path="res://addons/nodecam/example/2D/subscripts/modules/interact_module.gd" id="3_nwqfc"]
+[ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="3_v0ufy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5ptje"]
+size = Vector2(63.25, 66)
+
+[node name="ZoomSignSmall" type="Sprite2D" unique_id=1676818547]
+texture = ExtResource("1_ntiyf")
+script = ExtResource("2_v0ufy")
+selection = 1
+
+[node name="Label" type="Label" parent="." unique_id=2117998550]
+visible = false
+z_index = 2
+offset_left = -31.0
+offset_top = -66.0
+offset_right = 31.0
+offset_bottom = -43.0
+text = "Interact"
+horizontal_alignment = 1
+
+[node name="Node" type="Node" parent="Label" unique_id=1398305294]
+script = ExtResource("3_v0ufy")
+
+[node name="InteractModule" type="Area2D" parent="." unique_id=653622733]
+script = ExtResource("3_nwqfc")
+force_stop_player = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractModule" unique_id=1894696306]
+shape = SubResource("RectangleShape2D_5ptje")

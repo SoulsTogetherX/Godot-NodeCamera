@@ -4,6 +4,11 @@
 class_name NodeCameraGroup extends NodeCameraLayer
 ## A [NodeCameraLayer] node able to be registered to by other layers.
 
+#region External Variables
+@export var resize : bool
+#endregion
+
+
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
 #endregion

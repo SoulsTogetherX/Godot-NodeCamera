@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraTweenTransition extends NodeCameraGeneralTransition
-## A general transitions that uses a tween to transition property values.
+class_name NodeCameraTransitionTween extends NodeCameraTransitionGeneral
+## A general transition that uses a tween to transition property values.
 
 #region External Variables
 @export_group("Tween Settings")
