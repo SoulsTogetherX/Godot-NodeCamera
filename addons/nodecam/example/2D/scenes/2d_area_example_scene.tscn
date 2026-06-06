@@ -7,12 +7,12 @@
 [ext_resource type="Script" uid="uid://bk7huf1xfvurb" path="res://addons/nodecam/example/2D/subscripts/room_switcher.gd" id="5_o5q8e"]
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/2D/subscenes/player/player.tscn" id="5_o382p"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="7_dya0v"]
-[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/target/nce_glue.gd" id="8_4nij2"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="8_4nij2"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="9_jw882"]
-[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_tween.gd" id="10_lyn83"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="10_lyn83"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="11_oufw8"]
 [ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="16_jq2dx"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_zoom.gd" id="17_d0och"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="17_d0och"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -370,6 +370,7 @@ offset = Vector2(-0.45240998, -2.172926)
 ignore_rotation = false
 zoom = Vector2(2, 2)
 process_callback = 0
+limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("7_dya0v")
@@ -379,9 +380,11 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185]
+[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_4nij2")
 follow_target = NodePath("../../../Player")
+offset = Vector2(0, 0)
+one_shot = false
 priority = 100
 metadata/_custom_type_script = "uid://b5sp1401joes8"
 

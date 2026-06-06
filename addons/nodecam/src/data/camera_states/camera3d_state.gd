@@ -8,10 +8,15 @@ class_name NodeCamera3DState extends NodeCameraState
 @export var global_position : Vector3:
 	set = set_global_position,
 	get = get_global_position
+
 ## The expected [member Node3D.rotation] of the [Camera3D].
 @export var rotation : Vector3:
 	set = set_rotation,
 	get = get_rotation
+## The expected [member Node3D.rotation_degrees] of the [Camera3D].
+@export var rotation_degrees : Vector3:
+	set = set_rotation_degrees,
+	get = get_rotation_degrees
 
 ## The expected [member Camera3D.h_offset] of the [Camera3D].
 @export var h_offset : float:
@@ -23,15 +28,15 @@ class_name NodeCamera3DState extends NodeCameraState
 	get = get_v_offset
 
 ## The expected [member Camera3D.fov] of the [Camera3D].
-@export var fov : float:
+@export var fov : float = 75.0:
 	set = set_fov,
 	get = get_fov
 ## The expected [member Camera3D.near] of the [Camera3D].
-@export var near : float:
+@export var near : float = 0.05:
 	set = set_near,
 	get = get_near
 ## The expected [member Camera3D.far] of the [Camera3D].
-@export var far : float:
+@export var far : float = 4000.0:
 	set = set_far,
 	get = get_far
 #endregion

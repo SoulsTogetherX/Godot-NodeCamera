@@ -8,13 +8,13 @@
 [ext_resource type="PackedScene" uid="uid://ckh51wglfjr3b" path="res://addons/nodecam/example/2D/subscenes/exclamation_mark/exclamation_mark.tscn" id="6_ot213"]
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/2D/subscenes/player/player.tscn" id="7_rdxs4"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="8_8ql8c"]
-[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/target/nce_glue.gd" id="9_x8fun"]
-[ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_lerp.gd" id="10_31wxg"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="9_x8fun"]
+[ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/nct_lerp.gd" id="10_31wxg"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="11_rql00"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="12_3ccc3"]
 [ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="13_jkgel"]
-[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_tween.gd" id="14_wb46y"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_zoom.gd" id="15_1nvym"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_wb46y"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="15_1nvym"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -444,9 +444,11 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185]
+[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("9_x8fun")
 follow_target = NodePath("../../../Player")
+offset = Vector2(0, 0)
+one_shot = false
 priority = 100
 metadata/_custom_type_script = "uid://b5sp1401joes8"
 

@@ -281,6 +281,9 @@ func flag_overwrite_stage(
 ## [method NodeCameraStaged.get_needed_change_stages].
 func flag_stage_mask_changed(layer : NodeCameraStaged) -> void:
 	if !layer: return
+	if !has_record(layer):
+		flag_add_layer(layer)
+		return
 	
 	_layer_to_dirty_op[layer as NodeCameraLayer] = _layer_to_dirty_op.get(
 		layer, 0

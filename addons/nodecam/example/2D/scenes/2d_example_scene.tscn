@@ -4,18 +4,18 @@
 [ext_resource type="Texture2D" uid="uid://dlop7k7huhsre" path="res://addons/nodecam/assets/examples/2D/other/ZoomSign.png" id="1_53wqg"]
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/2D/subscenes/player/player.tscn" id="2_sgsuy"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="3_p4abu"]
-[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/target/nce_glue.gd" id="4_7gxdf"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="4_7gxdf"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="4_lficx"]
 [ext_resource type="PackedScene" uid="uid://dhnh2fd6y17mo" path="res://addons/nodecam/example/2D/subscenes/sign/sign_small.tscn" id="4_pxnac"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_zoom.gd" id="5_rh7q4"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="5_rh7q4"]
 [ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="6_s74i5"]
 [ext_resource type="PackedScene" uid="uid://ckh51wglfjr3b" path="res://addons/nodecam/example/2D/subscenes/exclamation_mark/exclamation_mark.tscn" id="9_5ptje"]
 [ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="9_ucdtv"]
-[ext_resource type="Script" uid="uid://cbwmm710cp6ne" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_2D_framed.gd" id="10_1m2ar"]
+[ext_resource type="Script" uid="uid://cbwmm710cp6ne" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_framed2D.gd" id="10_1m2ar"]
 [ext_resource type="Script" uid="uid://d0pty7iabdxe8" path="res://addons/nodecam/example/2D/subscripts/effect_sea_sick.gd" id="10_3vvqe"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="10_ucdtv"]
 [ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="12_umlca"]
-[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/general/nct_tween.gd" id="14_1m2ar"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_1m2ar"]
 [ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="15_0aot7"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
@@ -398,9 +398,11 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185]
+[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("4_7gxdf")
 follow_target = NodePath("../../../Player")
+offset = Vector2(0, 0)
+one_shot = false
 priority = 100
 metadata/_custom_type_script = "uid://b5sp1401joes8"
 
