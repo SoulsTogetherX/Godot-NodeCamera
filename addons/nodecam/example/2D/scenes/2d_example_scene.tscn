@@ -263,9 +263,9 @@ size = Vector2(1654, 516)
 
 [sub_resource type="Curve2D" id="Curve2D_umlca"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -111.83304, 68.56532, 0, 0, 0, 0, 223.16696, 66.56532, 0, 0, 0, 0, 377.16696, 89.56532, 0, 0, 0, 0, 576.167, 90.56532, 0, 0, 0, 0, 748.167, 37.565323, 0, 0, 0, 0, 1282.167, 35.565323)
+"points": PackedVector2Array(0, 0, 0, 0, -111.83304, 68.56532, -60.555183, -11.595674, 60.555183, 11.595674, 223.16696, 66.56532, -101.78425, 0, 101.78425, 0, 455.16696, 92.56532, -74.72768, 7.7304487, 74.72768, -7.7304487, 748.167, 37.565323, 0, 0, 0, 0, 1282.167, 35.565323)
 }
-point_count = 6
+point_count = 5
 
 [sub_resource type="Curve" id="Curve_ucdtv"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -454,7 +454,6 @@ metadata/_custom_type_script = "uid://xbw3mcx4uq1"
 
 [node name="PathSelector" type="Node" parent="NodeCameraFolder/Global" unique_id=670512599]
 script = ExtResource("10_ucdtv")
-_selection_idx = 1
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
 [node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/PathSelector" unique_id=421810843]
@@ -467,9 +466,10 @@ metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 script = ExtResource("4_lficx")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectPath" type="Node" parent="NodeCameraFolder/Global/PathSelector/Path" unique_id=350844020]
+[node name="EffectPath" type="Node" parent="NodeCameraFolder/Global/PathSelector/Path" unique_id=350844020 node_paths=PackedStringArray("path_node")]
 script = ExtResource("15_0aot7")
 path_node = NodePath("../../../../../Path2D")
+one_shot = false
 inital_stage = 1
 priority = 98
 metadata/_custom_type_script = "uid://b6ndqicguokrj"
@@ -482,7 +482,6 @@ metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="BoundarySelector" type="Node" parent="NodeCameraFolder/Global" unique_id=844290170]
 script = ExtResource("10_ucdtv")
-_selection_idx = 1
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
 [node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/BoundarySelector" unique_id=1922873181]

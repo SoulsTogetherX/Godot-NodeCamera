@@ -333,7 +333,7 @@ offset_bottom = 24.0
 text = "Tween
 Ease - Out
 Trans - Quint
-Duration - 0.3s
+Duration - 0.5s
 "
 label_settings = SubResource("LabelSettings_rh7q4")
 horizontal_alignment = 1
@@ -434,10 +434,11 @@ position = Vector2(-169, 54)
 offset = Vector2(-0.45240998, -2.172926)
 ignore_rotation = false
 zoom = Vector2(2, 2)
-process_callback = 0
+limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("8_8ql8c")
+callback_mode = 1
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="NodeCameraFolder" type="Node" parent="." unique_id=1436810013]
@@ -476,7 +477,7 @@ metadata/_custom_type_script = "uid://soqkn57afvil"
 script = ExtResource("14_wb46y")
 ease_type = 1
 trans_type = 2
-duration = 0.3
+manual_step = false
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="MiddleRoom" type="Node" parent="NodeCameraFolder/RoomSwitcher" unique_id=721454476]
@@ -493,6 +494,7 @@ script = ExtResource("14_wb46y")
 ease_type = 2
 trans_type = 10
 duration = 0.8
+manual_step = false
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="LeftRoom" type="Node" parent="NodeCameraFolder/RoomSwitcher" unique_id=1039958638]
@@ -528,6 +530,7 @@ script = ExtResource("14_wb46y")
 ease_type = 1
 trans_type = 1
 duration = 0.1
+manual_step = false
 _op_mask = 18
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
@@ -546,5 +549,6 @@ script = ExtResource("14_wb46y")
 ease_type = 1
 trans_type = 1
 duration = 0.1
+manual_step = false
 _op_mask = 18
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"

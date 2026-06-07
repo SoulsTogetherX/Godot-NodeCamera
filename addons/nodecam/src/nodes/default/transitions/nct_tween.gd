@@ -20,7 +20,7 @@ class_name NodeCameraTransitionTween extends NodeCameraTransitionGeneral
 ## If [code]true[/code], this transition will use [method custom_step]
 ## for tween transitions instead. Can cause issues if value is changed
 ## mid-transition.
-@export var manual_step : bool = false
+@export var manual_step : bool = true
 #endregion
 
 

@@ -138,6 +138,8 @@ func get_is_2d() -> bool:
 	return is_2d
 
 func set_follow_target(val : Node) -> void:
+	if !(val is Node2D) && !(val is Node3D):
+		val = null
 	if val == follow_target:
 		return
 	follow_target = val
