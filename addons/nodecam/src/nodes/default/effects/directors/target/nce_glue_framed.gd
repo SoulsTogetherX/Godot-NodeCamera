@@ -1,13 +1,21 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraEffectGlue extends NodeCameraEffect
-## An effect that sets the camera position to a given target.
+class_name NodeCameraEffectGlueFramed extends NodeCameraEffect
+## A [Camera2D] effect that applies a deadzone on a frame, only
+## following the target position when it tries to leave.
+## [br[br]
+## [b]NOTE[/b]: Currently only works for 2D.
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
 @export var is_2d : bool = true:
 	set = set_is_2d,
 	get = get_is_2d
+
+## The deadzone this transition uses. Each coordinate uses a ratio
+## from 0-1 to calculate the frame's width and height, depending
+## on the current viewport of the camera.
+@export var dead_zone := Vector2(0.2, 0.2)
 
 @export_group("Additional Arguments")
 ## The the node, either [Node2D] or [Node3D], this effect will follow.
@@ -95,16 +103,12 @@ func _property_get_revert(property: StringName) -> Variant:
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if (target is NodeCamera3DState) == is_2d:
-		return
-	target.global_position = follow_target.position + offset
+	_process_frame(target)
 
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if (target is NodeCamera3DState) == is_2d:
-		return
-	target.global_position = follow_target.position + offset
+	_process_frame(target)
 #endregion
 
 
@@ -153,6 +157,44 @@ func set_one_shot(val : bool) -> void:
 	notify_stage_masks_changed()
 func get_one_shot() -> bool:
 	return one_shot
+#endregion
+
+
+#region Private Methods
+func _process_frame(target : NodeCameraState) -> void:
+	if target is NodeCamera2DState:
+		var pos : Vector2 = follow_target.global_position
+		
+		var viewport_target_offset := Vector2.ZERO
+		var cam : Camera2D = target.get_camera()
+		var view_size : Vector2 = (
+			cam.get_viewport_rect().size / target.zoom.abs()
+		)
+		
+		## Dead Zone
+		var viewport_dead_zone := Vector2(
+			view_size.x * dead_zone.x, view_size.y * dead_zone.y
+		) * 0.5
+		var dead_zone := Vector4(
+			cam.global_position.x - viewport_dead_zone.x,
+			cam.global_position.x + viewport_dead_zone.x,
+			cam.global_position.y - viewport_dead_zone.y,
+			cam.global_position.y + viewport_dead_zone.y,
+		)
+		
+		## Horizontal Dead Zone
+		if dead_zone.x > pos.x:
+			viewport_target_offset.x = dead_zone.x - pos.x
+		elif dead_zone.y < pos.x:
+			viewport_target_offset.x = dead_zone.y - pos.x
+		
+		## Vertical Dead Zone
+		if dead_zone.z > pos.y:
+			viewport_target_offset.y = dead_zone.z - pos.y
+		elif dead_zone.w < pos.y:
+			viewport_target_offset.y = dead_zone.w - pos.y
+		
+		target.global_position -= viewport_target_offset
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

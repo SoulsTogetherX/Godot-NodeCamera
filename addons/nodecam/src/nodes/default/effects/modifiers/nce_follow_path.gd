@@ -30,7 +30,7 @@ func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	target.global_position = (
-		_path_node.curve.get_closest_point(target.global_position) + _path_node.global_position
+		_path_node.curve.get_closest_point(target.global_position)
 	)
 #endregion
 

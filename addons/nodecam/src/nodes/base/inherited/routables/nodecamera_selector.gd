@@ -17,12 +17,15 @@ var selection : int:
 var _valid_layers : Array[NodeCameraLayer]
 
 var _selected_layer : NodeCameraLayer
-@export_storage var _selection_idx : int
+@export_storage var _selection_idx : int = 0
 #endregion
 
 
 
 #region Virtual Methods
+func _init() -> void:
+	super()
+	set_deferred("selection", _selection_idx)
 func _ready() -> void:
 	child_order_changed.connect(_settup_bundle)
 	_settup_vaild_layers()
@@ -50,6 +53,7 @@ func _settup_bundle() -> void:
 		flag_route_layers_changed()
 func _settup_vaild_layers() -> void:
 	_valid_layers.assign(get_children().filter(_is_node_cam_layer))
+	
 	_selection_idx = mini(_selection_idx, _valid_layers.size() - 1)
 func _settup_selected_layer() -> void:
 	if _selection_idx < 0:

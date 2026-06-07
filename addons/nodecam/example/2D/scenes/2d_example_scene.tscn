@@ -11,9 +11,9 @@
 [ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="6_s74i5"]
 [ext_resource type="PackedScene" uid="uid://ckh51wglfjr3b" path="res://addons/nodecam/example/2D/subscenes/exclamation_mark/exclamation_mark.tscn" id="9_5ptje"]
 [ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="9_ucdtv"]
-[ext_resource type="Script" uid="uid://cbwmm710cp6ne" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_framed2D.gd" id="10_1m2ar"]
 [ext_resource type="Script" uid="uid://d0pty7iabdxe8" path="res://addons/nodecam/example/2D/subscripts/effect_sea_sick.gd" id="10_3vvqe"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="10_ucdtv"]
+[ext_resource type="Script" uid="uid://bgckgpjegvcje" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="12_58ilg"]
 [ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="12_umlca"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_1m2ar"]
 [ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="15_0aot7"]
@@ -263,9 +263,9 @@ size = Vector2(1654, 516)
 
 [sub_resource type="Curve2D" id="Curve2D_umlca"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -111.83304, 38.565323, 0, 0, 0, 0, 153.16696, -16.434677, 0, 0, 0, 0, 489.16696, 70.56532, 0, 0, 0, 0, 858.167, 5.565323, 0, 0, 0, 0, 1284.167, 48.565323)
+"points": PackedVector2Array(0, 0, 0, 0, -111.83304, 68.56532, 0, 0, 0, 0, 223.16696, 66.56532, 0, 0, 0, 0, 377.16696, 89.56532, 0, 0, 0, 0, 576.167, 90.56532, 0, 0, 0, 0, 748.167, 37.565323, 0, 0, 0, 0, 1282.167, 35.565323)
 }
-point_count = 5
+point_count = 6
 
 [sub_resource type="Curve" id="Curve_ucdtv"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -360,7 +360,7 @@ position = Vector2(-169, 54)
 
 [node name="FrameMark" parent="ExclamationMarks" unique_id=903363092 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("9_5ptje")]
 position = Vector2(231, 46)
-layer_controlled = NodePath("../../NodeCameraFolder/Global/FramedSelector")
+layer_controlled = NodePath("../../NodeCameraFolder/Global/FollowSelector")
 text = "Framed"
 
 [node name="ShakeMark" parent="ExclamationMarks" unique_id=1941920241 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("9_5ptje")]
@@ -398,35 +398,40 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
+[node name="FollowSelector" type="Node" parent="NodeCameraFolder/Global" unique_id=1071913456]
+script = ExtResource("10_ucdtv")
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="Glue" type="Node" parent="NodeCameraFolder/Global/FollowSelector" unique_id=1218742235]
+script = ExtResource("4_lficx")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global/FollowSelector/Glue" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("4_7gxdf")
-follow_target = NodePath("../../../Player")
+follow_target = NodePath("../../../../../Player")
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
 metadata/_custom_type_script = "uid://b5sp1401joes8"
 
-[node name="FramedSelector" type="Node" parent="NodeCameraFolder/Global" unique_id=1071913456]
-script = ExtResource("10_ucdtv")
-metadata/_custom_type_script = "uid://mlgr1bvxdhab"
-
-[node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/FramedSelector" unique_id=1324494760]
+[node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/FollowSelector/Glue" unique_id=1324494760]
 script = ExtResource("14_1m2ar")
 duration = 0.1
 inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
-[node name="Framed" type="Node" parent="NodeCameraFolder/Global/FramedSelector" unique_id=1533104522]
+[node name="Framed" type="Node" parent="NodeCameraFolder/Global/FollowSelector" unique_id=1533104522]
 script = ExtResource("4_lficx")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectFramed" type="Node" parent="NodeCameraFolder/Global/FramedSelector/Framed" unique_id=1091252824]
-script = ExtResource("10_1m2ar")
-inital_stage = 1
-priority = 99
-metadata/_custom_type_script = "uid://cbwmm710cp6ne"
+[node name="GlueFramed" type="Node" parent="NodeCameraFolder/Global/FollowSelector/Framed" unique_id=690957242 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("12_58ilg")
+follow_target = NodePath("../../../../../Player")
+offset = Vector2(0, 0)
+one_shot = false
+metadata/_custom_type_script = "uid://bgckgpjegvcje"
 
-[node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/FramedSelector/Framed" unique_id=703862934]
+[node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/FollowSelector/Framed" unique_id=703862934]
 script = ExtResource("14_1m2ar")
 duration = 0.1
 inital_stage = 1
