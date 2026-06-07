@@ -4,6 +4,11 @@
 class_name NodeCameraGroup extends NodeCameraLayer
 ## A [NodeCameraLayer] node able to be registered to by other layers.
 
+#region External Variables
+@export var resize : bool
+#endregion
+
+
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
 #endregion
@@ -24,19 +29,6 @@ func _register() -> void:
 	if _layer_storage.is_empty():
 		return
 	super()
-#endregion
-
-
-#region Private Tick Methods
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int:
-	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
-	
-	if param_scope.has_effects():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.EFFECTS
-	if param_scope.has_transitions():
-		mask |= NodeCameraExecutionScope.TICK_TYPE.TRANSITIONS
-	
-	return mask
 #endregion
 
 

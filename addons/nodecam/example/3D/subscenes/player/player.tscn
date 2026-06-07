@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ckipkreqa6o1i"]
+
+[ext_resource type="Script" uid="uid://c404ec6kgojmr" path="res://addons/nodecam/example/3D/subscenes/player/player.gd" id="1_2lmn4"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cbuk4"]
+radius = 5.0
+height = 20.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cbuk4"]
+radius = 5.0
+height = 20.0
+
+[node name="Player" type="CharacterBody3D" unique_id=1684348752]
+script = ExtResource("1_2lmn4")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=766118707]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+mesh = SubResource("CapsuleMesh_cbuk4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1501252506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+shape = SubResource("CapsuleShape3D_cbuk4")

@@ -1,0 +1,93 @@
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
+@tool
+class_name NodeCameraEffectOffset extends NodeCameraEffect
+## An effect for camera offset.
+
+#region External Variables
+@export_group("2D")
+## The static [member Camera2D.offset] value for [Camera2D] nodes.
+@export var offset := Vector2(0.0, 0.0):
+	set = set_offset,
+	get = get_offset
+
+@export_group("3D")
+## The static [member Camera3D.h_offset] value for [Camera3D] nodes.
+@export var h_offset : float = 0.0:
+	set = set_h_offset,
+	get = get_h_offset
+## The static [member Camera3D.v_offset] value for [Camera3D] nodes.
+@export var v_offset : float = 0.0:
+	set = set_v_offset,
+	get = get_v_offset
+
+@export_group("Settings")
+## If [code]true[/code], the layer will only set the effect's zoom
+## for one frame in [method effect_stage_changed]'s starting stage.
+## [br][br]
+## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
+@export var one_shot : bool = false:
+	set = set_one_shot,
+	get = get_one_shot
+#endregion
+
+
+
+#region Virtual Methods (User Overwrite)
+func process_effect(
+	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+) -> void:
+	if target is NodeCamera2DState:
+		target.offset = offset
+	else:
+		target.h_offset = h_offset
+		target.v_offset = v_offset
+
+func effect_stage_changed(
+	target : NodeCameraState, stage : LAYER_STAGES
+) -> void:
+	if target is NodeCamera2DState:
+		target.offset = offset
+	else:
+		target.h_offset = h_offset
+		target.v_offset = v_offset
+#endregion
+
+
+#region Public Methods (Stages)
+func get_needed_process_stages() -> PackedInt32Array:
+	if !one_shot:
+		return [LAYER_STAGES.RUNNING]
+	return []
+func get_needed_change_stages() -> PackedInt32Array:
+	return [LAYER_STAGES.STARTING]
+#endregion
+
+
+#region Accessor Methods
+func set_offset(val : Vector2) -> void:
+	offset = val
+func get_offset() -> Vector2:
+	return offset
+
+
+func set_h_offset(val : float) -> void:
+	h_offset = val
+func get_h_offset() -> float:
+	return h_offset
+
+func set_v_offset(val : float) -> void:
+	v_offset = val
+func get_v_offset() -> float:
+	return v_offset
+
+
+func set_one_shot(val : bool) -> void:
+	if val == one_shot:
+		return
+	one_shot = val
+	notify_stage_masks_changed()
+func get_one_shot() -> bool:
+	return one_shot
+#endregion
+
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

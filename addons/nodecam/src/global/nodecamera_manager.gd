@@ -59,13 +59,13 @@ func _update_ticks() -> void:
 		if process.is_connected(_process_tick):
 			process.disconnect(_process_tick)
 	elif !process.is_connected(_process_tick):
-		process.connect(_process_tick)
+		process.connect(_process_tick, CONNECT_DEFERRED)
 	
 	if _physics_hosts.is_empty():
 		if physics.is_connected(_physics_tick):
 			physics.disconnect(_physics_tick)
 	elif !physics.is_connected(_physics_tick):
-		physics.connect(_physics_tick)
+		physics.connect(_physics_tick, CONNECT_DEFERRED)
 #endregion
 
 

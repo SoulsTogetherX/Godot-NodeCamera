@@ -33,7 +33,12 @@ var angle : float = 0.0:
 	set = set_angle,
 	get = get_angle
 
-@export_group("Easing")
+@export_group("Timeline")
+## If [code]true[/code], the shake effect will last until
+## deactivated.
+@export var continuous : bool = true:
+	set = set_continuous,
+	get = get_continuous
 @export_subgroup("Grow Ease")
 ## The curve used for shake growth.
 ## [br][br]
@@ -156,21 +161,23 @@ func effect_stage_changed(
 
 #region Public Methods (Stages)
 func get_needed_process_stages() -> PackedInt32Array:
-	var ret : PackedInt32Array = [LAYER_STAGES.RUNNING]
+	var ret : PackedInt32Array = []
 	if grow_curve != null && !is_zero_approx(grow_duration):
 		ret.append(LAYER_STAGES.STARTING)
 	if decay_curve != null && !is_zero_approx(decay_duration):
 		ret.append(LAYER_STAGES.ENDING)
+	if continuous:
+		ret.append(LAYER_STAGES.RUNNING)
 	
 	return ret
 func get_needed_change_stages() -> PackedInt32Array:
-	var ret : PackedInt32Array = [
-		LAYER_STAGES.RUNNING, LAYER_STAGES.HALTED
-	]
+	var ret : PackedInt32Array = []
 	if grow_curve != null && !is_zero_approx(grow_duration):
 		ret.append(LAYER_STAGES.STARTING)
+		ret.append(LAYER_STAGES.RUNNING)
 	if decay_curve != null && !is_zero_approx(decay_duration):
 		ret.append(LAYER_STAGES.ENDING)
+		ret.append(LAYER_STAGES.HALTED)
 	
 	return ret
 #endregion
@@ -211,6 +218,14 @@ func set_angle(val : float) -> void:
 	_cal_cached_angle()
 func get_angle() -> float:
 	return angle
+
+func set_continuous(val : bool) -> void:
+	if val == continuous:
+		return
+	continuous = val
+	notify_stage_masks_changed()
+func get_continuous() -> bool:
+	return continuous
 
 func set_grow_curve(val : Curve) -> void:
 	if val == grow_curve:

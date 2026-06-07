@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cqx874axh2pdw"]
+
+[node name="ExclamationMark" type="CSGCombiner3D" unique_id=144333531]
+
+[node name="Point" type="CSGSphere3D" parent="." unique_id=219709750]
+radius = 1.0
+
+[node name="Line" type="CSGSphere3D" parent="." unique_id=212051356]
+transform = Transform3D(1, 0, 0, 0, 3.8880002, 0, 0, 0, 1, 0, 6, 0)
+radius = 1.0

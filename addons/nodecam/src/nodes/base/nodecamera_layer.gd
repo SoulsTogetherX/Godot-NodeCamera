@@ -117,20 +117,12 @@ func _flag_camera_mask_changed(old : int) -> void:
 	for scope : NodeCameraExecutionScope in l._parent_scopes:
 		scope.flag_list_construct(layers)
 
-## Flags all active cached scopes to be recreated.
+## Flags all active parent scopes to be recreated.
+## [br][br]
+## Does nothing if this node is not active.
 func flag_refresh_scopes() -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_construct_scope()
-#endregion
-
-
-#region Tick Methods
-## An abstract method that determines the classification of this
-## [NodeCameraLayer].
-## [br][br]
-## Also see: [enum NodeCameraExecutionScope.TICK_TYPE].
-@abstract
-func _get_tick_mask(param_scope : NodeCameraExecutionScope) -> int
 #endregion
 
 
@@ -190,6 +182,51 @@ func get_closest_active_layer_list() -> Array[NodeCameraLayer]:
 			return []
 		layer = layer._parent_group
 	return ret
+#endregion
+
+
+#region Public Flag Methods
+## Forces all active [NodeCameraExecutionScope]s to advance any [LayerRecord]s,
+## featuring this [NodeCameraStaged], one stage forward.
+## [br][br]
+## Also see: [method NodeCameraLayer.get_parent_scopes],
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
+func notify_advance_stage() -> void:
+	for scope : NodeCameraExecutionScope in _parent_scopes:
+		scope.flag_advance_stage(self)
+## Forces all active [NodeCameraExecutionScope]sto overwrite the stage
+## of any [LayerRecord]s, featuring this [NodeCameraStaged], assuming
+## it's current stage is before the given argument [param stage].
+## [br][br]
+## Stages go in the order of [code]STARTING > RUNNING > ENDING > HALTED
+## [/code][br][br]
+## Also see: [method NodeCameraLayer.get_parent_scopes],
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
+func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
+	for scope : NodeCameraExecutionScope in _parent_scopes:
+		scope.flag_advance_to_stage(self, stage)
+## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
+## of any [LayerRecord]s featuring this [NodeCameraStaged], assuming
+## it is possible.
+## [br][br]
+## Also see: [method NodeCameraLayer.get_parent_scopes],
+## [method NodeCameraLayer.get_closest_active_scripts],
+## [method overwrite_stage], and
+## [enum NodeCameraExecutionScope.LAYER_STAGES].
+func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
+	var layers := get_closest_active_layer_list()
+	if layers.is_empty():
+		return
+	
+	var l := layers.back()
+	if l == self:
+		for scope : NodeCameraExecutionScope in _parent_scopes:
+			scope.flag_overwrite_stage(self, stage)
+		return
+	for scope : NodeCameraExecutionScope in l._parent_scopes:
+		scope.flag_list_construct(layers, stage)
 #endregion
 
 

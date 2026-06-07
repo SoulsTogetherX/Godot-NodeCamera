@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://ckh51wglfjr3b"]
+
+[ext_resource type="Texture2D" uid="uid://denoc3rxorm7f" path="res://addons/nodecam/assets/examples/2D/other/exclamation-mark.png" id="1_px6d3"]
+[ext_resource type="Script" uid="uid://csgq5eexhpyd1" path="res://addons/nodecam/example/2D/subscenes/exclamation_mark/exclamation_mark.gd" id="1_ubos4"]
+[ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="3_ajqvs"]
+[ext_resource type="Script" uid="uid://43ebgvvbo4w" path="res://addons/nodecam/example/2D/subscripts/modules/interact_module.gd" id="4_ln5ri"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ubos4"]
+size = Vector2(40, 49)
+
+[node name="ExclamationMark" type="Node2D" unique_id=1850814629]
+script = ExtResource("1_ubos4")
+
+[node name="Label" type="Label" parent="." unique_id=1315730543]
+visible = false
+z_index = 2
+offset_left = -31.0
+offset_top = -66.0
+offset_right = 31.0
+offset_bottom = -43.0
+text = "Interact"
+horizontal_alignment = 1
+
+[node name="Node" type="Node" parent="Label" unique_id=78491879]
+script = ExtResource("3_ajqvs")
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=2083969315]
+texture_filter = 1
+texture = ExtResource("1_px6d3")
+
+[node name="FloatModule" type="Node" parent="Sprite" unique_id=1517777862]
+script = ExtResource("3_ajqvs")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=722457648]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_ln5ri")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1750334720]
+shape = SubResource("RectangleShape2D_ubos4")
+
+[connection signal="body_entered" from="InteractionArea" to="." method="_on_player_enter"]
+[connection signal="body_exited" from="InteractionArea" to="." method="_on_player_exit"]

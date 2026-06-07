@@ -1,6 +1,6 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCamera2DBoundaryEffect extends NodeCameraEffect
+class_name NodeCameraEffect2DBoundary extends NodeCameraEffect
 ## An effect for keeping a camera within a rectanglar (not rotated) bounds.
 
 #region External Variables

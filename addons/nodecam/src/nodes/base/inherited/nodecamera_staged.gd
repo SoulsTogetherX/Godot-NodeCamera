@@ -56,51 +56,6 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 
 
 #region Public Flag Methods
-## Forces all active [NodeCameraExecutionScope]s to advance any [LayerRecord]s,
-## featuring this [NodeCameraStaged], one stage forward.
-## [br][br]
-## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
-func notify_advance_stage() -> void:
-	for scope : NodeCameraExecutionScope in _parent_scopes:
-		scope.flag_advance_stage(self)
-## Forces all active [NodeCameraExecutionScope]sto overwrite the stage
-## of any [LayerRecord]s, featuring this [NodeCameraStaged], assuming
-## it's current stage is before the given argument [param stage].
-## [br][br]
-## Stages go in the order of [code]STARTING > RUNNING > ENDING > HALTED
-## [/code][br][br]
-## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
-func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
-	for scope : NodeCameraExecutionScope in _parent_scopes:
-		scope.flag_advance_to_stage(self, stage)
-## Forces all active [NodeCameraExecutionScope]s to overwrite the stage
-## of any [LayerRecord]s featuring this [NodeCameraStaged], assuming
-## it is possible.
-## [br][br]
-## Also see: [method NodeCameraLayer.get_parent_scopes],
-## [method NodeCameraLayer.get_closest_active_scripts],
-## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
-func notify_overwrite_stage(
-	stage : LAYER_STAGES, parent_overwrite : bool = true
-) -> void:
-	var layers := get_closest_active_layer_list()
-	if layers.is_empty():
-		return
-	
-	var l := layers.back()
-	if l == self:
-		for scope : NodeCameraExecutionScope in _parent_scopes:
-			scope.flag_overwrite_stage(self, stage)
-		return
-	for scope : NodeCameraExecutionScope in l._parent_scopes:
-		scope.flag_list_construct(layers, stage)
-	
-
 ## Forces all active [NodeCameraExecutionScope]s to notify this
 ## [NodeCameraStaged]'s stage masks have changed.
 ## [br][br]
