@@ -7,10 +7,10 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/2D/subscenes/player/player.tscn" id="6_anv1s"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="7_dieih"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/assets/examples/2D/icon.svg" id="7_prg43"]
-[ext_resource type="Script" uid="uid://73hs5vn6ig5v" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_group_glue.gd" id="8_jnvjb"]
+[ext_resource type="Script" uid="uid://73hs5vn6ig5v" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_group.gd" id="8_jnvjb"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="9_xy1ep"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="10_fmotm"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="11_w7iex"]
+[ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="11_w7iex"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="12_lghhq"]
 [ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="13_5mhkk"]
 
@@ -348,6 +348,7 @@ process_callback = 0
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("7_dieih")
+callback_mode = 1
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="NodeCameraFolder" type="Node" parent="." unique_id=1436810013]
@@ -365,7 +366,6 @@ metadata/_custom_type_script = "uid://73hs5vn6ig5v"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/Global" unique_id=294391842]
 script = ExtResource("11_w7iex")
 limits_path = NodePath("../../../BoundaryShape")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="ZoomSwitcher" type="Node" parent="NodeCameraFolder" unique_id=387830168]
 script = ExtResource("9_xy1ep")

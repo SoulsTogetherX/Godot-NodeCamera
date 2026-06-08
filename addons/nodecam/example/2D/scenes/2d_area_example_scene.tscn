@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="9_jw882"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="10_lyn83"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="11_oufw8"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="16_jq2dx"]
+[ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="16_jq2dx"]
 [ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="17_d0och"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
@@ -369,11 +369,11 @@ position = Vector2(-169, 54)
 offset = Vector2(-0.45240998, -2.172926)
 ignore_rotation = false
 zoom = Vector2(2, 2)
+process_callback = 0
 limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("7_dya0v")
-callback_mode = 1
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="NodeCameraFolder" type="Node" parent="." unique_id=1436810013]
@@ -399,7 +399,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=294391842]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/RightRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=1654341102]
 script = ExtResource("10_lyn83")
@@ -416,7 +415,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=2082263700]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/MiddleRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=78401273]
 script = ExtResource("10_lyn83")
@@ -433,7 +431,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=346299771]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1089299179]
 script = ExtResource("10_lyn83")

@@ -17,6 +17,11 @@ var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
 
+##
+var follow_type : bool = true:
+	set = set_follow_type,
+	get = get_follow_type
+	
 ## The offset, either [Vector2] or [Vector3], that will be applied to
 ## the camera position.
 ## [br][br]
@@ -51,6 +56,15 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
+	if !is_2d:
+		ret.append({
+			"name": "follow_type",
+			"type": TYPE_INT,
+			"hint": PROPERTY_HINT_ENUM,
+			"hint_string": "Position:0, Look:1",
+			"usage": PROPERTY_USAGE_DEFAULT
+		})
+	
 	ret.append({
 		"name": "offset",
 		"type": TYPE_VECTOR2 if is_2d else TYPE_VECTOR3,
@@ -74,6 +88,8 @@ func _property_can_revert(property: StringName) -> bool:
 	match property:
 		&"follow_target":
 			return follow_target != null
+		&"follow_type":
+			return !follow_type
 		&"offset":
 			return offset != Vector2.ZERO if is_2d else offset != Vector3.ZERO
 		&"one_shot":
@@ -83,6 +99,8 @@ func _property_get_revert(property: StringName) -> Variant:
 	match property:
 		&"follow_target":
 			return null
+		&"follow_type":
+			return true
 		&"offset":
 			return Vector2.ZERO if is_2d else Vector3.ZERO
 		&"one_shot":
@@ -95,14 +113,16 @@ func _property_get_revert(property: StringName) -> Variant:
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if (target is NodeCamera3DState) == is_2d:
+	if !is_2d && target is NodeCamera3DState && follow_type:
+		NodeCameraUtility.look_at_camera(target, follow_target.position, Vector3.UP)
 		return
 	target.global_position = follow_target.position + offset
 
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if (target is NodeCamera3DState) == is_2d:
+	if !is_2d && target is NodeCamera3DState && follow_type:
+		NodeCameraUtility.look_at_camera(target, follow_target.position, Vector3.UP)
 		return
 	target.global_position = follow_target.position + offset
 #endregion
@@ -141,10 +161,20 @@ func set_follow_target(val : Node) -> void:
 func get_follow_target() -> Node:
 	return follow_target
 
+func set_follow_type(val : bool) -> void:
+	if val == follow_type:
+		return
+	follow_type = val
+	notify_property_list_changed()
+func get_follow_type() -> bool:
+	return follow_type
+
+
 func set_offset(val : Variant) -> void:
 	offset = val
 func get_offset() -> Variant:
 	return offset
+
 
 func set_one_shot(val : bool) -> void:
 	if val == one_shot:

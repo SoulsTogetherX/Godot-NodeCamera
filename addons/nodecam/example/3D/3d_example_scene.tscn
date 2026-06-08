@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://dc1onbu3vmhkn"]
 
+[ext_resource type="Script" uid="uid://bgckgpjegvcje" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="2_a0avs"]
 [ext_resource type="PackedScene" uid="uid://ckipkreqa6o1i" path="res://addons/nodecam/example/3D/subscenes/player/player.tscn" id="2_sfail"]
-[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="3_a0avs"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="3_ay2ex"]
+[ext_resource type="Script" uid="uid://dva62hgnkfmx3" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_rotate.gd" id="3_n86kr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sfail"]
 
@@ -95,16 +96,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240, 0, 120)
 
 [node name="Global" type="Node" parent="CameraGroup" unique_id=339595484]
 
-[node name="EffectGlue" type="Node" parent="CameraGroup/Global" unique_id=870907046 node_paths=PackedStringArray("follow_target")]
-script = ExtResource("3_a0avs")
+[node name="EffectRotate" type="Node" parent="CameraGroup/Global" unique_id=14102031]
+script = ExtResource("3_n86kr")
+rotation_3D = Vector3(-80, 0, 0)
+one_shot = true
+metadata/_custom_type_script = "uid://dva62hgnkfmx3"
+
+[node name="EffectFramed" type="Node" parent="CameraGroup/Global" unique_id=1742157453 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("2_a0avs")
 is_2d = false
 follow_target = NodePath("../../../PlayerGroup/Player")
-offset = Vector3(0, 25, 20)
+distance = 100.0
 one_shot = false
+metadata/_custom_type_script = "uid://bgckgpjegvcje"
 
 [node name="Camera3D" type="Camera3D" parent="CameraGroup" unique_id=375481945]
-current = true
 
 [node name="NodeCameraHost" type="Node" parent="CameraGroup/Camera3D" unique_id=286738078]
 script = ExtResource("3_ay2ex")
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CameraGroup" unique_id=1008046095]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1278, 26.5005, 234)
+size = Vector3(5, 5, 5)
+
+[node name="Marker3D" type="Marker3D" parent="CameraGroup" unique_id=1830926295]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -244, 252, 0)

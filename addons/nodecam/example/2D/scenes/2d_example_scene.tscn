@@ -13,8 +13,8 @@
 [ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="9_ucdtv"]
 [ext_resource type="Script" uid="uid://d0pty7iabdxe8" path="res://addons/nodecam/example/2D/subscripts/effect_sea_sick.gd" id="10_3vvqe"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="10_ucdtv"]
-[ext_resource type="Script" uid="uid://bgckgpjegvcje" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="12_58ilg"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="12_umlca"]
+[ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="12_58ilg"]
+[ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="12_umlca"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_1m2ar"]
 [ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="15_0aot7"]
 
@@ -389,6 +389,7 @@ offset = Vector2(-0.45240998, -2.172926)
 ignore_rotation = false
 zoom = Vector2(2, 2)
 process_callback = 0
+limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("3_p4abu")
@@ -429,7 +430,6 @@ script = ExtResource("12_58ilg")
 follow_target = NodePath("../../../../../Player")
 offset = Vector2(0, 0)
 one_shot = false
-metadata/_custom_type_script = "uid://bgckgpjegvcje"
 
 [node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/FollowSelector/Framed" unique_id=703862934]
 script = ExtResource("14_1m2ar")
@@ -498,7 +498,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 script = ExtResource("12_umlca")
 limits_path = NodePath("../../../../../BoundaryShape")
 priority = -100
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TransitionTween" type="Node" parent="NodeCameraFolder/Global/BoundarySelector/Boundary" unique_id=1520797153]
 script = ExtResource("14_1m2ar")

@@ -4,6 +4,20 @@ class_name NodeCamera2DState extends NodeCameraState
 ## The [NodeCameraState] class extension for [Camera2D] nodes.
 
 #region External Variables
+## The expected [member Node2D.global_transform] of the [Camera2D].
+@export var transform: Transform2D = Transform2D.IDENTITY:
+	set = set_transform,
+	get = get_transform
+
+## The expected [member Camera2D.offset] of the [Camera2D].
+@export var offset : Vector2:
+	set = set_offset,
+	get = get_offset
+## The expected [member Camera2D.zoom] of the [Camera2D].
+@export var zoom : Vector2 = Vector2.ONE:
+	set = set_zoom,
+	get = get_zoom
+
 ## The expected [member Node2D.global_position] of the [Camera2D].
 @export var global_position : Vector2:
 	set = set_global_position,
@@ -16,46 +30,22 @@ class_name NodeCamera2DState extends NodeCameraState
 @export var rotation_degrees : float:
 	set = set_rotation_degrees,
 	get = get_rotation_degrees
-
-## The expected [member Camera2D.offset] of the [Camera2D].
-@export var offset : Vector2:
-	set = set_offset,
-	get = get_offset
-## The expected [member Camera2D.zoom] of the [Camera2D].
-@export var zoom : Vector2 = Vector2.ONE:
-	set = set_zoom,
-	get = get_zoom
 #endregion
 
 
 #region Public Variables
-## The camera itself. It is considered bad pratice to edit this directly.
+## The camera itself. It is considered bad practice to edit this directly.
 var camera : Camera2D
-#endregion
-
-
-#region Private Variables
-var _rotation : float
 #endregion
 
 
 
 #region Public Accessor Methods
-func set_global_position(val : Vector2) -> void:
-	global_position = val 
-func get_global_position() -> Vector2:
-	return global_position
+func set_transform(val : Transform2D) -> void:
+	transform = val 
+func get_transform() -> Transform2D:
+	return transform
 
-func set_rotation(val : float) -> void:
-	_rotation = val 
-func get_rotation() -> float:
-	return _rotation
-## Sets the [member rotation] to an angle in degrees.
-func set_rotation_degrees(val : float) -> void:
-	_rotation = deg_to_rad(val) 
-## Converts [member rotation] to degrees and returns it.
-func get_rotation_degrees() -> float:
-	return rad_to_deg(_rotation)
 
 func set_offset(val : Vector2) -> void:
 	offset = val 
@@ -66,6 +56,24 @@ func set_zoom(val : Vector2) -> void:
 	zoom = val 
 func get_zoom() -> Vector2:
 	return zoom
+
+
+func set_global_position(val : Vector2) -> void:
+	transform.origin = val 
+func get_global_position() -> Vector2:
+	return transform.origin
+
+func set_rotation(val : float) -> void:
+	transform = Transform2D(val, transform.origin) 
+func get_rotation() -> float:
+	return transform.get_rotation()
+
+## Sets the [member rotation] to an angle in degrees.
+func set_rotation_degrees(val : float) -> void:
+	transform = Transform2D(deg_to_rad(val), transform.origin) 
+## Converts [member rotation] to degrees and returns it.
+func get_rotation_degrees() -> float:
+	return rad_to_deg(transform.get_rotation())
 #endregion
 
 
@@ -82,24 +90,21 @@ func get_camera() -> Camera2D:
 ## A method for setting all values, of this [NodeCamera2DState],
 ## with the values of the given [Camera2D].
 func overwrite_status() -> void:
-	global_position = camera.global_position
+	transform = camera.global_transform
 	offset = camera.offset
 	zoom = camera.zoom
-	_rotation = camera.rotation
 ## A method for setting all values, of the given [Camera2D], with
 ## the values of this [NodeCamera2DState].
 func apply_status() -> void:
-	camera.global_position = global_position
+	camera.global_transform = transform
 	camera.offset = offset
 	camera.zoom = zoom
-	camera.rotation = _rotation
 ## A method to reassign all values to match the given
 ## [NodeCamera2DState].
 func assign(status : NodeCamera2DState) -> void:
-	global_position = status.global_position
+	transform = status.transform
 	offset = status.offset
 	zoom = status.zoom
-	_rotation = status.rotation
 
 
 ## Returns a duplicate of the current [NodeCamera2DState].
@@ -108,10 +113,9 @@ func duplicate() -> NodeCamera2DState:
 	ret._vars = _vars.duplicate()
 	ret.set_camera(camera)
 	
-	ret.global_position = global_position
+	ret.transform = transform
 	ret.offset = offset
 	ret.zoom = zoom
-	ret.rotation = _rotation
 	
 	return ret
 #endregion

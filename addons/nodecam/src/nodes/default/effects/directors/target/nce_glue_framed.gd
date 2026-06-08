@@ -25,13 +25,22 @@ var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
 
-## The offset, either [Vector2] or [Vector3], that will be applied to
-## the camera position.
+## The offset that will be applied to the camera position, if
+## [member is_2d] is [code]true[/code].
 ## [br][br]
 ## Also see [member is_2d]. 
-var offset : Variant = Vector2.ZERO:
+var offset := Vector2.ZERO:
 	set = set_offset,
 	get = get_offset
+
+## The distance that will be used in camera position calculations, if
+## [member is_2d] is [code]false[/code].
+## [br][br]
+## Also see [member is_2d]. 
+var distance : float = 100.0:
+	set = set_distance,
+	get = get_distance
+	
 
 ## If [code]true[/code], the layer will only set the effect's position
 ## for one frame in [method effect_stage_changed]'s starting stage.
@@ -45,9 +54,6 @@ var one_shot : bool = false:
 
 
 #region Virtual Methods
-func _init() -> void:
-	if offset == null:
-		offset = Vector2.ZERO if is_2d else Vector3.ZERO
 func _get_property_list() -> Array[Dictionary]:
 	var ret : Array[Dictionary]
 	
@@ -59,11 +65,18 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	ret.append({
-		"name": "offset",
-		"type": TYPE_VECTOR2 if is_2d else TYPE_VECTOR3,
-		"usage": PROPERTY_USAGE_DEFAULT
-	})
+	if is_2d:
+		ret.append({
+			"name": "offset",
+			"type": TYPE_VECTOR2,
+			"usage": PROPERTY_USAGE_DEFAULT
+		})
+	else:
+		ret.append({
+			"name": "distance",
+			"type": TYPE_FLOAT,
+			"usage": PROPERTY_USAGE_DEFAULT
+		})
 	
 	ret.append({
 		"name": "Settings",
@@ -83,7 +96,9 @@ func _property_can_revert(property: StringName) -> bool:
 		&"follow_target":
 			return follow_target != null
 		&"offset":
-			return offset != Vector2.ZERO if is_2d else offset != Vector3.ZERO
+			return offset != Vector2.ZERO
+		&"distance":
+			return distance != 100.0
 		&"one_shot":
 			return one_shot
 	return false
@@ -92,7 +107,9 @@ func _property_get_revert(property: StringName) -> Variant:
 		&"follow_target":
 			return null
 		&"offset":
-			return Vector2.ZERO if is_2d else Vector3.ZERO
+			return Vector2.ZERO
+		&"distance":
+			return 100.0
 		&"one_shot":
 			return false
 	return null
@@ -103,12 +120,26 @@ func _property_get_revert(property: StringName) -> Variant:
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	_process_frame(target)
+	if target is NodeCamera2DState:
+		NodeCameraUtility.frame_camera_2D(
+			target, follow_target.global_position + offset, dead_zone
+		)
+		return
+	NodeCameraUtility.frame_camera_3D(
+		target, follow_target.global_position, distance, dead_zone
+	)
 
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	_process_frame(target)
+	if target is NodeCamera2DState:
+		NodeCameraUtility.frame_camera_2D(
+			target, follow_target.global_position + offset, dead_zone
+		)
+		return
+	NodeCameraUtility.frame_camera_3D(
+		target, follow_target.global_position, distance, dead_zone
+	)
 #endregion
 
 
@@ -130,7 +161,6 @@ func set_is_2d(val : bool) -> void:
 		return
 	
 	follow_target = null
-	offset = Vector2.ZERO if val else Vector3.ZERO
 	is_2d = val
 	
 	notify_property_list_changed()
@@ -147,10 +177,15 @@ func set_follow_target(val : Node) -> void:
 func get_follow_target() -> Node:
 	return follow_target
 
-func set_offset(val : Variant) -> void:
+func set_offset(val : Vector2) -> void:
 	offset = val
-func get_offset() -> Variant:
+func get_offset() -> Vector2:
 	return offset
+
+func set_distance(val : float) -> void:
+	distance = val
+func get_distance() -> float:
+	return distance
 
 func set_one_shot(val : bool) -> void:
 	if val == one_shot:
@@ -159,44 +194,6 @@ func set_one_shot(val : bool) -> void:
 	notify_stage_masks_changed()
 func get_one_shot() -> bool:
 	return one_shot
-#endregion
-
-
-#region Private Methods
-func _process_frame(target : NodeCameraState) -> void:
-	if target is NodeCamera2DState:
-		var pos : Vector2 = follow_target.global_position
-		
-		var viewport_target_offset := Vector2.ZERO
-		var cam : Camera2D = target.get_camera()
-		var view_size : Vector2 = (
-			cam.get_viewport_rect().size / target.zoom.abs()
-		)
-		
-		## Dead Zone
-		var viewport_dead_zone := Vector2(
-			view_size.x * dead_zone.x, view_size.y * dead_zone.y
-		) * 0.5
-		var dead_zone := Vector4(
-			cam.global_position.x - viewport_dead_zone.x,
-			cam.global_position.x + viewport_dead_zone.x,
-			cam.global_position.y - viewport_dead_zone.y,
-			cam.global_position.y + viewport_dead_zone.y,
-		)
-		
-		## Horizontal Dead Zone
-		if dead_zone.x > pos.x:
-			viewport_target_offset.x = dead_zone.x - pos.x
-		elif dead_zone.y < pos.x:
-			viewport_target_offset.x = dead_zone.y - pos.x
-		
-		## Vertical Dead Zone
-		if dead_zone.z > pos.y:
-			viewport_target_offset.y = dead_zone.z - pos.y
-		elif dead_zone.w < pos.y:
-			viewport_target_offset.y = dead_zone.w - pos.y
-		
-		target.global_position -= viewport_target_offset
 #endregion
 
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
