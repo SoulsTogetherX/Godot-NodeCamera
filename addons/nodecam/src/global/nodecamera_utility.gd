@@ -300,11 +300,17 @@ static func frame_camera_3D(
 		viewport_target_offset.y = dead_zone_rect.w - screen_pos.y
 	
 	screen_pos +=  viewport_target_offset
-	var intersection := Plane(normal, global_pos).intersects_ray(
-		project_ray_origin(target, screen_pos),
-		project_ray_normal(target, screen_pos)
-	)
-	if !intersection:
+	
+	var origin := project_ray_origin(target, screen_pos)
+	var direction := project_ray_normal(target, screen_pos)
+	var dot := normal.dot(direction)
+	if is_zero_approx(dot):
 		return
+	
+	var distance := normal.dot(global_pos - origin) / dot
+	var intersection := origin + direction * distance
+	if global_pos.is_equal_approx(intersection):
+		return
+	
 	target.global_position += (global_pos - intersection)
 #endregion

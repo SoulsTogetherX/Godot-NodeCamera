@@ -108,7 +108,7 @@ func _property_get_revert(property: StringName) -> Variant:
 			return null
 		&"offset":
 			return Vector2.ZERO
-		&"distance":
+		&"normal":
 			return Vector3.UP
 		&"one_shot":
 			return false
