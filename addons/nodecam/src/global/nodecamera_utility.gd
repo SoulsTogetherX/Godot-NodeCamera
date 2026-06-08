@@ -300,7 +300,7 @@ static func frame_camera_3D(
 		viewport_target_offset.y = dead_zone_rect.w - screen_pos.y
 	
 	var desired_pos := project_position(
-		target, screen_pos + viewport_target_offset, 300
+		target, screen_pos + viewport_target_offset, distance
 	)
 	target.global_position += (global_pos - desired_pos)
 #endregion
