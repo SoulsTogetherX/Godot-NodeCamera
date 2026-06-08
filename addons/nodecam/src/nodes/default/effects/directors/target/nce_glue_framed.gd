@@ -33,13 +33,13 @@ var offset := Vector2.ZERO:
 	set = set_offset,
 	get = get_offset
 
-## The distance that will be used in camera position calculations, if
+## The normal that will be used in camera position calculations, if
 ## [member is_2d] is [code]false[/code].
 ## [br][br]
 ## Also see [member is_2d]. 
-var distance : float = 100.0:
-	set = set_distance,
-	get = get_distance
+var normal := Vector3.UP:
+	set = set_normal,
+	get = get_normal
 	
 
 ## If [code]true[/code], the layer will only set the effect's position
@@ -73,8 +73,8 @@ func _get_property_list() -> Array[Dictionary]:
 		})
 	else:
 		ret.append({
-			"name": "distance",
-			"type": TYPE_FLOAT,
+			"name": "normal",
+			"type": TYPE_VECTOR3,
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 	
@@ -97,8 +97,8 @@ func _property_can_revert(property: StringName) -> bool:
 			return follow_target != null
 		&"offset":
 			return offset != Vector2.ZERO
-		&"distance":
-			return distance != 100.0
+		&"normal":
+			return normal != Vector3.UP
 		&"one_shot":
 			return one_shot
 	return false
@@ -109,7 +109,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&"offset":
 			return Vector2.ZERO
 		&"distance":
-			return 100.0
+			return Vector3.UP
 		&"one_shot":
 			return false
 	return null
@@ -126,7 +126,7 @@ func process_effect(
 		)
 		return
 	NodeCameraUtility.frame_camera_3D(
-		target, follow_target.global_position, distance, dead_zone
+		target, follow_target.global_position, normal, dead_zone
 	)
 
 func effect_stage_changed(
@@ -138,7 +138,7 @@ func effect_stage_changed(
 		)
 		return
 	NodeCameraUtility.frame_camera_3D(
-		target, follow_target.global_position, distance, dead_zone
+		target, follow_target.global_position, normal, dead_zone
 	)
 #endregion
 
@@ -182,10 +182,10 @@ func set_offset(val : Vector2) -> void:
 func get_offset() -> Vector2:
 	return offset
 
-func set_distance(val : float) -> void:
-	distance = val
-func get_distance() -> float:
-	return distance
+func set_normal(val : Vector3) -> void:
+	normal = val
+func get_normal() -> Vector3:
+	return normal
 
 func set_one_shot(val : bool) -> void:
 	if val == one_shot:

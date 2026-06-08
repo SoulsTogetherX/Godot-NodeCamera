@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dc1onbu3vmhkn"]
 
 [ext_resource type="Script" uid="uid://bgckgpjegvcje" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="2_a0avs"]
+[ext_resource type="Script" uid="uid://qlilx0dw5q7p" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_position.gd" id="2_n86kr"]
 [ext_resource type="PackedScene" uid="uid://ckipkreqa6o1i" path="res://addons/nodecam/example/3D/subscenes/player/player.tscn" id="2_sfail"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="3_ay2ex"]
 [ext_resource type="Script" uid="uid://dva62hgnkfmx3" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_rotate.gd" id="3_n86kr"]
@@ -96,6 +97,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240, 0, 120)
 
 [node name="Global" type="Node" parent="CameraGroup" unique_id=339595484]
 
+[node name="EffectPosition" type="Node" parent="CameraGroup/Global" unique_id=1797694938]
+script = ExtResource("2_n86kr")
+position_3D = Vector3(0, 300, 0)
+one_shot = true
+priority = 9999
+metadata/_custom_type_script = "uid://qlilx0dw5q7p"
+
 [node name="EffectRotate" type="Node" parent="CameraGroup/Global" unique_id=14102031]
 script = ExtResource("3_n86kr")
 rotation_3D = Vector3(-80, 0, 0)
@@ -106,7 +114,7 @@ metadata/_custom_type_script = "uid://dva62hgnkfmx3"
 script = ExtResource("2_a0avs")
 is_2d = false
 follow_target = NodePath("../../../PlayerGroup/Player")
-distance = 100.0
+normal = Vector3(0, 1, 0)
 one_shot = false
 metadata/_custom_type_script = "uid://bgckgpjegvcje"
 

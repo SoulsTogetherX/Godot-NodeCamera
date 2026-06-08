@@ -268,7 +268,7 @@ static func frame_camera_2D(
 ## Returns moves the given [NodeCamera3DState] within a deadzone box.
 static func frame_camera_3D(
 	target : NodeCamera3DState, global_pos : Vector3,
-	distance : float, dead_zone : Vector2
+	normal : Vector3, dead_zone : Vector2
 ) -> void:
 	var cam: Camera3D = target.get_camera()
 	var screen_pos: Vector2 = unproject_position(target, global_pos)
@@ -299,8 +299,12 @@ static func frame_camera_3D(
 	elif dead_zone_rect.w < screen_pos.y:
 		viewport_target_offset.y = dead_zone_rect.w - screen_pos.y
 	
-	var desired_pos := project_position(
-		target, screen_pos + viewport_target_offset, distance
+	screen_pos +=  viewport_target_offset
+	var intersection := Plane(normal, global_pos).intersects_ray(
+		project_ray_origin(target, screen_pos),
+		project_ray_normal(target, screen_pos)
 	)
-	target.global_position += (global_pos - desired_pos)
+	if !intersection:
+		return
+	target.global_position += (global_pos - intersection)
 #endregion
