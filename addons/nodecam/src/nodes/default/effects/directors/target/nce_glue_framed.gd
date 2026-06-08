@@ -8,16 +8,12 @@ class_name NodeCameraEffectGlueFramed extends NodeCameraEffect
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
-@export var is_2d : bool = true:
+## [br][br]
+## Also see [enum NodeCameraUtility.DIMENSION].
+var is_2d : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 	set = set_is_2d,
 	get = get_is_2d
 
-## The deadzone this transition uses. Each coordinate uses a ratio
-## from 0-1 to calculate the frame's width and height, depending
-## on the current viewport of the camera.
-@export var dead_zone := Vector2(0.2, 0.2)
-
-@export_group("Additional Arguments")
 ## The the node, either [Node2D] or [Node3D], this effect will follow.
 ## [br][br]
 ## Also see [member is_2d]. 
@@ -25,13 +21,21 @@ var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
 
-## The offset that will be applied to the camera position, if
+## The deadzone this transition uses. Each coordinate uses a ratio
+## from 0-1 to calculate the frame's width and height, depending
+## on the current viewport of the camera.
+var dead_zone := Vector2(0.2, 0.2)
+
+## The offset that will be applied to the camera's position, if
 ## [member is_2d] is [code]true[/code].
-## [br][br]
-## Also see [member is_2d]. 
-var offset := Vector2.ZERO:
-	set = set_offset,
-	get = get_offset
+var offset_2d := Vector2.ZERO:
+	set = set_offset_2d,
+	get = get_offset_2d
+## The offset that will be applied to the camera's position, if
+## [member is_2d] is [code]false[/code].
+var offset_3d := Vector3.ZERO:
+	set = set_offset_3d,
+	get = get_offset_3d
 
 ## The normal that will be used in camera position calculations, if
 ## [member is_2d] is [code]false[/code].
@@ -40,7 +44,6 @@ var offset := Vector2.ZERO:
 var normal := Vector3.UP:
 	set = set_normal,
 	get = get_normal
-	
 
 ## If [code]true[/code], the layer will only set the effect's position
 ## for one frame in [method effect_stage_changed]'s starting stage.
@@ -58,20 +61,39 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret : Array[Dictionary]
 	
 	ret.append({
-		"name": "follow_target",
-		"type": TYPE_OBJECT,
-		"hint": PROPERTY_HINT_NODE_TYPE,
-		"hint_string": "Node2D" if is_2d else "Node3D",
+		"name": "is_2d",
+		"type": TYPE_INT,
+		"hint": PROPERTY_HINT_ENUM,
+		"hint_string": NodeCameraUtility.DIMENSION_FLAGS,
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if is_2d:
-		ret.append({
-			"name": "offset",
-			"type": TYPE_VECTOR2,
-			"usage": PROPERTY_USAGE_DEFAULT
-		})
-	else:
+	ret.append({
+		"name": "follow_target",
+		"type": TYPE_OBJECT,
+		"hint": PROPERTY_HINT_NODE_TYPE,
+		"hint_string": "Node2D" if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "Node3D",
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	ret.append({
+		"name": "dead_zone",
+		"type": TYPE_VECTOR2,
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	ret.append({
+		"name": "Additional Arguments",
+		"type": TYPE_NIL,
+		"usage": PROPERTY_USAGE_GROUP,
+	})
+	ret.append({
+		"name": "offset",
+		"type": TYPE_VECTOR2 if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else TYPE_VECTOR3,
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	if is_2d == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
 		ret.append({
 			"name": "normal",
 			"type": TYPE_VECTOR3,
@@ -93,10 +115,15 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	match property:
+		&"is_2d":
+			return is_2d != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_target":
 			return follow_target != null
 		&"offset":
-			return offset != Vector2.ZERO
+			return (
+				offset_2d != Vector2.ZERO if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+				else offset_3d != Vector3.ZERO
+			)
 		&"normal":
 			return normal != Vector3.UP
 		&"one_shot":
@@ -104,14 +131,35 @@ func _property_can_revert(property: StringName) -> bool:
 	return false
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
+		&"is_2d":
+			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_target":
 			return null
 		&"offset":
-			return Vector2.ZERO
+			return (
+				Vector2.ZERO if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+				else Vector3.ZERO
+			)
 		&"normal":
 			return Vector3.UP
 		&"one_shot":
 			return false
+	return null
+
+func _set(property: StringName, value: Variant) -> bool:
+	if property == "offset":
+		if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+			offset_2d = value
+		else:
+			offset_3d = value
+		return true
+	return false
+func _get(property: StringName) -> Variant:
+	if property == "offset":
+		return (
+			offset_2d if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+			else offset_3d
+		)
 	return null
 #endregion
 
@@ -122,11 +170,11 @@ func process_effect(
 ) -> void:
 	if target is NodeCamera2DState:
 		NodeCameraUtility.frame_camera_2D(
-			target, follow_target.global_position + offset, dead_zone
+			target, follow_target.global_position + offset_2d, dead_zone
 		)
 		return
 	NodeCameraUtility.frame_camera_3D(
-		target, follow_target.global_position, normal, dead_zone
+		target, follow_target.global_position + offset_3d, normal, dead_zone
 	)
 
 func effect_stage_changed(
@@ -134,11 +182,11 @@ func effect_stage_changed(
 ) -> void:
 	if target is NodeCamera2DState:
 		NodeCameraUtility.frame_camera_2D(
-			target, follow_target.global_position + offset, dead_zone
+			target, follow_target.global_position + offset_2d, dead_zone
 		)
 		return
 	NodeCameraUtility.frame_camera_3D(
-		target, follow_target.global_position, normal, dead_zone
+		target, follow_target.global_position + offset_3d, normal, dead_zone
 	)
 #endregion
 
@@ -156,15 +204,13 @@ func get_needed_change_stages() -> PackedInt32Array:
 
 
 #region Accessor Method
-func set_is_2d(val : bool) -> void:
+func set_is_2d(val : NodeCameraUtility.DIMENSION) -> void:
 	if val == is_2d:
 		return
-	
 	follow_target = null
 	is_2d = val
-	
 	notify_property_list_changed()
-func get_is_2d() -> bool:
+func get_is_2d() -> NodeCameraUtility.DIMENSION:
 	return is_2d
 
 func set_follow_target(val : Node) -> void:
@@ -177,10 +223,14 @@ func set_follow_target(val : Node) -> void:
 func get_follow_target() -> Node:
 	return follow_target
 
-func set_offset(val : Vector2) -> void:
-	offset = val
-func get_offset() -> Vector2:
-	return offset
+func set_offset_2d(val : Vector2) -> void:
+	offset_2d = val
+func get_offset_2d() -> Vector2:
+	return offset_2d
+func set_offset_3d(val : Vector3) -> void:
+	offset_3d = val
+func get_offset_3d() -> Vector3:
+	return offset_3d
 
 func set_normal(val : Vector3) -> void:
 	normal = val

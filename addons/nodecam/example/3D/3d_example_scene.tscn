@@ -112,8 +112,10 @@ metadata/_custom_type_script = "uid://dva62hgnkfmx3"
 
 [node name="EffectFramed" type="Node" parent="CameraGroup/Global" unique_id=1742157453 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("2_a0avs")
-is_2d = false
+is_2d = 1
 follow_target = NodePath("../../../PlayerGroup/Player")
+dead_zone = Vector2(0.2, 0.2)
+offset = Vector3(0, 0, 0)
 normal = Vector3(0, 1, 0)
 one_shot = false
 metadata/_custom_type_script = "uid://bgckgpjegvcje"

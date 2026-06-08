@@ -1,6 +1,26 @@
 class_name NodeCameraUtility
 ## A global class for general [NodeCameraState] methods.
 
+#region Enums
+## PreBuilt flags used for Editor Exporting of [enum DIMENSION].
+const DIMENSION_FLAGS := "2D:0,3D:1"
+## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS].
+const FOLLOW_TYPE_FLAGS := "Position:0,LookAt:1"
+
+## Flags used to decide between the 2D and 3D variation of a layer.
+enum DIMENSION {
+	TWO_DIMENSIONAL = 0,
+	THREE_DIMENSIONAL = 1
+}
+## Flags used to decide if a 3D layer should look at or reposition itself
+## to a calculated position.
+enum FOLLOW_TYPE {
+	POSITION = 0,
+	LOOK_AT = 1
+}
+#endregion
+
+
 
 #region Camera3D Methods
 ## Returns the viewport expected size in 3D space.

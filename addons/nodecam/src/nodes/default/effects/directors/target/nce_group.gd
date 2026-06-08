@@ -6,7 +6,9 @@ class_name NodeCameraEffectGroup extends NodeCameraEffect
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
-@export var is_2d : bool = true:
+## [br][br]
+## Also see [enum NodeCameraUtility.DIMENSION].
+var is_2d : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 	set = set_is_2d,
 	get = get_is_2d
 
@@ -17,8 +19,9 @@ var follow_targets : Array[Node]:
 	set = set_follow_targets,
 	get = get_follow_targets
 
-##
-var follow_type : bool = true:
+## Determines whether a 3D camera will look at the target position, or
+## reposition itself to the target position
+var follow_type := NodeCameraUtility.FOLLOW_TYPE.POSITION:
 	set = set_follow_type,
 	get = get_follow_type
 
@@ -55,12 +58,6 @@ var zoom_max : float = 10.0:
 	set = set_zoom_max,
 	get = get_zoom_max
 
-# 3D Fit
-## 
-var min_distance : float = 1.0:
-	set = set_min_distance,
-	get = get_min_distance
-
 # Addtional Arguments
 ## If [code]true[/code], the layer will only set the effect's position
 ## for one frame in [method effect_stage_changed]'s starting stage.
@@ -83,23 +80,34 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret : Array[Dictionary]
 	
 	ret.append({
-		"name": "follow_targets",
-		"type": TYPE_ARRAY,
-		"hint": PROPERTY_HINT_TYPE_STRING,
-		"hint_string": "24/34:Node2D" if is_2d else "24/34:Node3D",
+		"name": "is_2d",
+		"type": TYPE_INT,
+		"hint": PROPERTY_HINT_ENUM,
+		"hint_string": NodeCameraUtility.DIMENSION_FLAGS,
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if !is_2d:
+	ret.append({
+		"name": "follow_targets",
+		"type": TYPE_ARRAY,
+		"hint": PROPERTY_HINT_TYPE_STRING,
+		"hint_string": "24/34:Node2D" if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "24/34:Node3D",
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	if is_2d == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
 		ret.append({
 			"name": "follow_type",
 			"type": TYPE_INT,
 			"hint": PROPERTY_HINT_ENUM,
-			"hint_string": "Position:0, Look:1",
+			"hint_string": NodeCameraUtility.FOLLOW_TYPE_FLAGS,
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 	
-	if follow_type || is_2d:
+	if (
+		follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT ||
+		is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+	):
 		ret.append({
 			"name": "Zoom",
 			"type": TYPE_NIL,
@@ -123,7 +131,7 @@ func _get_property_list() -> Array[Dictionary]:
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 		
-		if is_2d:
+		if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 			ret.append({
 				"name": "2D Fit",
 				"type": TYPE_NIL,
@@ -143,19 +151,6 @@ func _get_property_list() -> Array[Dictionary]:
 				"hint_string": "0.0,10.0,0.001,or_greater",
 				"usage": PROPERTY_USAGE_DEFAULT
 			})
-		else:
-			ret.append({
-				"name": "3D Fit",
-				"type": TYPE_NIL,
-				"usage": PROPERTY_USAGE_SUBGROUP,
-			})
-			ret.append({
-				"name": "min_distance",
-				"type": TYPE_FLOAT,
-				"hint": PROPERTY_HINT_RANGE,
-				"hint_string": "0.0,50.0,0.001,or_greater",
-				"usage": PROPERTY_USAGE_DEFAULT
-			})
 	
 	ret.append({
 		"name": "Settings",
@@ -172,6 +167,8 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	match property:
+		&"is_2d":
+			return is_2d != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return !follow_type
 		&"change_zoom":
@@ -184,13 +181,13 @@ func _property_can_revert(property: StringName) -> bool:
 			return zoom_margin != 0
 		&"zoom_ratio_margin":
 			return zoom_ratio_margin != 0.15
-		&"min_distance":
-			return min_distance != 1.0
 		&"one_shot":
 			return one_shot != false
 	return false
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
+		&"is_2d":
+			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return true
 		&"change_zoom":
@@ -203,8 +200,6 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 0
 		&"zoom_ratio_margin":
 			return 0.15
-		&"min_distance":
-			return 1.0
 		&"one_shot":
 			return false
 	return null
@@ -213,7 +208,7 @@ func _property_get_revert(property: StringName) -> Variant:
 
 #region Private Methods
 func _handle_center(target : NodeCamera3DState, center : Vector3) -> void:
-	if follow_type:
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT:
 		NodeCameraUtility.look_at_camera(target, center, Vector3.UP)
 		return
 	target.global_position = center
@@ -311,21 +306,21 @@ func get_needed_change_stages() -> PackedInt32Array:
 
 
 #region Accessor Method
-func set_is_2d(val : bool) -> void:
+func set_is_2d(val : NodeCameraUtility.DIMENSION) -> void:
 	if val == is_2d:
 		return
 	follow_targets.clear()
 	_follow_nodes.clear()
 	is_2d = val
 	notify_property_list_changed()
-func get_is_2d() -> bool:
+func get_is_2d() -> NodeCameraUtility.DIMENSION:
 	return is_2d
 
 func set_follow_targets(val : Array[Node]) -> void:
 	if val == follow_targets:
 		return
 	follow_targets = val.filter(
-		(func(v : Node): return v is Node2D || v == null) if is_2d
+		(func(v : Node): return v is Node2D || v == null) if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		else (func(v : Node): return v is Node3D || v == null)
 	)
 	_follow_nodes.assign(
@@ -335,12 +330,12 @@ func set_follow_targets(val : Array[Node]) -> void:
 func get_follow_targets() -> Array[Node]:
 	return follow_targets
 
-func set_follow_type(val : bool) -> void:
+func set_follow_type(val : NodeCameraUtility.FOLLOW_TYPE) -> void:
 	if val == follow_type:
 		return
 	follow_type = val
 	notify_property_list_changed()
-func get_follow_type() -> bool:
+func get_follow_type() -> NodeCameraUtility.FOLLOW_TYPE:
 	return follow_type
 
 
@@ -368,12 +363,6 @@ func set_zoom_ratio_margin(val : float) -> void:
 	zoom_ratio_margin = val
 func get_zoom_ratio_margin() -> float:
 	return zoom_ratio_margin
-
-
-func set_min_distance(val : float) -> void:
-	min_distance = val
-func get_min_distance() -> float:
-	return min_distance
 
 
 func set_one_shot(val : bool) -> void:
