@@ -15,9 +15,9 @@ var scope : NodeCameraExecutionScope
 ## The current stage this [LayerRecord] is in within the current
 ## [NodeCameraExecutionScope].
 ## [br][br]
-## [b]NOTE[/b]: This member is always [enum NodeCameraExecutionScope.LAYER_STAGES].HALTED
+## [b]NOTE[/b]: This member is always [enum NodeCameraUtility.LAYER_STAGES].HALTED
 ## if this [LayerRecord] is a [GroupLayerRecord].
-var stage : NodeCameraExecutionScope.LAYER_STAGES = NodeCameraExecutionScope.LAYER_STAGES.HALTED
+var stage : NodeCameraUtility.LAYER_STAGES = NodeCameraUtility.LAYER_STAGES.HALTED
 
 ## A byte holding if this [LayerRecord] controls an effect, transition, or both.
 ## Also see: [enum NodeCameraExecutionScope.TICK_TYPE].

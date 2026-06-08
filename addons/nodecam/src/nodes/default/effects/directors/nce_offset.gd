@@ -23,8 +23,6 @@ class_name NodeCameraEffectOffset extends NodeCameraEffect
 @export_group("Settings")
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
-## [br][br]
-## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot

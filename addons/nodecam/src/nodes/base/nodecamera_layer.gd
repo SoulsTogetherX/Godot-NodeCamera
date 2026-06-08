@@ -27,14 +27,14 @@ signal camera_mask_changed
 
 #region Enums
 ## The bitwise flags for [LayerRecord] stages. Also see
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
+## [enum NodeCameraUtility.LAYER_STAGES].
 ## [br][br]
 ## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
-const LAYER_STAGES	= NodeCameraExecutionScope.LAYER_STAGES
+const LAYER_STAGES = NodeCameraUtility.LAYER_STAGES
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither). Also see
 ## [enum NodeCameraExecutionScope.TICK_TYPE].
-const TICK_TYPE		= NodeCameraExecutionScope.TICK_TYPE
+const TICK_TYPE = NodeCameraExecutionScope.TICK_TYPE
 #endregion
 
 
@@ -191,7 +191,7 @@ func get_closest_active_layer_list() -> Array[NodeCameraLayer]:
 ## [br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
 ## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
+## [enum NodeCameraUtility.LAYER_STAGES].
 func notify_advance_stage() -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_stage(self)
@@ -203,7 +203,7 @@ func notify_advance_stage() -> void:
 ## [/code][br][br]
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
 ## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
+## [enum NodeCameraUtility.LAYER_STAGES].
 func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
 	for scope : NodeCameraExecutionScope in _parent_scopes:
 		scope.flag_advance_to_stage(self, stage)
@@ -214,7 +214,7 @@ func notify_advance_to_stage(stage : LAYER_STAGES) -> void:
 ## Also see: [method NodeCameraLayer.get_parent_scopes],
 ## [method NodeCameraLayer.get_closest_active_scripts],
 ## [method overwrite_stage], and
-## [enum NodeCameraExecutionScope.LAYER_STAGES].
+## [enum NodeCameraUtility.LAYER_STAGES].
 func notify_overwrite_stage(stage : LAYER_STAGES) -> void:
 	var layers := get_closest_active_layer_list()
 	if layers.is_empty():

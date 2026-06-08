@@ -20,15 +20,9 @@ enum DIRTY_FLAGS {
 	TICK_MASK_CHANGED_DIRECT	= 1 << 11,	## Flags the scope to rebuild it's flatlists (effect, transition, both, or neither)
 }
 
-## The bitwise flags for [LayerRecord] stages.
-## [br][br]
-## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
-enum LAYER_STAGES {
-	HALTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
-	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
-	RUNNING		= 1 << 2,	## [LayerRecord] is running its execution.
-	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
-}
+## See [enum NodeCameraUtility.LAYER_STAGES].
+const LAYER_STAGES = NodeCameraUtility.LAYER_STAGES
+
 ## [b]For internal use only[/b].
 ## [br][br]
 ## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals

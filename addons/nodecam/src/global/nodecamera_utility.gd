@@ -18,6 +18,16 @@ enum FOLLOW_TYPE {
 	POSITION = 0,
 	LOOK_AT = 1
 }
+
+## The bitwise flags for [LayerRecord] stages.
+## [br][br]
+## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
+enum LAYER_STAGES {
+	HALTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
+	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
+	RUNNING		= 1 << 2,	## [LayerRecord] is running its execution.
+	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
+}
 #endregion
 
 

@@ -17,8 +17,6 @@ var path_node: Node:
 
 ## If [code]true[/code], the layer will only set the effect's position
 ## for one frame in [method effect_stage_changed]'s starting stage.
-## [br][br]
-## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot

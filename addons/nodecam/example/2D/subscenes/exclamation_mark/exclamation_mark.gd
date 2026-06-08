@@ -44,9 +44,9 @@ func _on_interact() -> void:
 		return
 	
 	if active:
-		layer_controlled.notify_overwrite_stage(NodeCameraExecutionScope.LAYER_STAGES.STARTING)
+		layer_controlled.notify_overwrite_stage(NodeCameraUtility.LAYER_STAGES.STARTING)
 		return
-	layer_controlled.notify_overwrite_stage(NodeCameraExecutionScope.LAYER_STAGES.HALTED)
+	layer_controlled.notify_overwrite_stage(NodeCameraUtility.LAYER_STAGES.HALTED)
 
 func _set_active_color() -> void:
 	modulate = Color.YELLOW if active else Color.WHITE
