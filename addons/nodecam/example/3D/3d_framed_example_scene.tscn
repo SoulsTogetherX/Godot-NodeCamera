@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://c4r48sk783tf6"]
+
+[ext_resource type="PackedScene" uid="uid://ckipkreqa6o1i" path="res://addons/nodecam/example/3D/subscenes/player/player.tscn" id="1_ln70r"]
+[ext_resource type="Script" uid="uid://qlilx0dw5q7p" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_position.gd" id="2_yey3w"]
+[ext_resource type="Script" uid="uid://dva62hgnkfmx3" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_rotate.gd" id="3_1632g"]
+[ext_resource type="Script" uid="uid://bgckgpjegvcje" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue_framed.gd" id="4_a7d0l"]
+[ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="5_arpmm"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ln70r"]
+
+[sub_resource type="Sky" id="Sky_yey3w"]
+sky_material = SubResource("ProceduralSkyMaterial_ln70r")
+
+[sub_resource type="Environment" id="Environment_1632g"]
+background_mode = 2
+sky = SubResource("Sky_yey3w")
+
+[node name="Root" type="Node3D" unique_id=570835729]
+
+[node name="Environment" type="Node" parent="." unique_id=1727926045]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment" unique_id=1086391037]
+environment = SubResource("Environment_1632g")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment" unique_id=1009151553]
+transform = Transform3D(-4.371139e-08, -0.707107, 0.707107, 0, 0.7071069, 0.7071069, -0.9999998, 3.0908623e-08, -3.0908623e-08, 0, 8, 0)
+metadata/_edit_lock_ = true
+
+[node name="Floor" type="CSGBox3D" parent="Environment" unique_id=453012567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -46, 0)
+size = Vector3(1000, 65, 1000)
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Rooms" type="CSGCombiner3D" parent="Environment" unique_id=1330181338]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+calculate_tangents = false
+use_collision = true
+collision_layer = 2
+collision_mask = 0
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Walls" type="CSGBox3D" parent="Environment/Rooms" unique_id=879672460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 43.5, -48)
+size = Vector3(358, 167, 569)
+
+[node name="Room1" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=976054018]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -5.5, -187)
+operation = 2
+size = Vector3(315, 269, 167)
+
+[node name="Room2" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=198237724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -181.5, -5)
+operation = 2
+size = Vector3(315, 603, 167)
+
+[node name="Pillar" type="CSGCylinder3D" parent="Environment/Rooms/Walls/Room2" unique_id=469208203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, -14.375, 5)
+operation = 2
+radius = 5.0
+height = 200.25
+
+[node name="Room3" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=1831993008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -42, 180)
+operation = 2
+size = Vector3(315, 322, 167)
+
+[node name="Door1" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=1551196614]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, -106)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door2" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=1945206581]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, -132, -40, 85)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door3" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=2018110877]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, 273)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="PlayerGroup" type="Node" parent="." unique_id=243325890]
+
+[node name="Player" parent="PlayerGroup" unique_id=1684348752 node_paths=PackedStringArray("cam") instance=ExtResource("1_ln70r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240, -16, 120)
+collision_mask = 2
+cam = NodePath("../../CameraGroup/Camera3D")
+
+[node name="Markers" type="Node" parent="." unique_id=924042481]
+
+[node name="ExclamationMarkGroup" type="Node" parent="." unique_id=1122873620]
+
+[node name="CameraGroup" type="Node" parent="." unique_id=1897841386]
+
+[node name="Global" type="Node" parent="CameraGroup" unique_id=339595484]
+
+[node name="EffectPosition" type="Node" parent="CameraGroup/Global" unique_id=1797694938]
+script = ExtResource("2_yey3w")
+position_3D = Vector3(0, 300, 0)
+one_shot = true
+priority = 9999
+metadata/_custom_type_script = "uid://qlilx0dw5q7p"
+
+[node name="EffectRotate" type="Node" parent="CameraGroup/Global" unique_id=14102031]
+script = ExtResource("3_1632g")
+rotation_3D = Vector3(-1.5707964, -0.17453292, 0)
+one_shot = true
+metadata/_custom_type_script = "uid://dva62hgnkfmx3"
+
+[node name="EffectFramed" type="Node" parent="CameraGroup/Global" unique_id=1742157453 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("4_a7d0l")
+dimention = 1
+follow_target = NodePath("../../../PlayerGroup/Player")
+dead_zone = Vector2(0.2, 0.2)
+offset = Vector3(0, 0, 0)
+normal = Vector3(0, 1, 0)
+one_shot = false
+metadata/_custom_type_script = "uid://bgckgpjegvcje"
+
+[node name="Camera3D" type="Camera3D" parent="CameraGroup" unique_id=375481945]
+
+[node name="NodeCameraHost" type="Node" parent="CameraGroup/Camera3D" unique_id=286738078]
+script = ExtResource("5_arpmm")
+metadata/_custom_type_script = "uid://d0kobwrqqmnd6"

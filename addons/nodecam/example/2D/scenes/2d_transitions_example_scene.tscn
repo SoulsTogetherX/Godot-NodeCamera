@@ -447,11 +447,11 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("9_x8fun")
+dimention = 0
 follow_target = NodePath("../../../Player")
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
-metadata/_custom_type_script = "uid://b5sp1401joes8"
 
 [node name="TransitionLerp" type="Node" parent="NodeCameraFolder/Global" unique_id=1169911556]
 script = ExtResource("10_31wxg")
@@ -503,9 +503,10 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 script = ExtResource("13_jkgel")
 limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
 
-[node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=465004628]
+[node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1828797251]
 script = ExtResource("10_31wxg")
-threshold = 5.0
+inital_stage = 1
+priority = 2
 metadata/_custom_type_script = "uid://d0offmj7e061w"
 
 [node name="ZoomSwitcher" type="Node" parent="NodeCameraFolder" unique_id=387830168]

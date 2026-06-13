@@ -10,13 +10,13 @@ class_name NodeCameraEffectGlueFramed extends NodeCameraEffect
 ## Determines if this node should be used for 2D or 3D purposes.
 ## [br][br]
 ## Also see [enum NodeCameraUtility.DIMENSION].
-var is_2d : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
-	set = set_is_2d,
-	get = get_is_2d
+var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+	set = set_dimention,
+	get = get_dimention
 
 ## The the node, either [Node2D] or [Node3D], this effect will follow.
 ## [br][br]
-## Also see [member is_2d]. 
+## Also see [member dimention]. 
 var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
@@ -27,20 +27,20 @@ var follow_target : Node:
 var dead_zone := Vector2(0.2, 0.2)
 
 ## The offset that will be applied to the camera's position, if
-## [member is_2d] is [code]true[/code].
+## [member dimention] is [code]true[/code].
 var offset_2d := Vector2.ZERO:
 	set = set_offset_2d,
 	get = get_offset_2d
 ## The offset that will be applied to the camera's position, if
-## [member is_2d] is [code]false[/code].
+## [member dimention] is [code]false[/code].
 var offset_3d := Vector3.ZERO:
 	set = set_offset_3d,
 	get = get_offset_3d
 
 ## The normal that will be used in camera position calculations, if
-## [member is_2d] is [code]false[/code].
+## [member dimention] is [code]false[/code].
 ## [br][br]
-## Also see [member is_2d]. 
+## Also see [member dimention]. 
 var normal := Vector3.UP:
 	set = set_normal,
 	get = get_normal
@@ -59,7 +59,7 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret : Array[Dictionary]
 	
 	ret.append({
-		"name": "is_2d",
+		"name": "dimention",
 		"type": TYPE_INT,
 		"hint": PROPERTY_HINT_ENUM,
 		"hint_string": NodeCameraUtility.DIMENSION_FLAGS,
@@ -70,7 +70,7 @@ func _get_property_list() -> Array[Dictionary]:
 		"name": "follow_target",
 		"type": TYPE_OBJECT,
 		"hint": PROPERTY_HINT_NODE_TYPE,
-		"hint_string": "Node2D" if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "Node3D",
+		"hint_string": "Node2D" if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "Node3D",
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
@@ -87,11 +87,11 @@ func _get_property_list() -> Array[Dictionary]:
 	})
 	ret.append({
 		"name": "offset",
-		"type": TYPE_VECTOR2 if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else TYPE_VECTOR3,
+		"type": TYPE_VECTOR2 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else TYPE_VECTOR3,
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if is_2d == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
+	if dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
 		ret.append({
 			"name": "normal",
 			"type": TYPE_VECTOR3,
@@ -113,13 +113,13 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	match property:
-		&"is_2d":
-			return is_2d != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		&"dimention":
+			return dimention != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_target":
 			return follow_target != null
 		&"offset":
 			return (
-				offset_2d != Vector2.ZERO if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+				offset_2d != Vector2.ZERO if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 				else offset_3d != Vector3.ZERO
 			)
 		&"normal":
@@ -129,13 +129,13 @@ func _property_can_revert(property: StringName) -> bool:
 	return false
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"is_2d":
+		&"dimention":
 			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_target":
 			return null
 		&"offset":
 			return (
-				Vector2.ZERO if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+				Vector2.ZERO if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 				else Vector3.ZERO
 			)
 		&"normal":
@@ -146,7 +146,7 @@ func _property_get_revert(property: StringName) -> Variant:
 
 func _set(property: StringName, value: Variant) -> bool:
 	if property == "offset":
-		if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+		if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 			offset_2d = value
 		else:
 			offset_3d = value
@@ -155,7 +155,7 @@ func _set(property: StringName, value: Variant) -> bool:
 func _get(property: StringName) -> Variant:
 	if property == "offset":
 		return (
-			offset_2d if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+			offset_2d if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 			else offset_3d
 		)
 	return null
@@ -202,14 +202,14 @@ func get_needed_change_stages() -> PackedInt32Array:
 
 
 #region Accessor Method
-func set_is_2d(val : NodeCameraUtility.DIMENSION) -> void:
-	if val == is_2d:
+func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
+	if val == dimention:
 		return
 	follow_target = null
-	is_2d = val
+	dimention = val
 	notify_property_list_changed()
-func get_is_2d() -> NodeCameraUtility.DIMENSION:
-	return is_2d
+func get_dimention() -> NodeCameraUtility.DIMENSION:
+	return dimention
 
 func set_follow_target(val : Node) -> void:
 	if !(val is Node2D) && !(val is Node3D):

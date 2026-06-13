@@ -8,13 +8,13 @@ class_name NodeCameraEffectGroup extends NodeCameraEffect
 ## Determines if this node should be used for 2D or 3D purposes.
 ## [br][br]
 ## Also see [enum NodeCameraUtility.DIMENSION].
-var is_2d : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
-	set = set_is_2d,
-	get = get_is_2d
+var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+	set = set_dimention,
+	get = get_dimention
 
 ## The nodes, [Node2D] or [Node3D], that this layer will follow.
 ## [br][br]
-## Also see: [member is_2d].
+## Also see: [member dimention].
 var follow_targets : Array[Node]:
 	set = set_follow_targets,
 	get = get_follow_targets
@@ -78,7 +78,7 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret : Array[Dictionary]
 	
 	ret.append({
-		"name": "is_2d",
+		"name": "dimention",
 		"type": TYPE_INT,
 		"hint": PROPERTY_HINT_ENUM,
 		"hint_string": NodeCameraUtility.DIMENSION_FLAGS,
@@ -89,11 +89,11 @@ func _get_property_list() -> Array[Dictionary]:
 		"name": "follow_targets",
 		"type": TYPE_ARRAY,
 		"hint": PROPERTY_HINT_TYPE_STRING,
-		"hint_string": "24/34:Node2D" if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "24/34:Node3D",
+		"hint_string": "24/34:Node2D" if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "24/34:Node3D",
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if is_2d == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
+	if dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
 		ret.append({
 			"name": "follow_type",
 			"type": TYPE_INT,
@@ -104,7 +104,7 @@ func _get_property_list() -> Array[Dictionary]:
 	
 	if (
 		follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT ||
-		is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 	):
 		ret.append({
 			"name": "Zoom",
@@ -129,7 +129,7 @@ func _get_property_list() -> Array[Dictionary]:
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 		
-		if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+		if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 			ret.append({
 				"name": "2D Fit",
 				"type": TYPE_NIL,
@@ -165,8 +165,8 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	match property:
-		&"is_2d":
-			return is_2d != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		&"dimention":
+			return dimention != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return !follow_type
 		&"change_zoom":
@@ -184,7 +184,7 @@ func _property_can_revert(property: StringName) -> bool:
 	return false
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"is_2d":
+		&"dimention":
 			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return true
@@ -304,21 +304,21 @@ func get_needed_change_stages() -> PackedInt32Array:
 
 
 #region Accessor Method
-func set_is_2d(val : NodeCameraUtility.DIMENSION) -> void:
-	if val == is_2d:
+func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
+	if val == dimention:
 		return
 	follow_targets.clear()
 	_follow_nodes.clear()
-	is_2d = val
+	dimention = val
 	notify_property_list_changed()
-func get_is_2d() -> NodeCameraUtility.DIMENSION:
-	return is_2d
+func get_dimention() -> NodeCameraUtility.DIMENSION:
+	return dimention
 
 func set_follow_targets(val : Array[Node]) -> void:
 	if val == follow_targets:
 		return
 	follow_targets = val.filter(
-		(func(v : Node): return v is Node2D || v == null) if is_2d == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		(func(v : Node): return v is Node2D || v == null) if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		else (func(v : Node): return v is Node3D || v == null)
 	)
 	_follow_nodes.assign(

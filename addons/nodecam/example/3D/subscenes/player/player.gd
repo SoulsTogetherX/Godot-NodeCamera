@@ -26,6 +26,24 @@ const INPUT_MOVEMENT_DIC: Dictionary[StringName, Array] = {
 #endregion
 
 
+#region External Variables
+@export_group("Camera")
+@export var cam : Camera3D
+@export var effect_rotation : NodeCameraEffectRotate
+@export var spring_rotation : SpringArm3D
+
+@export_group("Camera Settings")
+@export var mouse_sensitivity : float = 0.02
+
+@export_range(-90.0, 0.0, 0.1, "radians_as_degrees")
+var min_vertical_angle : float = -PI / 2
+
+@export_range(0.0, 90.0, 0.1, "radians_as_degrees")
+var max_vertical_angle : float = PI / 4
+#endregion
+
+
+
 #region Virtual Methods
 func _ready() -> void:
 	# Needs to dynmanically set inputs, since mapping inputs --
@@ -39,6 +57,30 @@ func _ready() -> void:
 			movement_input.physical_keycode = k
 			InputMap.action_add_event(key, movement_input)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		if effect_rotation:
+			var rot := effect_rotation.rotation_3D
+			
+			rot.y -= event.relative.x * mouse_sensitivity
+			rot.y = wrapf(rot.y, 0.0, TAU)
+			
+			rot.x -= event.relative.y * mouse_sensitivity
+			rot.x = clampf(rot.x, min_vertical_angle, max_vertical_angle)
+			
+			effect_rotation.rotation_3D = rot
+		if spring_rotation:
+			var rot := spring_rotation.global_rotation
+			
+			rot.y -= event.relative.x * mouse_sensitivity
+			rot.y = wrapf(rot.y, 0.0, TAU)
+			
+			rot.x -= event.relative.y * mouse_sensitivity
+			rot.x = clampf(rot.x, min_vertical_angle, max_vertical_angle)
+			
+			spring_rotation.global_rotation = rot
+	
+
 func _physics_process(delta: float) -> void:
 	var input_dir := Input.get_vector(
 		INPUT_MOVE_LEFT_STRINGNAME,
@@ -47,6 +89,8 @@ func _physics_process(delta: float) -> void:
 		INPUT_MOVE_BACKWARD_STRINGNAME,
 	)
 	var direction := Vector3(input_dir.x, 0, input_dir.y).normalized()
+	if cam:
+		direction = direction.rotated(Vector3.UP, cam.global_rotation.y)
 	
 	if direction:
 		velocity.x = direction.x * SPEED

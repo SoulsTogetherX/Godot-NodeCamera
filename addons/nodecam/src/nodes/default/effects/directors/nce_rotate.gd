@@ -5,14 +5,21 @@ class_name NodeCameraEffectRotate extends NodeCameraEffect
 
 #region External Variables
 @export_group("2D")
-## The static [member Camera2D.rotation_degrees] value for [Camera2D] nodes.
-@export var rotation_2D : float = 1.0:
+## The static [member Camera2D.rotation] value for [Camera2D] nodes.
+## [br][br]
+## [b]NOTE[/b]: This property is edited in degrees in the inspector.
+@export_range(0.0, 360.0, 0.1, "radians_as_degrees") var rotation_2D : float = 0.0:
 	set = set_rotation_2D,
 	get = get_rotation_2D
 
 @export_group("3D")
-## The static [member Camera3D.rotation_degrees] value for [Camera3D] nodes.
-@export var rotation_3D : Vector3 = Vector3.ZERO:
+## The static [member Camera3D.rotation] value for [Camera3D] nodes.
+## [br][br]
+## [b]NOTE[/b]: This property is edited in degrees in the inspector.
+@export_custom(
+	PROPERTY_HINT_NONE,
+	"radians"
+) var rotation_3D : Vector3 = Vector3.ZERO:
 	set = set_rotation_3D,
 	get = get_rotation_3D
 
@@ -31,17 +38,17 @@ func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	if target is NodeCamera2DState:
-		target.rotation_degrees = rotation_2D
+		target.rotation = rotation_2D
 	else:
-		target.rotation_degrees = rotation_3D
+		target.rotation = rotation_3D
 
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
 	if target is NodeCamera2DState:
-		target.rotation_degrees = rotation_2D
+		target.rotation = rotation_2D
 	else:
-		target.rotation_degrees = rotation_3D
+		target.rotation = rotation_3D
 #endregion
 
 
@@ -62,6 +69,9 @@ func get_rotation_2D() -> float:
 	return rotation_2D
 
 func set_rotation_3D(val : Vector3) -> void:
+	if val == rotation_3D:
+		return
+	
 	rotation_3D = val
 func get_rotation_3D() -> Vector3:
 	return rotation_3D

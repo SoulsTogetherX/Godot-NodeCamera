@@ -30,6 +30,11 @@ func _tween_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	st : NodeCameraState
 ) -> void:
+	prints(
+		target.global_position,
+		current.global_position,
+		st.global_position
+	)
 	# BOTH
 	if _op_mask & CAMERA_PROPERTY.POSITION:
 		current.global_position = (

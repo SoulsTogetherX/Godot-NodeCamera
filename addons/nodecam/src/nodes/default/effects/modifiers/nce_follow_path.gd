@@ -5,9 +5,9 @@ class_name NodeCameraEffectFollowPath extends NodeCameraEffect
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
-@export var is_2d : bool = true:
-	set = set_is_2d,
-	get = get_is_2d
+@export var dimention : bool = true:
+	set = set_dimention,
+	get = get_dimention
 
 @export_group("Additional Arguments")
 ## The path the effect will cling to.
@@ -32,7 +32,7 @@ func _get_property_list() -> Array[Dictionary]:
 		"name": "path_node",
 		"type": TYPE_OBJECT,
 		"hint": PROPERTY_HINT_NODE_TYPE,
-		"hint_string": "Path2D" if is_2d else "Path3D",
+		"hint_string": "Path2D" if dimention else "Path3D",
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
@@ -85,14 +85,14 @@ func get_needed_process_stages() -> PackedInt32Array:
 
 
 #region Accessor Method
-func set_is_2d(val : bool) -> void:
-	if val == is_2d:
+func set_dimention(val : bool) -> void:
+	if val == dimention:
 		return
 	path_node = null
-	is_2d = val
+	dimention = val
 	notify_property_list_changed()
-func get_is_2d() -> bool:
-	return is_2d
+func get_dimention() -> bool:
+	return dimention
 
 func set_path_node(val : Node) -> void:
 	if !(val is Path2D) && !(val is Path3D):

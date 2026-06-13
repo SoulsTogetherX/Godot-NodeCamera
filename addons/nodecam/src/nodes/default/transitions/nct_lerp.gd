@@ -5,7 +5,14 @@ class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
 
 #region External Variables
 ## The lerp factor used.
-@export_range(0, 1, 0.001) var factor : float = 0.05
+@export_range(0, 1, 0.001, "or_less", "or_greater")
+var factor : float = 0.05
+
+## If [code]true[/code], this layer scale the factor according to
+## the delta.
+## [br][br]
+## Ths can make the lerping feel sluggish.
+@export var scale_factor_to_delta : bool = true
 
 ## If [code]true[/code], this layer will halt if [b]ALL[/b]
 ## transitioning properties are within [member threshold] distance.
@@ -22,7 +29,10 @@ func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
-	var f := 1.0 - pow(factor, delta)
+	var f := (
+		1.0 - pow(1.0 - factor, delta) if scale_factor_to_delta
+		else factor
+	)
 	var disable_check : bool = true
 	
 	# BOTH

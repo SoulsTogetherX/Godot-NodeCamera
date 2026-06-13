@@ -24,6 +24,7 @@ func overwrite_status() -> void
 @abstract
 func apply_status() -> void
 
+
 ## Sets a variable for the [param layer] to freely use.
 func set_var(layer : NodeCameraLayer, val : Variant = null) -> void:
 	_vars.set(layer, val)

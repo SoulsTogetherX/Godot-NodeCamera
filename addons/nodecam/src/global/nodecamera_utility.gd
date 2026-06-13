@@ -5,7 +5,7 @@ class_name NodeCameraUtility
 ## PreBuilt flags used for Editor Exporting of [enum DIMENSION].
 const DIMENSION_FLAGS := "2D:0,3D:1"
 ## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS].
-const FOLLOW_TYPE_FLAGS := "Position:0,LookAt:1"
+const FOLLOW_TYPE_FLAGS := "Position:0,RotateMimic:1,LookAt:2"
 
 ## Flags used to decide between the 2D and 3D variation of a layer.
 enum DIMENSION {
@@ -16,7 +16,8 @@ enum DIMENSION {
 ## to a calculated position.
 enum FOLLOW_TYPE {
 	POSITION = 0,
-	LOOK_AT = 1
+	ROTATE_MIMIC = 1,
+	LOOK_AT = 2
 }
 
 ## The bitwise flags for [LayerRecord] stages.
