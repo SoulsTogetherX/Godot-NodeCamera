@@ -52,8 +52,10 @@ var _host_scope : NodeCameraHostExecutionScope
 var _container_record : GroupLayerRecord
 var _layer_storage : NodeCameraLayerStorage
 
-var _effect_storage := NodeCameraRecordStorage.new()
-var _transition_storage := NodeCameraRecordStorage.new()
+var _effect_storage := NodeCameraLayerRecordStorage.new()
+var _transition_storage := NodeCameraLayerRecordStorage.new()
+
+var _stage_change_storage := NodeCameraStageChangeStorage.new()
 
 var _record_by_layer : Dictionary[NodeCameraLayer, LayerRecord]
 
@@ -306,7 +308,7 @@ func flag_tick_mask_direct_changed(tick : TICK_TYPE) -> void:
 
 func _flag_request(op : DIRTY_FLAGS) -> void:
 	if _dirty_mask == 0:
-		_handle_dirty_layers.call_deferred()
+		_host_scope.defer_method(_handle_dirty_layers)
 	_dirty_mask |= op
 #endregion
 
@@ -412,6 +414,7 @@ func _handle_dirty_layers() -> void:
 		_force_rebuild_flat_lists(rebuild_flags)
 		_flag_parent_tick_mask_changed()
 	
+	_host_scope.flush_change_storage(_stage_change_storage)
 	_clear_dirty_flags()
 func _clear_dirty_flags() -> void:
 	_layer_to_dirty_op.clear()
@@ -435,6 +438,8 @@ func _force_rebuild_scope(init_stage : LAYER_STAGES) -> void:
 	# Rebuilds scop and flatlists
 	_construct_scope(init_stage)
 	_force_rebuild_flat_lists(TICK_TYPE.BOTH)
+	
+	_host_scope.flush_change_storage(_stage_change_storage)
 func _force_rebuild_flat_lists(tick_mask : int) -> void:
 	if tick_mask & TICK_TYPE.EFFECTS:
 		_effect_storage.rebuild()
@@ -476,7 +481,9 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 		record.stage != LAYER_STAGES.HALTED && record is StagedLayerRecord &&
 		get_changed_mask(record) & LAYER_STAGES.HALTED
 	):
-		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
+		_stage_change_storage.add_to_queue(
+			layer, LAYER_STAGES.HALTED
+		)
 	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)

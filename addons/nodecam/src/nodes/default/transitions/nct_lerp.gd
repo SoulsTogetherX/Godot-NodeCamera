@@ -6,7 +6,7 @@ class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
 #region External Variables
 ## The lerp factor used.
 @export_range(0, 1, 0.001, "or_less", "or_greater")
-var factor : float = 0.05
+var factor : float = 0.95
 
 ## If [code]true[/code], this layer scale the factor according to
 ## the delta.

@@ -107,7 +107,7 @@ script = ExtResource("2_to4fe")
 dimention = 1
 follow_target = NodePath("../../../PlayerGroup/Player")
 follow_type = 0
-offset = Vector3(0, 0, 0)
+offset = Vector3(0, 20, 0)
 one_shot = false
 
 [node name="EffectRotate" type="Node" parent="CameraGroup/Global" unique_id=2050903120]

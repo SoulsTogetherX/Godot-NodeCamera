@@ -18,6 +18,10 @@ var _scope_array_by_host : Dictionary[NodeCameraHost, Array]
 
 
 #region Virtual Methods (Engine)
+func _init() -> void:
+	process_priority = 99999999999
+	process_physics_priority = 99999999999
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_top_level_storage.free()
@@ -46,10 +50,12 @@ func _process_tick() -> void:
 	var delta := get_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _process_hosts:
 		scope.run_tick(delta)
+		scope.run_defered_methods()
 func _physics_tick() -> void:
 	var delta := get_physics_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _physics_hosts:
 		scope.run_tick(delta)
+		scope.run_defered_methods()
 
 func _update_ticks() -> void:
 	var process := get_tree().process_frame

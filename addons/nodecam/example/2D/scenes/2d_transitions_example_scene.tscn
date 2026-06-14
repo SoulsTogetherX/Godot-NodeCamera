@@ -257,13 +257,13 @@ terrain_set_0/terrain_0/color = Color(1, 1, 1, 1)
 sources/0 = SubResource("TileSetAtlasSource_sgsuy")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ory1x"]
-size = Vector2(568, 259)
+size = Vector2(482, 259)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o5q8e"]
-size = Vector2(402, 243)
+size = Vector2(362, 243)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mpndc"]
-size = Vector2(1073, 311)
+size = Vector2(1060, 311)
 
 [node name="Root" type="Node2D" unique_id=17282856]
 
@@ -397,7 +397,7 @@ script = ExtResource("5_0hgd4")
 selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/RightRoomArea" unique_id=1750651738]
-position = Vector2(-51, 14.5)
+position = Vector2(-94, 14.5)
 shape = SubResource("RectangleShape2D_ory1x")
 
 [node name="MiddleRoomArea" type="Area2D" parent="TriggerAreas" unique_id=510484087 node_paths=PackedStringArray("selector")]
@@ -406,7 +406,7 @@ selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 index = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/MiddleRoomArea" unique_id=419458187]
-position = Vector2(416, 41.5)
+position = Vector2(396, 41.5)
 shape = SubResource("RectangleShape2D_o5q8e")
 
 [node name="LeftRoomArea" type="Area2D" parent="TriggerAreas" unique_id=1918478350 node_paths=PackedStringArray("selector")]
@@ -415,7 +415,7 @@ selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 index = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/LeftRoomArea" unique_id=320485827]
-position = Vector2(1139.5, -38.5)
+position = Vector2(1146, -38.5)
 shape = SubResource("RectangleShape2D_mpndc")
 
 [node name="ExclamationMarks" type="Node2D" parent="." unique_id=1937753027]
@@ -505,6 +505,7 @@ limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
 
 [node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1828797251]
 script = ExtResource("10_31wxg")
+threshold = 10.0
 inital_stage = 1
 priority = 2
 metadata/_custom_type_script = "uid://d0offmj7e061w"

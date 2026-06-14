@@ -111,7 +111,7 @@ metadata/_custom_type_script = "uid://qlilx0dw5q7p"
 
 [node name="EffectRotate" type="Node" parent="CameraGroup/Global" unique_id=14102031]
 script = ExtResource("3_1632g")
-rotation_3D = Vector3(-1.5707964, -0.17453292, 0)
+rotation_3D = Vector3(-1.3962634, -0.17453292, 0)
 one_shot = true
 metadata/_custom_type_script = "uid://dva62hgnkfmx3"
 

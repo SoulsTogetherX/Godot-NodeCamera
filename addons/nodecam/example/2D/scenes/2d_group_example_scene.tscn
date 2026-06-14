@@ -355,12 +355,16 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGroupGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1693278771]
+[node name="EffectGroupGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1693278771 node_paths=PackedStringArray("follow_targets")]
 script = ExtResource("8_jnvjb")
-follow_targets = Array[NodePath]([NodePath("../../../Player"), NodePath("../../../PlayerPlaceholder")])
+dimention = 0
+follow_targets = [NodePath("../../../Player"), NodePath("../../../PlayerPlaceholder")]
 change_zoom = true
-zoom_max = 8.0
+zoom_ratio_margin = 0.15
 zoom_margin = 100
+zoom_min = 0.1
+zoom_max = 8.0
+one_shot = false
 metadata/_custom_type_script = "uid://73hs5vn6ig5v"
 
 [node name="Boundary" type="Node" parent="NodeCameraFolder/Global" unique_id=294391842]

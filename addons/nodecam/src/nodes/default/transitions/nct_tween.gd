@@ -30,11 +30,6 @@ func _tween_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	st : NodeCameraState
 ) -> void:
-	prints(
-		target.global_position,
-		current.global_position,
-		st.global_position
-	)
 	# BOTH
 	if _op_mask & CAMERA_PROPERTY.POSITION:
 		current.global_position = (
@@ -142,12 +137,12 @@ func transition_stage_changed(
 	if manual_step:
 		tween.pause()
 	
-	var dup : NodeCameraState = current.duplicate()
+	var st : NodeCameraState = current.duplicate()
 	tween.tween_method(
-		_tween_transition.bind(target, current, dup),
+		_tween_transition.bind(target, current, st),
 		0.0, 1.0, duration
 	)
-	tween.tween_callback(dup.free)
+	tween.tween_callback(st.free)
 	tween.tween_callback(get_active_scope().flag_advance_stage.bind(self))
 	
 	target.set_var(self, tween)

@@ -8,6 +8,8 @@ var _host : NodeCameraHost
 
 var _target_state : NodeCameraState
 var _current_state : NodeCameraState
+
+var _defer_queue : Array[Callable] = []
 #endregion
 
 
@@ -20,6 +22,19 @@ func _init(host : NodeCameraHost) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_free_camera_states.call_deferred()
+#endregion
+
+
+#region Defer Methods
+func defer_method(foo : Callable) -> void:
+	_defer_queue.append(foo)
+func run_defered_methods() -> void:
+	var i : int = 0
+	while i < _defer_queue.size():
+		if _defer_queue[i].is_valid():
+			_defer_queue[i].call()
+		i += 1
+	_defer_queue.clear()
 #endregion
 
 
@@ -75,13 +90,17 @@ func _sync_layer_stage(
 	var changed_mask := get_changed_mask(record)
 	
 	if update_start && record.stage & changed_mask:
-		_force_stage_change(layer, record.stage)
+		record.scope._stage_change_storage.add_to_queue(
+			layer, record.stage
+		)
 	
 	if !(record.stage & linger_mask):
 		while record.stage > LAYER_STAGES.HALTED:
 			record.stage >>= 1
 			if record.stage & changed_mask:
-				_force_stage_change(layer, record.stage)
+				record.scope._stage_change_storage.add_to_queue(
+					layer, record.stage
+				)
 			
 			if record.stage & linger_mask:
 				break
@@ -91,11 +110,6 @@ func _sync_layer_stage(
 	if record.stage & process_mask:
 		return record.scope._set_pause_layer(record, false)
 	return record.scope._set_pause_layer(record, true)
-func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void:
-	if layer is NodeCameraEffect:
-		layer.effect_stage_changed(_target_state, stage)
-	elif layer is NodeCameraTransition:
-		layer.transition_stage_changed(_target_state, _current_state, stage)
 
 
 func _advance_stage_record(record : LayerRecord) -> int:
@@ -187,6 +201,7 @@ func _propagate_call_record(
 	scope.flag_tick_mask_direct_changed(mask)
 	return mask
 
+
 func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
@@ -194,7 +209,18 @@ func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 			record is StagedLayerRecord && record.layer &&
 			get_changed_mask(record) & LAYER_STAGES.HALTED
 		):
-			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HALTED)
+			scope._stage_change_storage.add_to_queue(
+				record.layer, record.stage
+			)
+	flush_change_storage(scope._stage_change_storage)
+#endregion
+
+
+#region Stage Change Methods
+func flush_change_storage(
+	change_storage : NodeCameraStageChangeStorage
+) -> void:
+	change_storage.flush(_target_state, _current_state)
 #endregion
 
 
