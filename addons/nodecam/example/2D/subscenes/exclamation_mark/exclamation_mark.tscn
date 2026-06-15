@@ -11,25 +11,22 @@ size = Vector2(40, 49)
 [node name="ExclamationMark" type="Node2D" unique_id=1850814629]
 script = ExtResource("1_ubos4")
 
-[node name="Label" type="Label" parent="." unique_id=1315730543]
-visible = false
-z_index = 2
-offset_left = -31.0
-offset_top = -66.0
-offset_right = 31.0
-offset_bottom = -43.0
-text = "Interact"
-horizontal_alignment = 1
-
-[node name="Node" type="Node" parent="Label" unique_id=78491879]
-script = ExtResource("3_ajqvs")
-
 [node name="Sprite" type="Sprite2D" parent="." unique_id=2083969315]
 texture_filter = 1
 texture = ExtResource("1_px6d3")
 
 [node name="FloatModule" type="Node" parent="Sprite" unique_id=1517777862]
 script = ExtResource("3_ajqvs")
+
+[node name="Label" type="Label" parent="Sprite" unique_id=1315730543]
+visible = false
+z_index = 2
+offset_left = -150.0
+offset_top = -66.0
+offset_right = 150.0
+offset_bottom = -43.0
+text = "Interact"
+horizontal_alignment = 1
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=722457648]
 collision_layer = 0
@@ -38,6 +35,3 @@ script = ExtResource("4_ln5ri")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1750334720]
 shape = SubResource("RectangleShape2D_ubos4")
-
-[connection signal="body_entered" from="InteractionArea" to="." method="_on_player_enter"]
-[connection signal="body_exited" from="InteractionArea" to="." method="_on_player_exit"]

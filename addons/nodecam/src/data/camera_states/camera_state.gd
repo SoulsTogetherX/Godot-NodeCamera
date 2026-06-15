@@ -6,10 +6,15 @@ class_name NodeCameraState extends Object
 ## [NodeCameraEffect] and [NodeCameraTransition] nodes.
 
 #region External Variables
-## A dictionary of varables, which may be accessed or edited.
-## The key is ment to be the layer using the varable. If you need multiple
-## variables for a single layer, consider an inner class or dictionary.
+# A dictionary of varables, which may be accessed or edited.
+# The key is ment to be the layer using the varable. If you need multiple
+# variables for a single layer, consider an inner class or dictionary.
 var _vars : Dictionary[NodeCameraLayer, Variant]
+
+# Mask used to cache witch values were changed.
+var _mask : int = 0
+
+var test : bool
 #endregion
 
 

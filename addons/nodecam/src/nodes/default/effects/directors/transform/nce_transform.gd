@@ -69,6 +69,9 @@ class_name NodeCameraEffectTransform extends NodeCameraEffect
 	get = get_far
 
 @export_group("Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's position.
+@export var incremental : bool = false
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
 @export var one_shot : bool = false:
@@ -77,53 +80,57 @@ class_name NodeCameraEffectTransform extends NodeCameraEffect
 #endregion
 
 
+#region Private Methods
+func _handle_transform(target : NodeCameraState) -> void:
+	if incremental:
+		if target is NodeCamera2DState:
+			target.offset += offset
+			
+			target.global_position += position_2D
+			target.rotation_degrees += rotation_2D
+			
+			target.zoom += zoom
+			return
+		target.h_offset += h_offset
+		target.v_offset += v_offset
+		
+		target.global_position += position_3D
+		target.rotation_degrees += rotation_3D
+		
+		target.fov += fov
+		target.near += near
+		target.far += far
+		return
+	if target is NodeCamera2DState:
+		target.offset = offset
+		
+		target.global_position = position_2D
+		target.rotation_degrees = rotation_2D
+		
+		target.zoom = zoom
+		return
+	target.h_offset = h_offset
+	target.v_offset = v_offset
+	
+	target.global_position = position_3D
+	target.rotation_degrees = rotation_3D
+	
+	target.fov = fov
+	target.near = near
+	target.far = far
+#endregion
+
 
 #region Virtual Methods (User Overwrite)
 func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		# Offset
-		target.offset = offset
-		
-		# Position
-		target.global_position = position_2D
-		
-		# Rotation
-		target.rotation_degrees = rotation_2D
-		
-		# Zoom
-		target.zoom = zoom
-	else:
-		# Offset
-		target.h_offset = h_offset
-		target.v_offset = v_offset
-		
-		# Position
-		target.global_position = position_3D
-		
-		# Rotation
-		target.rotation_degrees = rotation_3D
-		
-		# Zoom
-		target.fov = fov
-		target.near = near
-		target.far = far
+	_handle_transform(target)
 
 func effect_stage_changed(
-	target : NodeCameraState, stage : LAYER_STAGES
+	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.offset = offset
-		
-		target.zoom = zoom
-	else:
-		target.h_offset = h_offset
-		target.v_offset = v_offset
-		
-		target.fov = fov
-		target.near = near
-		target.far = far
+	_handle_transform(target)
 #endregion
 
 

@@ -1,10 +1,51 @@
 [gd_scene format=3 uid="uid://cqx874axh2pdw"]
 
-[node name="ExclamationMark" type="CSGCombiner3D" unique_id=144333531]
+[ext_resource type="Script" uid="uid://du3pxiqi2tihi" path="res://addons/nodecam/example/3D/subscenes/exclamation_mark/exclamation_mark.gd" id="1_6e6di"]
+[ext_resource type="Shader" uid="uid://b6a4bb7os5cue" path="res://addons/nodecam/example/3D/subscripts/3Doutline.gdshader" id="1_dpkg7"]
+[ext_resource type="Script" uid="uid://uhswg2grxmqh" path="res://addons/nodecam/example/3D/subscripts/modules/float_module.gd" id="3_vway5"]
+[ext_resource type="Script" uid="uid://dhw6xuwd1p80e" path="res://addons/nodecam/example/3D/subscripts/modules/interact_module.gd" id="3_xmgjk"]
 
-[node name="Point" type="CSGSphere3D" parent="." unique_id=219709750]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6e6di"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("1_dpkg7")
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/outline_width = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_6e6di"]
+radius = 34.0
+
+[node name="ExclamationMark" type="Node3D" unique_id=1055615509]
+script = ExtResource("1_6e6di")
+
+[node name="Mark" type="CSGCombiner3D" parent="." unique_id=144333531]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+collision_layer = 0
+collision_mask = 0
+
+[node name="Label3D" type="Label3D" parent="Mark" unique_id=1242082336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19, 0)
+visible = false
+pixel_size = 0.15
+billboard = 1
+text = "Hello Test"
+
+[node name="Point" type="CSGSphere3D" parent="Mark" unique_id=219709750]
 radius = 1.0
+material = SubResource("ShaderMaterial_6e6di")
 
-[node name="Line" type="CSGSphere3D" parent="." unique_id=212051356]
+[node name="Line" type="CSGSphere3D" parent="Mark" unique_id=212051356]
 transform = Transform3D(1, 0, 0, 0, 3.8880002, 0, 0, 0, 1, 0, 6, 0)
 radius = 1.0
+material = SubResource("ShaderMaterial_6e6di")
+
+[node name="FloatModule" type="Node" parent="Mark" unique_id=1597262312]
+script = ExtResource("3_vway5")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1905222783]
+collision_layer = 0
+monitorable = false
+script = ExtResource("3_xmgjk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1832968402]
+shape = SubResource("SphereShape3D_6e6di")

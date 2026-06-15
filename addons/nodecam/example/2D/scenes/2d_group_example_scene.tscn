@@ -12,7 +12,7 @@
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="10_fmotm"]
 [ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="11_w7iex"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="12_lghhq"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="13_5mhkk"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="13_5mhkk"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -324,6 +324,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_orevw")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1421027814]
 visible = false
@@ -340,15 +341,13 @@ scale = Vector2(0.2, 0.2)
 texture = ExtResource("7_prg43")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=126404351]
-position = Vector2(-169, 54)
-offset = Vector2(-0.45240998, -2.172926)
+position = Vector2(112, 43.09401)
 ignore_rotation = false
-zoom = Vector2(2, 2)
 process_callback = 0
+limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("7_dieih")
-callback_mode = 1
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="NodeCameraFolder" type="Node" parent="." unique_id=1436810013]
@@ -359,13 +358,14 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 script = ExtResource("8_jnvjb")
 dimention = 0
 follow_targets = [NodePath("../../../Player"), NodePath("../../../PlayerPlaceholder")]
-change_zoom = true
-zoom_ratio_margin = 0.15
-zoom_margin = 100
-zoom_min = 0.1
-zoom_max = 8.0
+follow_type = 0
+offset = Vector2(0, 0)
+change_size = true
+size_padding = 0.5
+size_min = 0.1
+size_max = 10.0
 one_shot = false
-metadata/_custom_type_script = "uid://73hs5vn6ig5v"
+priority = 1
 
 [node name="Boundary" type="Node" parent="NodeCameraFolder/Global" unique_id=294391842]
 script = ExtResource("11_w7iex")
@@ -385,6 +385,7 @@ ease_type = 1
 trans_type = 1
 duration = 0.1
 _op_mask = 18
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1504007739]
@@ -402,4 +403,5 @@ ease_type = 1
 trans_type = 1
 duration = 0.1
 _op_mask = 18
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"

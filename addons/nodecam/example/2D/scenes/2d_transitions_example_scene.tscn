@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="12_3ccc3"]
 [ext_resource type="Script" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="13_jkgel"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_wb46y"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="15_1nvym"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="15_1nvym"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -361,11 +361,11 @@ script = ExtResource("2_o83lo")
 [node name="Label4" type="Label" parent="Control" unique_id=97833716]
 layout_mode = 0
 offset_left = 735.0
-offset_top = -119.0
+offset_top = -127.0
 offset_right = 884.0
-offset_bottom = -18.0
+offset_bottom = -26.0
 text = "Lerp
-Factor - 0.05
+Factor - 0.95
 Threshold - 5.0
 "
 label_settings = SubResource("LabelSettings_rh7q4")
@@ -389,6 +389,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_mc5y3")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="TriggerAreas" type="Node2D" parent="." unique_id=1837395728]
 
@@ -449,12 +450,14 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 script = ExtResource("9_x8fun")
 dimention = 0
 follow_target = NodePath("../../../Player")
+follow_type = 0
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
 
 [node name="TransitionLerp" type="Node" parent="NodeCameraFolder/Global" unique_id=1169911556]
 script = ExtResource("10_31wxg")
+scale_factor_to_delta = true
 auto_halt = false
 inital_stage = 1
 priority = 2
@@ -505,6 +508,7 @@ limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
 
 [node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1828797251]
 script = ExtResource("10_31wxg")
+scale_factor_to_delta = true
 threshold = 10.0
 inital_stage = 1
 priority = 2

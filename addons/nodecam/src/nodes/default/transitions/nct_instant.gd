@@ -79,8 +79,6 @@ func get_needed_process_stages() -> PackedInt32Array:
 	if one_shot:
 		return []
 	return [LAYER_STAGES.RUNNING]
-func get_needed_linger_stages() -> PackedInt32Array:
-	return [LAYER_STAGES.RUNNING]
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion

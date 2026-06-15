@@ -4,20 +4,24 @@ class_name NodeCameraUtility
 #region Enums
 ## PreBuilt flags used for Editor Exporting of [enum DIMENSION].
 const DIMENSION_FLAGS := "2D:0,3D:1"
-## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS].
-const FOLLOW_TYPE_FLAGS := "Position:0,RotateMimic:1,LookAt:2"
+## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS]
+## with 2D.
+const FOLLOW_TYPE_2D_FLAGS := "Position:0,Size:1"
+## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS]
+## with 3D.
+const FOLLOW_TYPE_3D_FLAGS := "Position:0,Size:1,RotateMimic:2,LookAt:3"
 
 ## Flags used to decide between the 2D and 3D variation of a layer.
 enum DIMENSION {
-	TWO_DIMENSIONAL = 0,
-	THREE_DIMENSIONAL = 1
+	TWO_DIMENSIONAL	= 0,	## 
+	THREE_DIMENSIONAL = 1	## 
 }
-## Flags used to decide if a 3D layer should look at or reposition itself
-## to a calculated position.
+## The mode certain layers use to change their output.
 enum FOLLOW_TYPE {
-	POSITION = 0,
-	ROTATE_MIMIC = 1,
-	LOOK_AT = 2
+	POSITION = 0,		## 
+	SIZE = 1,			## 
+	ROTATE_MIMIC = 2,	## 
+	LOOK_AT = 3			## 
 }
 
 ## The bitwise flags for [LayerRecord] stages.
@@ -28,6 +32,23 @@ enum LAYER_STAGES {
 	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
 	RUNNING		= 1 << 2,	## [LayerRecord] is running its execution.
 	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
+}
+
+## A bitmask for all possible properties [NodeCamera2DState]
+## and [NodeCamera3DState] objects can have.
+enum CAMERA_PROPERTY {
+	POSITION		= 1 << 0,			## Position property.
+	ROTATION		= 1 << 1,			## Rotation property.
+	OFFSET			= 1 << 2,			## Offset property.
+	ZOOM			= 1 << 3,			## Zoom Property.
+	H_OFFSET		= 1 << 4,			## H_Offset Property.
+	V_OFFSET		= 1 << 5,			## V_Offset Property.
+	FOV				= 1 << 6,			## FOV Property.
+	SIZE			= 1 << 7,			## Size Property.
+	FRUSTUM_OFFSET	= 1 << 8,			## Frustum_Offset Property.
+	NEAR			= 1 << 9,			## Near Property.
+	FAR				= 1 << 10,			## Far Property.
+	TRANSFORM		= 1 << 0 | 1 << 1	## Position & Rotation
 }
 #endregion
 
@@ -248,16 +269,19 @@ static func look_at_camera(
 	var z_axis := (origin - look_at_point).normalized()
 	if z_axis.is_zero_approx():
 		return
-
+	
 	var x_axis := up.cross(z_axis)
 	if x_axis.length_squared() < 0.000001:
 		# Fallback if up is parallel to view direction.
-		var fallback_up := Vector3.RIGHT if abs(z_axis.dot(Vector3.UP)) > 0.999 else Vector3.UP
+		var fallback_up := (
+			Vector3.RIGHT if abs(z_axis.dot(Vector3.UP)) > 0.999
+			else Vector3.UP
+		)
 		x_axis = fallback_up.cross(z_axis)
-
+	
 	x_axis = x_axis.normalized()
 	var y_axis := z_axis.cross(x_axis).normalized()
-
+	
 	target.transform = Transform3D(Basis(x_axis, y_axis, z_axis), origin)
 #endregion
 
@@ -344,4 +368,76 @@ static func frame_camera_3D(
 		return
 	
 	target.global_position += (global_pos - intersection)
+#endregion
+
+
+#region Zoom
+static func zoom_to_point_2D(
+	target : NodeCamera2DState,
+	target_global_pos: Vector2,
+	padding : float = 0.0
+) -> void:
+	var distance := target.global_position.distance_to(target_global_pos)
+	var view_size := target.get_camera().get_viewport_rect().size
+	target.zoom = Vector2.ONE * (
+		maxf(view_size.x, view_size.y) / (distance * (2.0 + padding))
+	)
+static func zoom_to_point_3D(
+	target : NodeCamera3DState,
+	target_global_pos: Vector3,
+	padding : float = 0.0
+) -> void:
+	var local := target.transform.affine_inverse() * target_global_pos
+	if local.z >= 0.0:
+		return
+	
+	var padding_full = padding + 1.0
+	var camera := target.camera
+	var aspect := get_3D_viewport_size(target).aspect()
+	var depth := -local.z
+	
+	match camera.projection:
+		Camera3D.PROJECTION_PERSPECTIVE:
+			if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+				var need_v := atan(
+					maxf(
+						absf(local.y), absf(local.x) / aspect
+					) / depth
+				) * 2.0
+				target.fov = rad_to_deg(need_v) * padding_full
+				return
+			var need_h := atan(
+				maxf(
+					absf(local.x), absf(local.y) * aspect
+				) / depth
+			) * 2.0
+			target.fov = clampf(
+				rad_to_deg(need_h) * padding_full, 1.0, 179.0
+			)
+
+		Camera3D.PROJECTION_ORTHOGONAL:
+			if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+				var need_size := maxf(
+					absf(local.y), absf(local.x) / aspect
+				) * 2.0
+				target.size = need_size * padding_full
+				return
+			var need_size := maxf(
+				absf(local.x), absf(local.y) * aspect
+			) * 2.0
+			target.size = need_size * padding_full
+		
+		Camera3D.PROJECTION_FRUSTUM:
+			if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+				var need_size := maxf(
+					absf(local.y) * target.near / depth,
+					absf(local.x) * target.near / (depth * aspect)
+				) * 2.0
+				target.size = maxf(need_size * padding_full, 0.0001)
+				return
+			var need_size := maxf(
+				absf(local.x) * target.near / depth,
+				absf(local.y) * target.near * aspect / depth
+			) * 2.0
+			target.size = maxf(need_size * padding_full, 0.0001)
 #endregion

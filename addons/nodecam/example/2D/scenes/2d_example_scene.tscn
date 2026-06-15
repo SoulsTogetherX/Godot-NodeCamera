@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="4_7gxdf"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="4_lficx"]
 [ext_resource type="PackedScene" uid="uid://dhnh2fd6y17mo" path="res://addons/nodecam/example/2D/subscenes/sign/sign_small.tscn" id="4_pxnac"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="5_rh7q4"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="5_rh7q4"]
 [ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="6_s74i5"]
 [ext_resource type="PackedScene" uid="uid://ckh51wglfjr3b" path="res://addons/nodecam/example/2D/subscenes/exclamation_mark/exclamation_mark.tscn" id="9_5ptje"]
 [ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="9_ucdtv"]
@@ -263,7 +263,7 @@ size = Vector2(1654, 516)
 
 [sub_resource type="Curve2D" id="Curve2D_umlca"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -111.83304, 68.56532, -60.555183, -11.595674, 60.555183, 11.595674, 223.16696, 66.56532, -101.78425, 0, 101.78425, 0, 455.16696, 92.56532, -74.72768, 7.7304487, 74.72768, -7.7304487, 748.167, 37.565323, 0, 0, 0, 0, 1282.167, 35.565323)
+"points": PackedVector2Array(0, 0, 0, 0, -289, 40, -64.80694, -24.350914, 64.80694, 24.350914, 126, 61, -83.36001, 34.01397, 83.36001, -34.01397, 534, 54, -70.47593, -2.1902933, 70.47593, 2.1902933, 840, 24, 0, 0, 0, 0, 1172, 19)
 }
 point_count = 5
 
@@ -342,6 +342,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_pxnac")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=517345636]
 visible = false
@@ -349,7 +350,6 @@ position = Vector2(455, -81)
 shape = SubResource("RectangleShape2D_umlca")
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1820285472]
-position = Vector2(-150.16696, -44.565323)
 curve = SubResource("Curve2D_umlca")
 
 [node name="Player" parent="." unique_id=1743147849 instance=ExtResource("2_sgsuy")]
@@ -411,6 +411,7 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 script = ExtResource("4_7gxdf")
 dimention = 0
 follow_target = NodePath("../../../../../Player")
+follow_type = 0
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
@@ -470,6 +471,7 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 
 [node name="EffectPath" type="Node" parent="NodeCameraFolder/Global/PathSelector/Path" unique_id=350844020 node_paths=PackedStringArray("path_node")]
 script = ExtResource("15_0aot7")
+dimention = 0
 path_node = NodePath("../../../../../Path2D")
 one_shot = false
 inital_stage = 1

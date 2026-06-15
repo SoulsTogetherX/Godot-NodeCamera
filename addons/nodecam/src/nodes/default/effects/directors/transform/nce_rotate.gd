@@ -24,6 +24,9 @@ class_name NodeCameraEffectRotate extends NodeCameraEffect
 	get = get_rotation_3D
 
 @export_group("Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's rotation.
+@export var incremental : bool = false
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
 @export var one_shot : bool = false:
@@ -33,22 +36,31 @@ class_name NodeCameraEffectRotate extends NodeCameraEffect
 
 
 
+#region Private Methods
+func _handle_rotate(target : NodeCameraState) -> void:
+	if incremental:
+		if target is NodeCamera2DState:
+			target.rotation += rotation_2D
+			return
+		target.rotation += rotation_3D
+		return
+	if target is NodeCamera2DState:
+		target.rotation = rotation_2D
+		return
+	target.rotation = rotation_3D
+#endregion
+
+
 #region Virtual Methods (User Overwrite)
 func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.rotation = rotation_2D
-	else:
-		target.rotation = rotation_3D
+	_handle_rotate(target)
 
 func effect_stage_changed(
-	target : NodeCameraState, stage : LAYER_STAGES
+	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.rotation = rotation_2D
-	else:
-		target.rotation = rotation_3D
+	_handle_rotate(target)
 #endregion
 
 

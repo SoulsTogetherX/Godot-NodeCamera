@@ -64,12 +64,20 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
+	if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 		ret.append({
 			"name": "follow_type",
 			"type": TYPE_INT,
 			"hint": PROPERTY_HINT_ENUM,
-			"hint_string": NodeCameraUtility.FOLLOW_TYPE_FLAGS,
+			"hint_string": NodeCameraUtility.FOLLOW_TYPE_2D_FLAGS,
+			"usage": PROPERTY_USAGE_DEFAULT
+		})
+	else:
+		ret.append({
+			"name": "follow_type",
+			"type": TYPE_INT,
+			"hint": PROPERTY_HINT_ENUM,
+			"hint_string": NodeCameraUtility.FOLLOW_TYPE_3D_FLAGS,
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 	
@@ -169,6 +177,7 @@ func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
 	if val == dimention:
 		return
 	follow_target = null
+	follow_type = 0
 	dimention = val
 	notify_property_list_changed()
 func get_dimention() -> NodeCameraUtility.DIMENSION:
@@ -212,18 +221,32 @@ func get_one_shot() -> bool:
 	return one_shot
 #endregion
 
+
 #region Private Methods
 func _handle_glue(target : NodeCameraState) -> void:
 	if (dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL) != (target is NodeCamera3DState):
 		return
 	if dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
 		if follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT:
-			NodeCameraUtility.look_at_camera(target, follow_target.global_position + offset_3d, Vector3.UP)
+			NodeCameraUtility.look_at_camera(
+				target, follow_target.global_position + offset_3d, Vector3.UP
+			)
+			return
+		if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
+			NodeCameraUtility.zoom_to_point_3D(
+				target, follow_target.global_position + offset_3d
+			)
 			return
 		if follow_type == NodeCameraUtility.FOLLOW_TYPE.ROTATE_MIMIC:
 			target.rotation = follow_target.global_rotation
 			return
 		target.global_position = follow_target.global_position + offset_3d
+		return
+	
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
+		NodeCameraUtility.zoom_to_point_2D(
+			target, follow_target.global_position + offset_2d
+		)
 		return
 	target.global_position = follow_target.global_position + offset_2d
 #endregion

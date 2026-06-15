@@ -12,7 +12,7 @@ var factor : float = 0.95
 ## the delta.
 ## [br][br]
 ## Ths can make the lerping feel sluggish.
-@export var scale_factor_to_delta : bool = true
+@export var scale_factor_to_delta : bool = false
 
 ## If [code]true[/code], this layer will halt if [b]ALL[/b]
 ## transitioning properties are within [member threshold] distance.
@@ -44,8 +44,6 @@ func process_transition(
 			disable_check &&
 			current.global_position.distance_squared_to(target.global_position) < threshold
 		)
-	else:
-		current.global_position = target.global_position
 	
 	
 	# 2D
@@ -56,8 +54,6 @@ func process_transition(
 				disable_check &&
 				abs(current.rotation - target.rotation) < threshold
 			)
-		else:
-			current.rotation = target.rotation
 		
 		
 		if _op_mask & CAMERA_PROPERTY.OFFSET:
@@ -66,8 +62,6 @@ func process_transition(
 				disable_check &&
 				current.offset.distance_squared_to(target.offset) < threshold
 			)
-		else:
-			current.offset = target.offset
 		
 		if _op_mask & CAMERA_PROPERTY.ZOOM:
 			current.zoom = current.zoom.lerp(target.zoom, f)
@@ -75,8 +69,6 @@ func process_transition(
 				disable_check &&
 				current.zoom.distance_squared_to(target.zoom) < threshold
 			)
-		else:
-			current.zoom = target.zoom
 	
 	# 3D
 	if current is NodeCamera3DState:
@@ -90,8 +82,6 @@ func process_transition(
 				disable_check &&
 				current.rotation.distance_squared_to(target.rotation) < threshold
 			)
-		else:
-			current.rotation = target.rotation
 		
 		
 		if _op_mask & CAMERA_PROPERTY.H_OFFSET:
@@ -100,8 +90,6 @@ func process_transition(
 				disable_check &&
 				abs(current.h_offset - target.h_offset) < threshold
 			)
-		else:
-			current.h_offset = target.h_offset
 		
 		if _op_mask & CAMERA_PROPERTY.V_OFFSET:
 			current.v_offset = lerpf(current.v_offset, target.v_offset, f)
@@ -109,8 +97,6 @@ func process_transition(
 				disable_check &&
 				abs(current.v_offset - target.v_offset) < threshold
 			)
-		else:
-			current.v_offset = target.v_offset
 		
 		
 		if _op_mask & CAMERA_PROPERTY.FOV:
@@ -119,8 +105,6 @@ func process_transition(
 				disable_check &&
 				abs(current.fov - target.fov) < threshold
 			)
-		else:
-			current.fov = target.fov
 		
 		if _op_mask & CAMERA_PROPERTY.NEAR:
 			current.near = lerpf(current.near, target.near, f)
@@ -128,8 +112,6 @@ func process_transition(
 				disable_check &&
 				abs(current.near - target.near) < threshold
 			)
-		else:
-			current.near = target.near
 		
 		if _op_mask & CAMERA_PROPERTY.FAR:
 			current.far = lerpf(current.far, target.far, f)
@@ -137,8 +119,6 @@ func process_transition(
 				disable_check &&
 				abs(current.far - target.far) < threshold
 			)
-		else:
-			current.far = target.far
 	
 	if disable_check && auto_halt:
 		advance_stage()

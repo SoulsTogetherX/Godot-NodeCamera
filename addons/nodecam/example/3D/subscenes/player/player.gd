@@ -43,6 +43,13 @@ var max_vertical_angle : float = PI / 4
 #endregion
 
 
+#region Private Variables
+var _interacting : bool = false
+
+var _interactables : Array[Node]
+#endregion
+
+
 
 #region Virtual Methods
 func _ready() -> void:
@@ -57,8 +64,19 @@ func _ready() -> void:
 			movement_input.physical_keycode = k
 			InputMap.action_add_event(key, movement_input)
 
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
+	# If you came here for good player interaction code, you
+	# are in the wrong place.
+	if event.is_action_pressed("interact") && !_interactables.is_empty():
+		_interactables[0].on_interact()
+		if _interactables[0].force_stop_player:
+			set_physics_process(_interacting)
+			_interacting = !_interacting
+	
+	if _interacting:
+		return
+	if event is InputEventMouseMotion || event is InputEventScreenDrag:
 		if effect_rotation:
 			var rot := effect_rotation.rotation_3D
 			
@@ -100,4 +118,12 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
 	move_and_slide()
+#endregion
+
+
+#region Interact Methods
+func add_to_interactables(node : Node) -> void:
+	_interactables.append(node)
+func remove_from_interactables(node : Node) -> void:
+	_interactables.erase(node)
 #endregion

@@ -8,21 +8,10 @@ class_name NodeCameraTransitionGeneral extends NodeCameraTransition
 ## [b]NOTE[/b]: For efficiency reasons, you may want to create your own
 ## transition that's more selective in what properties it affects.
 
-#region Enums
-## A bitmask for all possible properties [NodeCamera2DState]
-## and [NodeCamera3DState] objects can have.
-enum CAMERA_PROPERTY {
-	POSITION	= 1 << 1, ## Position property.
-	ROTATION	= 1 << 2, ## Rotation property.
-	OFFSET		= 1 << 3, ## Offset property.
-	ZOOM		= 1 << 4, ## Zoom Property.
-	H_OFFSET	= 1 << 5, ## H_Offset Property.
-	V_OFFSET	= 1 << 6, ## V_Offset Property.
-	FOV			= 1 << 7, ## FOV Property.
-	NEAR		= 1 << 8, ## Near Property.
-	FAR			= 1 << 9, ## Far Property.
-}
+#region Enum
+const CAMERA_PROPERTY = NodeCameraUtility.CAMERA_PROPERTY
 #endregion
+
 
 
 #region External Variables
@@ -95,6 +84,26 @@ var fov : bool:
 		_op_mask |= int(val) * CAMERA_PROPERTY.FOV
 	get():
 		return _op_mask & CAMERA_PROPERTY.FOV
+## If [code]true[/code], this transition is expected to transition
+## the fov property.
+@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
+var size : bool:
+	set(val):
+		_op_mask &= ~CAMERA_PROPERTY.SIZE
+		_op_mask |= int(val) * CAMERA_PROPERTY.SIZE
+	get():
+		return _op_mask & CAMERA_PROPERTY.SIZE
+## If [code]true[/code], this transition is expected to transition
+## the fov property.
+@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
+var frustum_offset : bool:
+	set(val):
+		_op_mask &= ~CAMERA_PROPERTY.FRUSTUM_OFFSET
+		_op_mask |= int(val) * CAMERA_PROPERTY.FRUSTUM_OFFSET
+	get():
+		return _op_mask & CAMERA_PROPERTY.FRUSTUM_OFFSET
+		
+		
 ## If [code]true[/code], this transition is expected to transition
 ## the near property.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)

@@ -24,39 +24,44 @@ var follow_targets : Array[Node]:
 var follow_type := NodeCameraUtility.FOLLOW_TYPE.POSITION:
 	set = set_follow_type,
 	get = get_follow_type
+	
+## The offset that will be applied to the camera's position, if
+## [member dimention] is [code]true[/code].
+var offset_2d := Vector2.ZERO:
+	set = set_offset_2d,
+	get = get_offset_2d
+## The offset that will be applied to the camera's position, if
+## [member dimention] is [code]false[/code].
+var offset_3d := Vector3.ZERO:
+	set = set_offset_3d,
+	get = get_offset_3d
 
 # Zoom
 ## If [code]true[/code], the layer will automatically zoom in or
 ## out to fit all following elements in.
-var change_zoom : bool = false:
-	set = set_change_zoom,
-	get = get_change_zoom
-## The ratio margin the camera will automatically zoom with.
+var change_size : bool = false:
+	set = set_change_size,
+	get = get_change_size
+## The ratio padding the camera will automatically zoom with.
 ## [br][br]
 ## Also see [member change_zoom].
-var zoom_ratio_margin : float = 0.15:
-	set = set_zoom_ratio_margin,
-	get = get_zoom_ratio_margin
-## The pixel margin the camera will automatically zoom with.
-## [br][br]
-## Also see [member change_zoom].
-var zoom_margin : int = 0:
-	set = set_zoom_margin,
-	get = get_zoom_margin
+var size_padding : float = 0.5:
+	set = set_size_padding,
+	get = get_size_padding
 
 # 2D Fit
 ## The minimum zoom the camera will automatically be resized.
 ## [br][br]
 ## Also see [member change_zoom].
-var zoom_min : float = 0.1:
-	set = set_zoom_min,
-	get = get_zoom_min
+var size_min : float = 0.1:
+	set = set_size_min,
+	get = get_size_min
 ## The maximum zoom the camera will automatically be resized.
 ## [br][br]
 ## Also see [member m_max].
-var zoom_max : float = 10.0:
-	set = set_zoom_max,
-	get = get_zoom_max
+var size_max : float = 10.0:
+	set = set_size_max,
+	get = get_size_max
 
 # Addtional Arguments
 ## If [code]true[/code], the layer will only set the effect's position
@@ -93,62 +98,66 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
-	if dimention == NodeCameraUtility.DIMENSION.THREE_DIMENSIONAL:
+	if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 		ret.append({
 			"name": "follow_type",
 			"type": TYPE_INT,
 			"hint": PROPERTY_HINT_ENUM,
-			"hint_string": NodeCameraUtility.FOLLOW_TYPE_FLAGS,
+			"hint_string": NodeCameraUtility.FOLLOW_TYPE_2D_FLAGS,
+			"usage": PROPERTY_USAGE_DEFAULT
+		})
+	else:
+		ret.append({
+			"name": "follow_type",
+			"type": TYPE_INT,
+			"hint": PROPERTY_HINT_ENUM,
+			"hint_string": NodeCameraUtility.FOLLOW_TYPE_3D_FLAGS,
 			"usage": PROPERTY_USAGE_DEFAULT
 		})
 	
-	if (
-		follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT ||
-		dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
-	):
-		ret.append({
-			"name": "Zoom",
-			"type": TYPE_NIL,
-			"usage": PROPERTY_USAGE_GROUP,
-		})
-		ret.append({
-			"name": "change_zoom",
-			"type": TYPE_BOOL,
-			"usage": PROPERTY_USAGE_DEFAULT
-		})
-		ret.append({
-			"name": "zoom_ratio_margin",
-			"type": TYPE_FLOAT,
-			"hint": PROPERTY_HINT_RANGE,
-			"hint_string": "0.0,1.0,0.001,or_less,or_greater",
-			"usage": PROPERTY_USAGE_DEFAULT
-		})
-		ret.append({
-			"name": "zoom_margin",
-			"type": TYPE_INT,
-			"usage": PROPERTY_USAGE_DEFAULT
-		})
-		
-		if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
-			ret.append({
-				"name": "2D Fit",
-				"type": TYPE_NIL,
-				"usage": PROPERTY_USAGE_SUBGROUP,
-			})
-			ret.append({
-				"name": "zoom_min",
-				"type": TYPE_FLOAT,
-				"hint": PROPERTY_HINT_RANGE,
-				"hint_string": "0.0,10.0,0.001,or_greater",
-				"usage": PROPERTY_USAGE_DEFAULT
-			})
-			ret.append({
-				"name": "zoom_max",
-				"type": TYPE_FLOAT,
-				"hint": PROPERTY_HINT_RANGE,
-				"hint_string": "0.0,10.0,0.001,or_greater",
-				"usage": PROPERTY_USAGE_DEFAULT
-			})
+	ret.append({
+		"name": "offset",
+		"type": TYPE_VECTOR2 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else TYPE_VECTOR3,
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	ret.append({
+		"name": "Sizing",
+		"type": TYPE_NIL,
+		"usage": PROPERTY_USAGE_GROUP,
+	})
+	ret.append({
+		"name": "change_size",
+		"type": TYPE_BOOL,
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	ret.append({
+		"name": "size_padding",
+		"type": TYPE_FLOAT,
+		"hint": PROPERTY_HINT_RANGE,
+		"hint_string": "0.0,2.0,0.001,or_less,or_greater",
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	
+	ret.append({
+		"name": "Size Fit",
+		"type": TYPE_NIL,
+		"usage": PROPERTY_USAGE_SUBGROUP,
+	})
+	ret.append({
+		"name": "size_min",
+		"type": TYPE_FLOAT,
+		"hint": PROPERTY_HINT_RANGE,
+		"hint_string": "0.0,100.0,0.001,or_greater",
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
+	ret.append({
+		"name": "size_max",
+		"type": TYPE_FLOAT,
+		"hint": PROPERTY_HINT_RANGE,
+		"hint_string": "0.0,100.0,0.001,or_greater",
+		"usage": PROPERTY_USAGE_DEFAULT
+	})
 	
 	ret.append({
 		"name": "Settings",
@@ -169,16 +178,19 @@ func _property_can_revert(property: StringName) -> bool:
 			return dimention != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return !follow_type
-		&"change_zoom":
-			return change_zoom
-		&"zoom_min":
-			return zoom_min != 0.1
-		&"zoom_max":
-			return zoom_max != 10.0
-		&"zoom_margin":
-			return zoom_margin != 0
-		&"zoom_ratio_margin":
-			return zoom_ratio_margin != 0.15
+		&"offset":
+			return (
+				offset_2d != Vector2.ZERO if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+				else offset_3d != Vector3.ZERO
+			)
+		&"change_size":
+			return change_size
+		&"size_min":
+			return size_min != (0.1 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 1.0)
+		&"size_max":
+			return size_max != (10.0 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 179.0)
+		&"size_padding":
+			return size_padding != 0.5
 		&"one_shot":
 			return one_shot != false
 	return false
@@ -188,58 +200,89 @@ func _property_get_revert(property: StringName) -> Variant:
 			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 		&"follow_type":
 			return true
-		&"change_zoom":
+		&"offset":
+			return Vector2.ZERO if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else Vector3.ZERO
+		&"change_size":
 			return false
-		&"zoom_min":
-			return 0.1
-		&"zoom_max":
-			return 10.0
-		&"zoom_margin":
-			return 0
-		&"zoom_ratio_margin":
-			return 0.15
+		&"size_min":
+			return 0.1 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 1.0
+		&"size_max":
+			return 10.0 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 179.0
+		&"size_padding":
+			return 0.5
 		&"one_shot":
 			return false
+	return null
+
+func _set(property: StringName, value: Variant) -> bool:
+	if property == &"offset":
+		if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+			offset_2d = value
+			return false
+		offset_3d = value
+		return false
+	return true
+func _get(property: StringName) -> Variant:
+	if property == &"offset":
+		if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
+			return offset_2d
+		return offset_3d
 	return null
 #endregion
 
 
 #region Private Methods
-func _handle_center(target : NodeCamera3DState, center : Vector3) -> void:
+func _handle_vector_3D(target : NodeCamera3DState, center : Vector3) -> void:
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
+		NodeCameraUtility.zoom_to_point_3D(
+			target, center
+		)
+		return
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.ROTATE_MIMIC:
+		return
 	if follow_type == NodeCameraUtility.FOLLOW_TYPE.LOOK_AT:
-		NodeCameraUtility.look_at_camera(target, center, Vector3.UP)
+		NodeCameraUtility.look_at_camera(
+			target, center, Vector3.UP
+		)
 		return
 	target.global_position = center
+func _handle_vector_2D(target : NodeCamera2DState, center : Vector2) -> void:
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
+		NodeCameraUtility.zoom_to_point_2D(
+			target, center
+		)
+		return
+	target.global_position = center
+	
 
 func _set_target_pos(target : NodeCameraState) -> void:
 	if target is NodeCamera2DState:
-		var pos : Vector2
-		var max_vec : Vector2
-		var min_vec : Vector2
+		var center : Vector2
+		var max_p : Vector2 = Vector2(-INF, -INF)
+		var min_p : Vector2 = Vector2(INF, INF)
 		for node : Node2D in _follow_nodes:
-			pos += node.global_position
-			max_vec = max_vec.max(node.global_position)
-			min_vec = max_vec.min(node.global_position)
-		target.global_position = pos / _follow_nodes.size()
+			var p := node.global_position
+			center += p
+			max_p = max_p.max(p)
+			min_p = min_p.min(p)
 		
-		if !change_zoom:
+		center = (center / _follow_nodes.size()) + offset_2d
+		_handle_vector_2D(target, center + offset_2d)
+		
+		if !change_size:
 			return
 		
-		# Furthest offset, in all four corners, from the
-		# camera's center
-		max_vec = (max_vec - target.global_position).abs().max(
-			(min_vec - target.global_position).abs()
+		var zoom_pos : Vector2 = (
+			(max_p - target.global_position).abs().max(
+				(min_p - target.global_position).abs()
+			) + target.global_position
+		)
+		NodeCameraUtility.zoom_to_point_2D(
+			target, zoom_pos, size_padding
 		)
 		
-		var cam : Camera2D = target.get_camera()
-		var viewport_size := NodeCameraUtility.get_2D_unzoomed_viewport_size(target)
-		var zoom_view : Vector2 = (
-			(
-				viewport_size - Vector2(zoom_margin, zoom_margin)
-			) * 0.5 * (1.0 - zoom_ratio_margin)
-		) / max_vec
 		target.zoom = Vector2.ONE * clampf(
-			minf(zoom_view.x, zoom_view.y), zoom_min, zoom_max
+			target.zoom.x, size_min, size_max
 		)
 		return
 	
@@ -251,30 +294,30 @@ func _set_target_pos(target : NodeCameraState) -> void:
 		for node : Node3D in _follow_nodes:
 			var p := node.global_position
 			center += p
-			min_p = min_p.min(p)
 			max_p = max_p.max(p)
+			min_p = min_p.min(p)
 		
-		center /= float(_follow_nodes.size())
-		var extents := (max_p - min_p) * 0.5
+		center = (center / float(_follow_nodes.size()))
+		_handle_vector_3D(target, center + offset_3d)
 		
-		if !change_zoom:
-			_handle_center(target, center)
+		if !change_size:
 			return
 		
-		var cam : Camera3D = target.get_camera()
+		var size_pos : Vector3 = (
+			(max_p - center).abs().max(
+				(min_p - center).abs()
+			) + center
+		)
+		NodeCameraUtility.zoom_to_point_3D(target, size_pos, size_padding)
 		
-		# Perspective: "zoom" = move camera farther away.
-		var viewport_size := NodeCameraUtility.get_3D_viewport_size(target)
-		var aspect := viewport_size.x / maxf(viewport_size.y, 0.001)
-		
-		var half_fov := deg_to_rad(cam.fov) * 0.5
-		var half_h_fov := atan(tan(half_fov) * aspect)
-		
-		var radius := extents.length()
-		var required_distance := radius / maxf(sin(minf(half_fov, half_h_fov)), 0.001)
-		
-		target.global_position = center + cam.global_transform.basis.z.normalized() * required_distance
-		NodeCameraUtility.look_at_camera(target, center, Vector3.UP)
+		if target.camera.projection == Camera3D.ProjectionType.PROJECTION_PERSPECTIVE:
+			target.fov = clampf(
+				target.fov, size_min, size_max
+			)
+			return
+		target.size = clampf(
+			target.size, size_min, size_max
+		)
 #endregion
 
 
@@ -309,6 +352,7 @@ func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
 		return
 	follow_targets.clear()
 	_follow_nodes.clear()
+	follow_type = 0
 	dimention = val
 	notify_property_list_changed()
 func get_dimention() -> NodeCameraUtility.DIMENSION:
@@ -337,30 +381,35 @@ func get_follow_type() -> NodeCameraUtility.FOLLOW_TYPE:
 	return follow_type
 
 
-func set_change_zoom(val : bool) -> void:
-	change_zoom = val
-func get_change_zoom() -> bool:
-	return change_zoom
+func set_offset_2d(val : Variant) -> void:
+	offset_2d = val
+func get_offset_2d() -> Variant:
+	return offset_2d
+func set_offset_3d(val : Variant) -> void:
+	offset_3d = val
+func get_offset_3d() -> Variant:
+	return offset_3d
 
-func set_zoom_min(val : float) -> void:
-	zoom_min = val
-func get_zoom_min() -> float:
-	return zoom_min
 
-func set_zoom_max(val : float) -> void:
-	zoom_max = val
-func get_zoom_max() -> float:
-	return zoom_max
+func set_change_size(val : bool) -> void:
+	change_size = val
+func get_change_size() -> bool:
+	return change_size
 
-func set_zoom_margin(val : int) -> void:
-	zoom_margin = val
-func get_zoom_margin() -> int:
-	return zoom_margin
+func set_size_min(val : float) -> void:
+	size_min = maxf(val, 0.0)
+func get_size_min() -> float:
+	return size_min
 
-func set_zoom_ratio_margin(val : float) -> void:
-	zoom_ratio_margin = val
-func get_zoom_ratio_margin() -> float:
-	return zoom_ratio_margin
+func set_size_max(val : float) -> void:
+	size_max = maxf(val, 0.0)
+func get_size_max() -> float:
+	return size_max
+
+func set_size_padding(val : float) -> void:
+	size_padding = val
+func get_size_padding() -> float:
+	return size_padding
 
 
 func set_one_shot(val : bool) -> void:

@@ -1,0 +1,432 @@
+[gd_scene format=3 uid="uid://c481kkplmsvdi"]
+
+[ext_resource type="PackedScene" uid="uid://ckipkreqa6o1i" path="res://addons/nodecam/example/3D/subscenes/player/player.tscn" id="1_a48xe"]
+[ext_resource type="PackedScene" uid="uid://bungsjf33psk2" path="res://addons/nodecam/example/3D/subscenes/npc/npc_look.tscn" id="2_4h808"]
+[ext_resource type="Script" uid="uid://uhswg2grxmqh" path="res://addons/nodecam/example/3D/subscripts/modules/float_module.gd" id="3_4h808"]
+[ext_resource type="PackedScene" uid="uid://cqx874axh2pdw" path="res://addons/nodecam/example/3D/subscenes/exclamation_mark/exclamation_mark.tscn" id="3_cxohi"]
+[ext_resource type="Script" uid="uid://b7bp0mv6xrihw" path="res://addons/nodecam/example/3D/subscripts/room_switch.gd" id="4_1564n"]
+[ext_resource type="Script" uid="uid://b1bqxnw315bxm" path="res://addons/nodecam/src/nodes/default/transitions/nct_instant.gd" id="5_jpbcj"]
+[ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="6_5nkf1"]
+[ext_resource type="Script" uid="uid://tle82rar1v5u" path="res://addons/nodecam/example/3D/subscripts/camera_setter_helper.gd" id="6_cxohi"]
+[ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="7_sp15o"]
+[ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="8_fn7vs"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="9_p1ey4"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="10_nkk7n"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="11_0m5a3"]
+[ext_resource type="Script" uid="uid://7exopasdoq2u" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_camera.gd" id="12_xe3nu"]
+[ext_resource type="Script" uid="uid://b6ndqicguokrj" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_follow_path.gd" id="13_ts4se"]
+[ext_resource type="Script" uid="uid://dva62hgnkfmx3" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_rotate.gd" id="14_cuy0c"]
+[ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="15_hg7l0"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sfail"]
+
+[sub_resource type="Sky" id="Sky_a0avs"]
+sky_material = SubResource("ProceduralSkyMaterial_sfail")
+
+[sub_resource type="Environment" id="Environment_sfail"]
+background_mode = 2
+sky = SubResource("Sky_a0avs")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lajqd"]
+size = Vector3(167, 106, 318)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b7xp7"]
+size = Vector3(29, 106, 89)
+
+[sub_resource type="Curve3D" id="Curve3D_lajqd"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, -150, 0, 0, 0, 0, 0, 0, 0, 0, 150),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
+
+[node name="Root" type="Node3D" unique_id=570835729]
+
+[node name="Environment" type="Node" parent="." unique_id=1388416845]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment" unique_id=1503986863]
+environment = SubResource("Environment_sfail")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment" unique_id=1942860298]
+transform = Transform3D(-4.371139e-08, -0.707107, 0.707107, 0, 0.7071069, 0.7071069, -0.9999998, 3.0908623e-08, -3.0908623e-08, 0, 8, 0)
+metadata/_edit_lock_ = true
+
+[node name="Floor" type="CSGBox3D" parent="Environment" unique_id=190092471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -46, 0)
+calculate_tangents = false
+use_collision = true
+collision_mask = 0
+size = Vector3(1000, 65, 1000)
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Rooms" type="CSGCombiner3D" parent="Environment" unique_id=460929477]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+calculate_tangents = false
+use_collision = true
+collision_mask = 0
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Walls" type="CSGBox3D" parent="Environment/Rooms" unique_id=805273885]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 43.5, -48)
+size = Vector3(358, 167, 569)
+
+[node name="Room1" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=745969713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -5.5, -187)
+operation = 2
+size = Vector3(315, 269, 167)
+
+[node name="Room2" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=958812325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -181.5, -5)
+operation = 2
+size = Vector3(315, 603, 167)
+
+[node name="Pillar" type="CSGCylinder3D" parent="Environment/Rooms/Walls/Room2" unique_id=1461172101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, -14.375, 5)
+operation = 2
+radius = 5.0
+height = 200.25
+
+[node name="Room3" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=1139157953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -42, 180)
+operation = 2
+size = Vector3(315, 322, 167)
+
+[node name="Door1" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=591166032]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, -106)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door2" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=1748664798]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, -132, -40, 85)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door3" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=875650275]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, 273)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="PlayerGroup" type="Node" parent="." unique_id=1528663138]
+
+[node name="Player" parent="PlayerGroup" unique_id=1684348752 node_paths=PackedStringArray("cam", "effect_rotation") instance=ExtResource("1_a48xe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240, -13.5, 120)
+cam = NodePath("../../CameraGroup/Camera/Main")
+effect_rotation = NodePath("../../CameraGroup/Nodes/RoomSelector/Outside/EffectRotate")
+mouse_sensitivity = 0.01
+
+[node name="Other" type="Node" parent="." unique_id=924042481]
+
+[node name="NPC" parent="Other" unique_id=847889789 node_paths=PackedStringArray("selector") instance=ExtResource("2_4h808")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, -13, 136)
+selection = 1
+selector = NodePath("../../CameraGroup/Nodes/NPCTalk")
+text = "Talk"
+
+[node name="Room1" type="Label3D" parent="Other" unique_id=1720385982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -234, 18, 0)
+pixel_size = 0.2
+billboard = 1
+text = "Ease: Out
+Transition: Quart
+Duration: 0.9"
+
+[node name="FloatModule" type="Node" parent="Other/Room1" unique_id=1887574149]
+script = ExtResource("3_4h808")
+
+[node name="Room2" type="Label3D" parent="Other" unique_id=1615907995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102, 15, 0)
+pixel_size = 0.2
+billboard = 1
+text = "Ease: Out
+Transition: Spring
+Duration: 1.5"
+
+[node name="FloatModule" type="Node" parent="Other/Room2" unique_id=255605564]
+script = ExtResource("3_4h808")
+
+[node name="Room3" type="Label3D" parent="Other" unique_id=1375417579]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 154, 15, 0)
+pixel_size = 0.4
+billboard = 1
+text = "Ease: Out In
+Transition: Circ
+Duration: 0.5"
+
+[node name="FloatModule" type="Node" parent="Other/Room3" unique_id=1049306916]
+script = ExtResource("3_4h808")
+
+[node name="Outside" type="Label3D" parent="Other" unique_id=1344052752]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 350, 15, 0)
+pixel_size = 0.2
+billboard = 1
+text = "Ease: In Out
+Transition: Sine
+Duration: 0.4"
+
+[node name="FloatModule" type="Node" parent="Other/Outside" unique_id=515354232]
+script = ExtResource("3_4h808")
+
+[node name="ExclamationMarkGroup" type="Node" parent="." unique_id=1122873620]
+
+[node name="ShakeMark" parent="ExclamationMarkGroup" unique_id=1055615509 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("3_cxohi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, -5, -17)
+layer_controlled = NodePath("../../CameraGroup/Nodes/Global/EffectShake")
+text = "Shake"
+
+[node name="Areas" type="Node" parent="." unique_id=1265015878]
+
+[node name="Room1" type="Area3D" parent="Areas" unique_id=1540804081 node_paths=PackedStringArray("selector")]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_1564n")
+selector = NodePath("../../CameraGroup/Nodes/RoomSelector")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Areas/Room1" unique_id=631034067]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -235, 11.5, -3.5)
+shape = SubResource("BoxShape3D_lajqd")
+
+[node name="Room2" type="Area3D" parent="Areas" unique_id=257014479 node_paths=PackedStringArray("selector")]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_1564n")
+selector = NodePath("../../CameraGroup/Nodes/RoomSelector")
+index = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Areas/Room2" unique_id=235007639]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -53, 11.5, -3.5)
+shape = SubResource("BoxShape3D_lajqd")
+
+[node name="Room3" type="Area3D" parent="Areas" unique_id=227552302 node_paths=PackedStringArray("selector")]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_1564n")
+selector = NodePath("../../CameraGroup/Nodes/RoomSelector")
+index = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Areas/Room3" unique_id=417272671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 11.5, -3.5)
+shape = SubResource("BoxShape3D_lajqd")
+
+[node name="Outside" type="Area3D" parent="Areas" unique_id=585130431 node_paths=PackedStringArray("selector")]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_1564n")
+selector = NodePath("../../CameraGroup/Nodes/RoomSelector")
+index = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Areas/Outside" unique_id=179266725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 251, 11.5, -118)
+shape = SubResource("BoxShape3D_b7xp7")
+
+[node name="CameraSetterHelper" type="Node" parent="Areas/Outside" unique_id=121981654 node_paths=PackedStringArray("effect_rotation")]
+script = ExtResource("6_cxohi")
+effect_rotation = NodePath("../../../CameraGroup/Nodes/RoomSelector/Outside/EffectRotate")
+
+[node name="CameraGroup" type="Node" parent="." unique_id=1897841386]
+
+[node name="Nodes" type="Node" parent="CameraGroup" unique_id=1836635731]
+
+[node name="Oneshot" type="Node" parent="CameraGroup/Nodes" unique_id=1645522374]
+
+[node name="TransitionInstant" type="Node" parent="CameraGroup/Nodes/Oneshot" unique_id=543540029]
+script = ExtResource("5_jpbcj")
+one_shot = true
+_op_mask = 3
+priority = -99999
+metadata/_custom_type_script = "uid://b1bqxnw315bxm"
+
+[node name="Global" type="Node" parent="CameraGroup/Nodes" unique_id=339595484]
+
+[node name="EffectShake" type="Node" parent="CameraGroup/Nodes/Global" unique_id=951477869]
+script = ExtResource("6_5nkf1")
+amplitude = 2.0
+inital_stage = 1
+metadata/_custom_type_script = "uid://xbw3mcx4uq1"
+
+[node name="NPCTalk" type="Node" parent="CameraGroup/Nodes" unique_id=2024977911]
+script = ExtResource("7_sp15o")
+priority = -1
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="Normal" type="Node" parent="CameraGroup/Nodes/NPCTalk" unique_id=483923724]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal" unique_id=2143691714]
+script = ExtResource("9_p1ey4")
+_op_mask = 67
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Talk" type="Node" parent="CameraGroup/Nodes/NPCTalk" unique_id=838214453]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=1042589731 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("10_nkk7n")
+dimention = 1
+follow_target = NodePath("../../../../../Other/NPC")
+follow_type = 0
+offset = Vector3(40, 30, -40)
+one_shot = false
+
+[node name="EffectLookAt" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=619425253 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("10_nkk7n")
+dimention = 1
+follow_target = NodePath("../../../../../Other/NPC")
+follow_type = 2
+offset = Vector3(0, 0, 0)
+one_shot = false
+priority = -1
+
+[node name="EffectZoom" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=145987222]
+script = ExtResource("11_0m5a3")
+fov = 100.0
+metadata/_custom_type_script = "uid://g244xvmo4uo5"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=208703726]
+script = ExtResource("9_p1ey4")
+_op_mask = 67
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="RoomSelector" type="Node" parent="CameraGroup/Nodes" unique_id=1962111645]
+script = ExtResource("7_sp15o")
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="Room1" type="Node" parent="CameraGroup/Nodes/RoomSelector" unique_id=2048443465]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectCamera" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room1" unique_id=207234143 node_paths=PackedStringArray("camera")]
+script = ExtResource("12_xe3nu")
+dimention = 1
+camera = NodePath("../../../../Camera/Room1")
+one_shot = false
+priority = 3
+metadata/_custom_type_script = "uid://7exopasdoq2u"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room1" unique_id=1666478257 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("10_nkk7n")
+dimention = 1
+follow_target = NodePath("../../../../../PlayerGroup/Player")
+follow_type = 0
+offset = Vector3(0, 0, 0)
+one_shot = false
+priority = 2
+
+[node name="EffectFollowPath" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room1" unique_id=2040134868 node_paths=PackedStringArray("path_node")]
+script = ExtResource("13_ts4se")
+dimention = 1
+path_node = NodePath("../../../../Camera/Room1Path")
+one_shot = false
+priority = 1
+metadata/_custom_type_script = "uid://b6ndqicguokrj"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room1" unique_id=557791774]
+script = ExtResource("9_p1ey4")
+ease_type = 1
+trans_type = 3
+duration = 0.9
+_op_mask = 3
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Room2" type="Node" parent="CameraGroup/Nodes/RoomSelector" unique_id=2017767679]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectCamera" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room2" unique_id=279467383 node_paths=PackedStringArray("camera")]
+script = ExtResource("12_xe3nu")
+dimention = 1
+camera = NodePath("../../../../Camera/Room2")
+one_shot = false
+metadata/_custom_type_script = "uid://7exopasdoq2u"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room2" unique_id=672494100]
+script = ExtResource("9_p1ey4")
+ease_type = 1
+trans_type = 11
+duration = 1.5
+_op_mask = 3
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Room3" type="Node" parent="CameraGroup/Nodes/RoomSelector" unique_id=491702160]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectCamera" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room3" unique_id=1470529777 node_paths=PackedStringArray("camera")]
+script = ExtResource("12_xe3nu")
+dimention = 1
+camera = NodePath("../../../../Camera/Room3")
+one_shot = false
+metadata/_custom_type_script = "uid://7exopasdoq2u"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/RoomSelector/Room3" unique_id=2089232949]
+script = ExtResource("9_p1ey4")
+ease_type = 3
+trans_type = 8
+_op_mask = 3
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Outside" type="Node" parent="CameraGroup/Nodes/RoomSelector" unique_id=347610826]
+script = ExtResource("8_fn7vs")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/RoomSelector/Outside" unique_id=379484145 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("10_nkk7n")
+dimention = 1
+follow_target = NodePath("../../../../../PlayerGroup/Player")
+follow_type = 0
+offset = Vector3(0, 20, 0)
+one_shot = false
+priority = 2
+
+[node name="EffectRotate" type="Node" parent="CameraGroup/Nodes/RoomSelector/Outside" unique_id=1410009906]
+script = ExtResource("14_cuy0c")
+metadata/_custom_type_script = "uid://dva62hgnkfmx3"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/RoomSelector/Outside" unique_id=1105264157]
+script = ExtResource("9_p1ey4")
+ease_type = 2
+trans_type = 1
+duration = 0.4
+_op_mask = 3
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Camera" type="Node" parent="CameraGroup" unique_id=1315232527]
+
+[node name="Main" type="Camera3D" parent="CameraGroup/Camera" unique_id=375481945]
+
+[node name="NodeCameraHost" type="Node" parent="CameraGroup/Camera/Main" unique_id=286738078]
+script = ExtResource("15_hg7l0")
+metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
+
+[node name="Room1" type="Camera3D" parent="CameraGroup/Camera" unique_id=654190261]
+process_mode = 4
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -313, 0, -130)
+
+[node name="Room1Path" type="Path3D" parent="CameraGroup/Camera" unique_id=1095889556]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319, 5, 0)
+curve = SubResource("Curve3D_lajqd")
+
+[node name="Room2" type="Camera3D" parent="CameraGroup/Camera" unique_id=626315492]
+process_mode = 4
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -106, 25, -154)
+
+[node name="Room3" type="Camera3D" parent="CameraGroup/Camera" unique_id=1233042111]
+process_mode = 4
+transform = Transform3D(-1, -8.742278e-08, -3.821371e-15, 0, -4.371139e-08, 1, -8.742278e-08, 1, 4.371139e-08, 105, 252, 26)
+
+[connection signal="body_entered" from="Areas/Outside" to="Areas/Outside/CameraSetterHelper" method="set_rotation"]

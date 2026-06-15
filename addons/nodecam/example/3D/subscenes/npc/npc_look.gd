@@ -1,4 +1,4 @@
-extends Sprite2D
+extends Node3D
 
 #region External Variables
 @export var selection : int
@@ -9,7 +9,7 @@ extends Sprite2D
 
 
 #region OnReady Variables
-@onready var _label: Label = $Label
+@onready var _label: Label3D = $Visual/Label3D
 #endregion
 
 
@@ -21,20 +21,18 @@ func _ready() -> void:
 
 
 #region Interaction Methods
-func entered_interaction() -> void:
-	_label.visible = true
-func exited_interaction() -> void:
-	_label.visible = false
-
 func interact() -> void:
 	if !selector:
 		return
 	if selector.selection == selection:
 		selector.selection = 0
-		%SignTexture.visible = false
 		_label.visible = true
 		return
 	selector.selection = selection
-	%SignTexture.visible = true
+	_label.visible = false
+
+func entered_interaction() -> void:
+	_label.visible = true
+func exited_interaction() -> void:
 	_label.visible = false
 #endregion

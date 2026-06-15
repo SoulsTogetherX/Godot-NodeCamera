@@ -30,6 +30,8 @@ func defer_method(foo : Callable) -> void:
 	_defer_queue.append(foo)
 func run_defered_methods() -> void:
 	var i : int = 0
+	# while loop becuase defered methods can be added while
+	# this is running.
 	while i < _defer_queue.size():
 		if _defer_queue[i].is_valid():
 			_defer_queue[i].call()
@@ -62,6 +64,7 @@ func _settup_camera_states() -> void:
 	# Args record is referenced in both camera states
 	_target_state._vars = {}
 	_current_state._vars = _target_state._vars
+	_current_state.test = true
 	
 	# Overwrite the states with the current camera information
 	_target_state.set_camera(cam)
@@ -269,6 +272,7 @@ func run_tick(delta: float) -> void:
 		return
 	
 	run_transitions(delta, _target_state, _current_state)
+	_current_state.assign_unchanged(_target_state)
 	_current_state.apply_status()
 #endregion
 

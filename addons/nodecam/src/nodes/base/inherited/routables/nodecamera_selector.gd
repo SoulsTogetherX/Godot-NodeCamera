@@ -6,8 +6,7 @@ class_name NodeCameraSelector extends NodeCameraRoutable
 
 #region External Variables
 ## The index for the layer to be selected.
-@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
-var selection : int:
+@export var selection : int = 0:
 	set = set_selection,
 	get = get_selection
 #endregion
@@ -17,15 +16,11 @@ var selection : int:
 var _valid_layers : Array[NodeCameraLayer]
 
 var _selected_layer : NodeCameraLayer
-@export_storage var _selection_idx : int = 0
 #endregion
 
 
 
 #region Virtual Methods
-func _init() -> void:
-	super()
-	set_deferred("selection", _selection_idx)
 func _ready() -> void:
 	child_order_changed.connect(_settup_bundle)
 	_settup_vaild_layers()
@@ -47,34 +42,39 @@ func _is_node_cam_layer(node : Node) -> bool:
 
 func _settup_bundle() -> void:
 	var old_selection : NodeCameraLayer = _selected_layer
+	
 	_settup_vaild_layers()
+	selection = mini(selection, _valid_layers.size() - 1)
+	
 	_settup_selected_layer()
 	if old_selection != _selected_layer:
 		flag_route_layers_changed()
 func _settup_vaild_layers() -> void:
 	_valid_layers.assign(get_children().filter(_is_node_cam_layer))
 	
-	_selection_idx = mini(_selection_idx, _valid_layers.size() - 1)
 func _settup_selected_layer() -> void:
-	if _selection_idx < 0:
+	if selection < 0:
 		_selected_layer = null
 		return
-	_selected_layer = _valid_layers[_selection_idx]
+	_selected_layer = _valid_layers[selection]
 #endregion
 
 
 #region Acessing Methods
 func set_selection(val : int) -> void:
-	val = clampi(val, 0, _valid_layers.size() - 1)
-	if val == _selection_idx:
+	if !is_node_ready():
+		selection = val
 		return
-	_selection_idx = val
 	
-	if is_node_ready():
-		_settup_selected_layer()
-		flag_route_layers_changed()
+	val = clamp(val, -1, _valid_layers.size() - 1)
+	if val == selection:
+		return
+	selection = val
+	
+	_settup_selected_layer()
+	flag_route_layers_changed()
 func get_selection() -> int:
-	return _selection_idx
+	return selection
 
 ## Returns the currenly selected layer.
 func get_selected_layer() -> NodeCameraLayer:

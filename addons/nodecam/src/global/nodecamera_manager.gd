@@ -49,13 +49,13 @@ func vaild_route(
 func _process_tick() -> void:
 	var delta := get_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _process_hosts:
-		scope.run_tick(delta)
 		scope.run_defered_methods()
+		scope.run_tick(delta)
 func _physics_tick() -> void:
 	var delta := get_physics_process_delta_time()
 	for scope : NodeCameraHostExecutionScope in _physics_hosts:
-		scope.run_tick(delta)
 		scope.run_defered_methods()
+		scope.run_tick(delta)
 
 func _update_ticks() -> void:
 	var process := get_tree().process_frame

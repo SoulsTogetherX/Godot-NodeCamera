@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraEffectFollowPath extends NodeCameraEffect
-## An effect for clamping an effect to a path.
+class_name NodeCameraEffectCamera extends NodeCameraEffect
+## An effect that sets the camera position to a given target.
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
@@ -11,11 +11,12 @@ var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DI
 	set = set_dimention,
 	get = get_dimention
 
-@export_group("Additional Arguments")
-## The path the effect will cling to.
-var path_node: Node:
-	set = set_path_node,
-	get = get_path_node
+## The the node, either [Node2D] or [Node3D], this effect will follow.
+## [br][br]
+## Also see [member dimention]. 
+var camera : Node:
+	set = set_camera,
+	get = get_camera
 
 ## If [code]true[/code], the layer will only set the effect's position
 ## for one frame in [method effect_stage_changed]'s starting stage.
@@ -39,10 +40,10 @@ func _get_property_list() -> Array[Dictionary]:
 	})
 	
 	ret.append({
-		"name": "path_node",
+		"name": "camera",
 		"type": TYPE_OBJECT,
 		"hint": PROPERTY_HINT_NODE_TYPE,
-		"hint_string": "Path2D" if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "Path3D",
+		"hint_string": "Camera2D" if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else "Camera3D",
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	
@@ -61,14 +62,18 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	match property:
-		&"path_node":
-			return path_node != null
+		&"dimention":
+			return dimention != NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		&"camera":
+			return camera != null
 		&"one_shot":
 			return one_shot
 	return false
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"path_node":
+		&"dimention":
+			return NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
+		&"camera":
 			return null
 		&"one_shot":
 			return false
@@ -78,18 +83,29 @@ func _property_get_revert(property: StringName) -> Variant:
 
 #region Virtual Methods (User Overwrite)
 func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	target.global_position = (
-		path_node.curve.get_closest_point(target.global_position)
-	) + path_node.global_position
+	if (camera is Camera2D) != (dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL):
+		return
+	target.overwrite_status_with(camera)
+
+func effect_stage_changed(
+	target : NodeCameraState, _stage : LAYER_STAGES
+) -> void:
+	if (camera is Camera2D) != (dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL):
+		return
+	target.overwrite_status_with(camera)
 #endregion
 
 
 #region Public Methods (Stages)
 func get_needed_process_stages() -> PackedInt32Array:
-	if path_node:
+	if camera && !one_shot:
 		return [LAYER_STAGES.RUNNING]
+	return []
+func get_needed_change_stages() -> PackedInt32Array:
+	if camera:
+		return [LAYER_STAGES.STARTING]
 	return []
 #endregion
 
@@ -98,21 +114,22 @@ func get_needed_process_stages() -> PackedInt32Array:
 func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
 	if val == dimention:
 		return
-	path_node = null
+	camera = null
 	dimention = val
 	notify_property_list_changed()
 func get_dimention() -> NodeCameraUtility.DIMENSION:
 	return dimention
 
-func set_path_node(val : Node) -> void:
-	if !(val is Path2D) && !(val is Path3D):
+func set_camera(val : Node) -> void:
+	if !(val is Camera2D) && !(val is Camera3D):
 		val = null
-	if val == path_node:
+	if val == camera:
 		return
-	path_node = val
+	camera = val
 	notify_stage_masks_changed()
-func get_path_node() -> Node:
-	return path_node
+func get_camera() -> Node:
+	return camera
+
 
 func set_one_shot(val : bool) -> void:
 	if val == one_shot:
@@ -122,5 +139,4 @@ func set_one_shot(val : bool) -> void:
 func get_one_shot() -> bool:
 	return one_shot
 #endregion
-
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

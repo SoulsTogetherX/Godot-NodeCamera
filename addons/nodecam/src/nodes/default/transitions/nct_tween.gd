@@ -35,80 +35,48 @@ func _tween_transition(
 		current.global_position = (
 			st.global_position + delta * (target.global_position - st.global_position)
 		)
-	else:
-		current.global_position = target.global_position
 	
 	# 2D
 	if current is NodeCamera2DState:
 		if _op_mask & CAMERA_PROPERTY.ROTATION:
-			current.rotation = (
-				st.rotation + delta * (target.rotation - st.rotation)
-			)
-		else:
-			current.rotation = target.rotation
-		
-		
+			current.rotation = lerp_angle(st.rotation, target.rotation, delta)
 		if _op_mask & CAMERA_PROPERTY.OFFSET:
-			current.offset = (
-				st.offset + delta * (target.offset - st.offset)
-			)
-		else:
-			current.offset = target.offset
-		
+			current.offset = st.offset.lerp(target.offset, delta)
 		if _op_mask & CAMERA_PROPERTY.ZOOM:
 			current.zoom = (
 				st.zoom + delta * (target.zoom - st.zoom)
 			)
-		else:
-			current.zoom = target.zoom
 	
 	# 3D
 	if current is NodeCamera3DState:
 		if _op_mask & CAMERA_PROPERTY.ROTATION:
-			current.rotation = (
-				st.rotation + delta * wrapf(
-					target.rotation - st.rotation, -180, 180
-				)
-			)
-		else:
-			current.rotation = target.rotation
+			current.rotation = Quaternion.from_euler(st.rotation).slerp(
+				Quaternion.from_euler(target.rotation), delta
+			).get_euler()
 		
 		
 		if _op_mask & CAMERA_PROPERTY.H_OFFSET:
 			current.h_offset = (
 				st.h_offset + delta * (target.h_offset - st.h_offset)
 			)
-		else:
-			current.h_offset = target.h_offset
-		
 		if _op_mask & CAMERA_PROPERTY.V_OFFSET:
 			current.v_offset = (
 				st.v_offset + delta * (target.v_offset - st.v_offset)
 			)
-		else:
-			current.v_offset = target.v_offset
 		
 		
 		if _op_mask & CAMERA_PROPERTY.FOV:
 			current.fov = (
 				st.fov + delta * (target.fov - st.fov)
 			)
-		else:
-			current.fov = target.fov
-		
 		if _op_mask & CAMERA_PROPERTY.NEAR:
 			current.near = (
 				st.near + delta * (target.near - st.near)
 			)
-		else:
-			current.near = target.near
-		
 		if _op_mask & CAMERA_PROPERTY.FAR:
 			current.far = (
 				st.far + delta * (target.far - st.far)
 			)
-		else:
-			current.far = target.far
 #endregion
 
 
