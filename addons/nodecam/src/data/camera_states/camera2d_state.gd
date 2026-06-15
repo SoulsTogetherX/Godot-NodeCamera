@@ -26,19 +26,23 @@ var _zoom: Vector2
 	set = set_global_position,
 	get = get_global_position
 ## The expected [member Node2D.rotation] of the [Camera2D].
-@export var rotation : float:
+@export_range(0.0, 360.0, 0.1, "radians_as_degrees")
+var rotation : float:
 	set = set_rotation,
 	get = get_rotation
 ## The expected [member Node2D.rotation_degrees] of the [Camera2D].
-@export var rotation_degrees : float:
+var rotation_degrees : float:
 	set = set_rotation_degrees,
 	get = get_rotation_degrees
 #endregion
 
 
 #region Public Variables
-## The camera itself. It is considered bad practice to edit this directly.
-var camera : Camera2D
+## The camera being edited. It is considered bad practice to edit
+## this directly.
+var camera : Camera2D:
+	set = set_camera,
+	get = get_camera
 #endregion
 
 
@@ -83,19 +87,15 @@ func set_rotation_degrees(val : float) -> void:
 ## Converts [member rotation] to degrees and returns it.
 func get_rotation_degrees() -> float:
 	return rad_to_deg(_transform.get_rotation())
+
+func set_camera(cam : Camera2D) -> void:
+	camera = cam
+func get_camera() -> Camera2D:
+	return camera
 #endregion
 
 
 #region Public Helper Methods
-## An method for setting the current [Camera2D] of this
-## [NodeCameraState].
-func set_camera(cam : Camera2D) -> void:
-	camera = cam
-## An method for setting the current [Camera2D] of this
-## [NodeCameraState].
-func get_camera() -> Camera2D:
-	return camera
-
 ## A method for setting all values, of this [NodeCamera2DState],
 ## with the values of [param cam].
 func overwrite_status_with(cam : Camera2D) -> void:
@@ -103,7 +103,7 @@ func overwrite_status_with(cam : Camera2D) -> void:
 	_offset = cam.offset
 	_zoom = cam.zoom
 	
-	_mask = ~0
+	_mask = ~0 # All properties changed
 ## A method for setting all values, of this [NodeCamera2DState],
 ## with the values of [member camera].
 func overwrite_status() -> void:
@@ -111,8 +111,8 @@ func overwrite_status() -> void:
 	_offset = camera.offset
 	_zoom = camera.zoom
 	
-	_mask = ~0
-## A method for setting all values, of the given [Camera2D], with
+	_mask = ~0 # All properties changed
+## A method for setting all values, of [member camera], with
 ## the values of this [NodeCamera2DState].
 func apply_status() -> void:
 	camera.global_transform = _transform
@@ -129,8 +129,9 @@ func assign(status : NodeCamera2DState) -> void:
 	
 	_mask = ~0
 ## A method to reassign all values to match the given
-## [NodeCamera3DState], if they were not already changed (in this object)
-## since the last time this method called.
+## [NodeCamera2DState]. If they were already changed (in this
+## object) since the last time this method called, then
+## leave them unchanged.
 func assign_unchanged(status : NodeCamera2DState) -> void:
 	if !(_mask & NodeCameraUtility.CAMERA_PROPERTY.TRANSFORM):
 		_transform = status.transform

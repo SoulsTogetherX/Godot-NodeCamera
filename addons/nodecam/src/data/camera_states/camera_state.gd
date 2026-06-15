@@ -2,30 +2,31 @@
 @tool
 @abstract
 class_name NodeCameraState extends Object
-## The base abstract [Object] class that holds a camera's state. Is sent and edited by
-## [NodeCameraEffect] and [NodeCameraTransition] nodes.
+## The base abstract class that holds a camera's property values.
+## This object is sent and edited by [NodeCameraEffect] and
+## [NodeCameraTransition] nodes.
 
 #region External Variables
-# A dictionary of varables, which may be accessed or edited.
-# The key is ment to be the layer using the varable. If you need multiple
-# variables for a single layer, consider an inner class or dictionary.
+## A dictionary of varables, which may be accessed or edited.
+## The key should be whichever layer using the varable. If
+## you need multiple variables for a single layer, consider an
+## inner class or dictionary.
 var _vars : Dictionary[NodeCameraLayer, Variant]
 
-# Mask used to cache witch values were changed.
+# Mask used to cache which values were changed since the last
+# checkin.
 var _mask : int = 0
-
-var test : bool
 #endregion
 
 
 
 #region Public Helper Methods
 ## An abstract method for setting all values, of this [NodeCameraState],
-## with the values of the given camera.
+## with the values of the current camera.
 @abstract
 func overwrite_status() -> void
-## An abstract method for setting all values, of the given camera, with
-## the values of this [NodeCameraState].
+## An abstract method for setting all values, of the current camera
+## with the values of this [NodeCameraState].
 @abstract
 func apply_status() -> void
 

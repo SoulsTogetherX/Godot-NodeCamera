@@ -4,6 +4,7 @@ class_name NodeCamera3DState extends NodeCameraState
 ## The [NodeCameraState] class extension for [Camera3D] nodes.
 
 #region External Variables
+## The expected [member Node3D.global_transform] of the [Camera3D].
 @export var transform: Transform3D = Transform3D.IDENTITY:
 	set = set_transform,
 	get = get_transform
@@ -53,19 +54,24 @@ var _far: float = 4000.0
 	get = get_global_position
 
 ## The expected [member Node3D.rotation] of the [Camera3D].
-@export var rotation : Vector3:
+@export_custom(
+	PROPERTY_HINT_NONE, "radians"
+) var rotation : Vector3:
 	set = set_rotation,
 	get = get_rotation
 ## The expected [member Node3D.rotation_degrees] of the [Camera3D].
-@export var rotation_degrees : Vector3:
+var rotation_degrees : Vector3:
 	set = set_rotation_degrees,
 	get = get_rotation_degrees
 #endregion
 
 
 #region Public Variables
-## The camera itself. It is considered bad practice to edit this directly.
-var camera : Camera3D
+## The camera being edited. It is considered bad practice to edit
+## this directly.
+var camera : Camera3D:
+	set = set_camera,
+	get = get_camera
 #endregion
 
 
@@ -140,21 +146,16 @@ func set_rotation_degrees(val : Vector3) -> void:
 func get_rotation_degrees() -> Vector3:
 	var r := _transform.basis.get_euler()
 	return Vector3(rad_to_deg(r.x), rad_to_deg(r.y), rad_to_deg(r.z))
+
+func set_camera(cam : Camera3D) -> void:
+	camera = cam
+	apply_status()
+func get_camera() -> Camera3D:
+	return camera
 #endregion
 
 
 #region Public Helper Methods
-## An method for setting the current [Camera3D] of this
-## [NodeCameraState].
-func set_camera(cam : Camera3D) -> void:
-	camera = cam
-	apply_status()
-## An method for setting the current [Camera3D] of this
-## [NodeCameraState].
-func get_camera() -> Camera3D:
-	return camera
-
-
 ## A method for setting all values, of this [NodeCamera3DState],
 ## with the values of the given [param cam].
 func overwrite_status_with(cam : Camera3D) -> void:
@@ -187,7 +188,7 @@ func overwrite_status() -> void:
 	_far = camera.far
 	
 	_mask = ~0
-## A method for setting all values, of the given [Camera3D], with
+## A method for setting all values, of [member camera], with
 ## the values of this [NodeCamera3DState].
 func apply_status() -> void:
 	camera.global_transform = _transform
@@ -220,8 +221,9 @@ func assign(status : NodeCamera3DState) -> void:
 	
 	_mask = 0
 ## A method to reassign all values to match the given
-## [NodeCamera3DState], if they were not already changed (in this object)
-## since the last time this method called.
+## [NodeCamera3DState]. If they were already changed (in this
+## object) since the last time this method called, then
+## leave them unchanged.
 func assign_unchanged(status : NodeCamera3DState) -> void:
 	if !(_mask & NodeCameraUtility.CAMERA_PROPERTY.TRANSFORM):
 		_transform = status.transform

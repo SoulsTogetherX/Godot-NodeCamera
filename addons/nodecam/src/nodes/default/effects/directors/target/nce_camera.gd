@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectCamera extends NodeCameraEffect
-## An effect that sets the camera position to a given target.
+## An effect that mimics a provided camera.
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
@@ -11,7 +11,7 @@ var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DI
 	set = set_dimention,
 	get = get_dimention
 
-## The the node, either [Node2D] or [Node3D], this effect will follow.
+## The camera node, either [Camera2D] or [Camera3D], this effect will reference.
 ## [br][br]
 ## Also see [member dimention]. 
 var camera : Node:
@@ -82,6 +82,7 @@ func _property_get_revert(property: StringName) -> Variant:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -89,6 +90,7 @@ func process_effect(
 		return
 	target.overwrite_status_with(camera)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -99,10 +101,12 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if camera && !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	if camera:
 		return [LAYER_STAGES.STARTING]
@@ -119,6 +123,7 @@ func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
 	notify_property_list_changed()
 func get_dimention() -> NodeCameraUtility.DIMENSION:
 	return dimention
+
 
 func set_camera(val : Node) -> void:
 	if !(val is Camera2D) && !(val is Camera3D):

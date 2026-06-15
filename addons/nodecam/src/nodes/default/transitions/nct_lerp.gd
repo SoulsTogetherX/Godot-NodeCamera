@@ -8,7 +8,7 @@ class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
 @export_range(0, 1, 0.001, "or_less", "or_greater")
 var factor : float = 0.95
 
-## If [code]true[/code], this layer scale the factor according to
+## If [code]true[/code], this layer will scale the factor according to
 ## the delta.
 ## [br][br]
 ## Ths can make the lerping feel sluggish.
@@ -25,6 +25,7 @@ var factor : float = 0.95
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraTransition.process_transition] method.
 func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
@@ -126,6 +127,7 @@ func process_transition(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
 #endregion

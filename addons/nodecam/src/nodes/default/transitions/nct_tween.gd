@@ -13,14 +13,16 @@ class_name NodeCameraTransitionTween extends NodeCameraTransitionGeneral
 @export_range(0.0, 1.0, 0.001, "or_greater") var duration : float = 0.5
 
 @export_group("Extra Args")
-## The TweenProcessModethat will be used to tween between property values.
+## The TweenProcessMode that will be used to tween between property values.
 ## This is ignored if [member manual_step] is [code]true[/code].
 @export var tween_process_mode : Tween.TweenProcessMode = Tween.TweenProcessMode.TWEEN_PROCESS_PHYSICS
 
 ## If [code]true[/code], this transition will use [method custom_step]
 ## for tween transitions instead. Can cause issues if value is changed
 ## mid-transition.
-@export var manual_step : bool = true
+@export var manual_step : bool = true:
+	set = set_manual_step,
+	get = get_manual_step
 #endregion
 
 
@@ -81,6 +83,7 @@ func _tween_transition(
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraTransition.transition_stage_changed] method.
 func transition_stage_changed(
 	target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
@@ -114,6 +117,7 @@ func transition_stage_changed(
 	tween.tween_callback(get_active_scope().flag_advance_stage.bind(self))
 	
 	target.set_var(self, tween)
+## Implements the [method NodeCameraTransition.get_needed_process_stages] method.
 func process_transition(
 	delta : float, target : NodeCameraState, _current : NodeCameraState,
 	_stage : LAYER_STAGES
@@ -123,12 +127,17 @@ func process_transition(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if manual_step:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_linger_stages] method.
 func get_needed_linger_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING, LAYER_STAGES.HALTED]
 #endregion

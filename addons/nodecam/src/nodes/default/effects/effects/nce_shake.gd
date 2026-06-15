@@ -16,12 +16,12 @@ var frequency : float = 20:
 	get = get_frequency
 
 @export_group("Baises")
-## How much in the x axis will the camera shake.
+## How much (in the x axis) will the camera shake.
 @export_range(0.0, 1.0, 0.001, "or_greater")
 var h_bias : float = 1.0:
 	set = set_h_bias,
 	get = get_h_bias
-## How much in the y axis will the camera shake.
+## How much (in the y axis) will the camera shake.
 @export_range(0.0, 1.0, 0.001, "or_greater")
 var v_bias : float = 1.0:
 	set = set_v_bias,
@@ -39,6 +39,7 @@ var angle : float = 0.0:
 @export var continuous : bool = true:
 	set = set_continuous,
 	get = get_continuous
+
 @export_subgroup("Grow Ease")
 ## The curve used for shake growth.
 ## [br][br]
@@ -70,8 +71,8 @@ var decay_duration : float = 0.0:
 	get = get_decay_duration
 
 @export_group("Extra Settings")
-## If [code]true[/code], this effect will compile with previous effects
-## that changes the camera's offset.
+## If [code]true[/code], this effect will compile with prior effect
+## layers changes the camera's offset.
 @export var incremental : bool = false
 #endregion
 
@@ -111,6 +112,7 @@ func _sample_curve(curve : Curve, pos : float) -> float:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
@@ -150,6 +152,7 @@ func process_effect(
 	_delta_time += delta
 	_stage_time += delta
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
@@ -160,6 +163,7 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	var ret : PackedInt32Array = []
 	if grow_curve != null && !is_zero_approx(grow_duration):
@@ -168,8 +172,9 @@ func get_needed_process_stages() -> PackedInt32Array:
 		ret.append(LAYER_STAGES.ENDING)
 	if continuous:
 		ret.append(LAYER_STAGES.RUNNING)
-	
 	return ret
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	var ret : PackedInt32Array = []
 	if grow_curve != null && !is_zero_approx(grow_duration):
@@ -178,7 +183,6 @@ func get_needed_change_stages() -> PackedInt32Array:
 	if decay_curve != null && !is_zero_approx(decay_duration):
 		ret.append(LAYER_STAGES.ENDING)
 		ret.append(LAYER_STAGES.HALTED)
-	
 	return ret
 #endregion
 

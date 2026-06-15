@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectGlue extends NodeCameraEffect
-## An effect that sets the camera position to a given target.
+## An effect that sets the camera properties according to a given target.
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
@@ -11,26 +11,27 @@ var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DI
 	set = set_dimention,
 	get = get_dimention
 
-## The the node, either [Node2D] or [Node3D], this effect will follow.
+## The node, either [Node2D] or [Node3D], this effect will follow.
 ## [br][br]
-## Also see [member dimention]. 
+## Also see [member dimention] and [member follow_type]. 
 var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
 
-## Determines whether a 3D camera will look at the target position, or
-## reposition itself to the target position
+## Determines how this layer will process [member follow_target].
+## [br][br]
+## Also see [member dimention].
 var follow_type := NodeCameraUtility.FOLLOW_TYPE.POSITION:
 	set = set_follow_type,
 	get = get_follow_type
-	
+
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]true[/code].
+## [member dimention] is [code]TWO_DIMENSIONAL[/code].
 var offset_2d := Vector2.ZERO:
 	set = set_offset_2d,
 	get = get_offset_2d
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]false[/code].
+## [member dimention] is [code]THREE_DIMENSIONAL[/code].
 var offset_3d := Vector3.ZERO:
 	set = set_offset_3d,
 	get = get_offset_3d
@@ -148,11 +149,13 @@ func _get(property: StringName) -> Variant:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
 	_handle_glue(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -161,10 +164,12 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if follow_target && !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	if follow_target:
 		return [LAYER_STAGES.STARTING]
@@ -232,8 +237,8 @@ func _handle_glue(target : NodeCameraState) -> void:
 				target, follow_target.global_position + offset_3d, Vector3.UP
 			)
 			return
-		if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
-			NodeCameraUtility.zoom_to_point_3D(
+		if follow_type == NodeCameraUtility.FOLLOW_TYPE.FIT:
+			NodeCameraUtility.fit_to_point_3D(
 				target, follow_target.global_position + offset_3d
 			)
 			return
@@ -243,8 +248,8 @@ func _handle_glue(target : NodeCameraState) -> void:
 		target.global_position = follow_target.global_position + offset_3d
 		return
 	
-	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
-		NodeCameraUtility.zoom_to_point_2D(
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.FIT:
+		NodeCameraUtility.fit_to_point_2D(
 			target, follow_target.global_position + offset_2d
 		)
 		return

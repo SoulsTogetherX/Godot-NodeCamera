@@ -1,27 +1,27 @@
-class_name NodeCameraUtility
+class_name NodeCameraUtility extends Object
 ## A global class for general [NodeCameraState] methods.
 
 #region Enums
 ## PreBuilt flags used for Editor Exporting of [enum DIMENSION].
 const DIMENSION_FLAGS := "2D:0,3D:1"
 ## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS]
-## with 2D.
-const FOLLOW_TYPE_2D_FLAGS := "Position:0,Size:1"
+## within a 2D context.
+const FOLLOW_TYPE_2D_FLAGS := "Position:0,Fit:1"
 ## PreBuilt flags used for Editor Exporting of [enum FOLLOW_TYPE_FLAGS]
-## with 3D.
-const FOLLOW_TYPE_3D_FLAGS := "Position:0,Size:1,RotateMimic:2,LookAt:3"
+## within a 3D context.
+const FOLLOW_TYPE_3D_FLAGS := "Position:0,Fit:1,RotateMimic:2,LookAt:3"
 
-## Flags used to decide between the 2D and 3D variation of a layer.
+## Flags used to decide between the 2D and 3D context variation of a layer.
 enum DIMENSION {
-	TWO_DIMENSIONAL	= 0,	## 
-	THREE_DIMENSIONAL = 1	## 
+	TWO_DIMENSIONAL	= 0,	## Represents 2D context
+	THREE_DIMENSIONAL = 1	## Represents 3D context
 }
-## The mode certain layers use to change their output.
+## The mode certain layers use to process a target.
 enum FOLLOW_TYPE {
-	POSITION = 0,		## 
-	SIZE = 1,			## 
-	ROTATE_MIMIC = 2,	## 
-	LOOK_AT = 3			## 
+	POSITION = 0,		## Set position to the target's position
+	FIT = 1,			## Set zoom/fov/size to fit the target's position on screen
+	ROTATE_MIMIC = 2,	## Rotate to look in the same direction of target
+	LOOK_AT = 3			## Rotate to look at the target's position
 }
 
 ## The bitwise flags for [LayerRecord] stages.
@@ -59,13 +59,17 @@ enum CAMERA_PROPERTY {
 static func get_3D_viewport_size(target: NodeCamera3DState) -> Vector2:
 	return target.camera.get_viewport().get_visible_rect().size
 ## Returns the viewport expected size in 2D space, not including zoom.
+## [br][br]
+## Also see [member get_2D_viewport_size].
 static func get_2D_unzoomed_viewport_size(target: NodeCamera2DState) -> Vector2:
 	return target.camera.get_viewport().get_visible_rect().size
-## Returns the viewport expected size in 2D space.
+## Returns the viewport expected size in 2D space, including zoom.
+## [br][br]
+## Also see [member get_2D_viewport_size].
 static func get_2D_viewport_size(target: NodeCamera2DState) -> Vector2:
 	return get_2D_unzoomed_viewport_size(target) / target.zoom.abs()
 
-## Returns a 3D camera's expected transform, including offset
+## Returns a 3D camera's expected transform, including offset.
 static func get_3D_camera_transform(
 	target: NodeCamera3DState
 ) -> Transform3D:
@@ -73,7 +77,7 @@ static func get_3D_camera_transform(
 	tr.origin += tr.basis.y * target.v_offset
 	tr.origin += tr.basis.x * target.h_offset
 	return tr
-## Returns a 2D camera's expected transform, including offset
+## Returns a 2D camera's expected transform, including offset.
 static func get_2D_camera_transform(
 	target: NodeCamera3DState
 ) -> Transform3D:
@@ -82,7 +86,7 @@ static func get_2D_camera_transform(
 	tr.origin += tr.basis.x * target.h_offset
 	return tr
 
-## See [method Camer3D.get_camera_projection].
+## Implements [method Camera3D.get_camera_projection] for [NodeCamera3DState].
 static func get_camera_projection(
 	target: NodeCamera3DState
 ) -> Projection:
@@ -110,7 +114,7 @@ static func get_camera_projection(
 		_:
 			return Projection()
 
-## See [method Camer3D.is_position_behind].
+## Implements [method Camera3D.is_position_behind] for [NodeCamera3DState].
 static func is_position_behind(
 	target: NodeCamera3DState, world_point: Vector3
 ) -> bool:
@@ -118,7 +122,7 @@ static func is_position_behind(
 	var eye_dir := -t.basis.z.normalized()
 	return eye_dir.dot(world_point - t.origin) < target.near
 
-## See [method Camer3D.get_frustum].
+## Implements [method Camera3D.get_frustum] for [NodeCamera3DState].
 static func get_frustum(target: NodeCamera3DState) -> Array[Plane]:
 	var proj := get_camera_projection(target)
 	var cam_xform := get_3D_camera_transform(target)
@@ -132,7 +136,7 @@ static func get_frustum(target: NodeCamera3DState) -> Array[Plane]:
 		cam_xform * proj.get_projection_plane(Projection.PLANE_BOTTOM),
 	]
 
-## See [method Camer3D.is_position_in_frustum].
+## Implements [method Camera3D.is_position_in_frustum] for [NodeCamera3DState].
 static func is_position_in_frustum(
 	target: NodeCamera3DState, world_point: Vector3
 ) -> bool:
@@ -141,7 +145,7 @@ static func is_position_in_frustum(
 			return false
 	return true
 
-## See [method Camer3D.project_ray_normal].
+## Implements [method Camera3D.project_ray_normal] for [NodeCamera3DState].
 static func project_ray_normal(
 	target: NodeCamera3DState, screen_point: Vector2
 ) -> Vector3:
@@ -149,7 +153,7 @@ static func project_ray_normal(
 		get_3D_camera_transform(target).basis * project_local_ray_normal(target, screen_point)
 	).normalized()
 
-## See [method Camer3D.project_local_ray_normal].
+## Implements [method Camera3D.project_local_ray_normal] for [NodeCamera3DState].
 static func project_local_ray_normal(
 	target: NodeCamera3DState, screen_point: Vector2
 ) -> Vector3:
@@ -171,7 +175,7 @@ static func project_local_ray_normal(
 	)
 	return ray.normalized()
 
-## See [method Camer3D.project_ray_origin].
+## Implements [method Camera3D.project_ray_origin] for [NodeCamera3DState].
 static func project_ray_origin(
 	target: NodeCamera3DState, screen_point: Vector2
 ) -> Vector3:
@@ -199,7 +203,7 @@ static func project_ray_origin(
 		return get_3D_camera_transform(target) * ray
 	return get_3D_camera_transform(target).origin
 
-## See [method Camer3D.project_position].
+## Implements [method Camera3D.project_position] for [NodeCamera3DState].
 static func project_position(
 	target: NodeCamera3DState, screen_point: Vector2, z_depth: float
 ) -> Vector3:
@@ -233,7 +237,7 @@ static func project_position(
 	var local_point := Vector3(point.x, point.y, -z_depth)
 	return get_3D_camera_transform(target) * local_point
 
-## See [method Camer3D.unproject_position].
+## Implements [method Camera3D.unproject_position] for [NodeCamera3DState].
 static func unproject_position(
 	target: NodeCamera3DState, world_point: Vector3
 ) -> Vector2:
@@ -261,7 +265,8 @@ static func unproject_position(
 
 
 #region Look At
-## Takes the current [NodeCamera3DState] and makes it look at a [Vector3].
+## Takes the current [NodeCamera3DState] and makes it look at
+## position [param look_at_point].
 static func look_at_camera(
 	target: NodeCamera3DState, look_at_point: Vector3, up: Vector3 = Vector3.UP
 ) -> void:
@@ -320,6 +325,7 @@ static func frame_camera_2D(
 		viewport_target_offset.y = dead_zone_rect.w - global_pos.y
 	
 	target.global_position -= viewport_target_offset
+
 ## Returns moves the given [NodeCamera3DState] within a deadzone box.
 static func frame_camera_3D(
 	target : NodeCamera3DState, global_pos : Vector3,
@@ -372,20 +378,51 @@ static func frame_camera_3D(
 
 
 #region Zoom
-static func zoom_to_point_2D(
+## Changes the [member NodeCamera2DState.zoom] to fit the given position
+## [param target_global_pos] in a [Camera2D]'s view.
+## [br][br]
+## Also see [member fit_camera_to_points_2D].
+static func fit_to_point_2D(
 	target : NodeCamera2DState,
 	target_global_pos: Vector2,
-	padding : float = 0.0
+	padding : float = 0.05
 ) -> void:
 	var distance := target.global_position.distance_to(target_global_pos)
 	var view_size := target.get_camera().get_viewport_rect().size
 	target.zoom = Vector2.ONE * (
 		maxf(view_size.x, view_size.y) / (distance * (2.0 + padding))
 	)
-static func zoom_to_point_3D(
+## Changes the [member NodeCamera2DState.zoom] to fit all given positions
+## [param PackedVector2Array] in a [Camera2D]'s view.
+## [br][br]
+## Also see [member fit_to_point_2D].
+static func fit_camera_to_points_2D(
+	target : NodeCamera2DState, points: PackedVector2Array,
+	padding: float = 0.05
+) -> void:
+	if points.is_empty():
+		return
+	
+	var max_zoom := 0.0
+	for global_point : Vector2 in points:
+		var distance := target.global_position.distance_to(global_point)
+		var view_size := target.get_camera().get_viewport_rect().size
+		max_zoom = maxf(
+			max_zoom,
+			maxf(view_size.x, view_size.y) / (distance * (2.0 + padding))
+		)
+	target.zoom = Vector2.ONE * max_zoom
+
+
+## Changes the [member NodeCamera3DState.fov] or [member NodeCamera3DState.size]
+## (depending on [Camera3D.projection]) to fit the given positions
+## [param target_global_pos] in a [Camera3D]'s view.
+## [br][br]
+## Also see [member fit_camera_to_points_3D].
+static func fit_to_point_3D(
 	target : NodeCamera3DState,
 	target_global_pos: Vector3,
-	padding : float = 0.0
+	padding : float = 0.05
 ) -> void:
 	var local := target.transform.affine_inverse() * target_global_pos
 	if local.z >= 0.0:
@@ -440,4 +477,133 @@ static func zoom_to_point_3D(
 				absf(local.y) * target.near * aspect / depth
 			) * 2.0
 			target.size = maxf(need_size * padding_full, 0.0001)
+## Changes the [member NodeCamera3DState.fov] or [member NodeCamera3DState.size]
+## (depending on [Camera3D.projection]) to fit all given positions
+## [param PackedVector2Array] in a [Camera3D]'s view.
+## [br][br]
+## Also see [member fit_to_point_3D].
+static func fit_camera_to_points_3D(
+	target : NodeCamera3DState, points: PackedVector3Array,
+	padding: float = 0.05
+) -> void:
+	if points.is_empty():
+		return
+	
+	var camera := target.camera
+	var aspect := get_3D_viewport_size(target).aspect()
+	var cam_to_world := target.transform.affine_inverse()
+	
+	var max_zoom := 0.0
+	for global_point : Vector3 in points:
+		var local: Vector3 = cam_to_world * global_point
+		
+		if local.z >= 0.0:
+			return
+		var depth := max(-local.z, 0.000001)
+		
+		match camera.projection:
+			Camera3D.PROJECTION_PERSPECTIVE:
+				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+					max_zoom = maxf(
+						max_zoom, atan(
+							maxf(
+								absf(local.y) / depth,
+								absf(local.x) / (depth * aspect)
+							)
+						)
+					)
+					continue
+				max_zoom = maxf(
+					max_zoom, atan(
+						maxf(
+							absf(local.x) / depth,
+							absf(local.y) * aspect / depth
+						)
+					)
+				)
+				continue
+			
+			Camera3D.PROJECTION_ORTHOGONAL:
+				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+					max_zoom = maxf(
+						max_zoom, maxf(
+							absf(local.y), absf(local.x) / aspect
+						)
+					)
+					return
+				max_zoom = maxf(
+					max_zoom, maxf(
+						absf(local.x), absf(local.y) * aspect
+					)
+				)
+				continue
+			
+			Camera3D.PROJECTION_FRUSTUM:
+				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
+					max_zoom = maxf(
+						max_zoom, maxf(
+							absf(local.y) * target.near / depth,
+							absf(local.x) * target.near / (depth * aspect)
+						)
+					)
+					return
+				max_zoom = maxf(
+					max_zoom, maxf(
+						absf(local.x) * target.near / depth,
+						absf(local.y) * target.near * aspect / depth
+					)
+				)
+	
+	max_zoom *= (padding + 1.0) * 2.0
+	
+	match camera.projection:
+		Camera3D.PROJECTION_PERSPECTIVE:
+			camera.fov = rad_to_deg(max_zoom)
+		Camera3D.PROJECTION_ORTHOGONAL, Camera3D.PROJECTION_FRUSTUM:
+			camera.size = max(max_zoom, 0.0001)
+#endregion
+
+
+#region Boundary
+## Restricts a [NodeCamera2DState] within a [param bound_rect] bounary.
+static func fit_to_rectangle(
+	target : NodeCamera2DState, bound_rect: Rect2,
+	include_offset : bool = true
+) -> void:
+	var cam : Camera2D = target.get_camera()
+	var int_off := cam.offset * int(include_offset)
+	
+	var center : Vector2 = target.global_position + int_off
+	var half_view : Vector2 = cam.get_viewport_rect().size / (2 * target.zoom.abs())
+	var min_center := bound_rect.position + half_view
+	var max_center := bound_rect.position + bound_rect.size - half_view
+	
+	if min_center.x > max_center.x:
+		center.x = bound_rect.position.x + bound_rect.size.x * 0.5
+	else:
+		center.x = clampf(center.x, min_center.x, max_center.x)
+	
+	if min_center.y > max_center.y:
+		center.y = bound_rect.position.y + bound_rect.size.y * 0.5
+	else:
+		center.y = clampf(center.y, min_center.y, max_center.y)
+	
+	target.global_position = center - int_off
+#endregion
+
+
+#region Node Methods
+## Returns if [param parent_layer] is currently routing to the child
+## [param layer]. Only works for direct pairings.
+static func vaild_route(
+	parent_layer : NodeCameraGroup, layer : NodeCameraLayer
+) -> bool:
+	return (
+		(layer.camera_mask & parent_layer.camera_mask) &&
+		layer._parent_group == parent_layer &&
+		(
+			!(parent_layer is NodeCameraRoutable) ||
+			parent_layer._route_to_layers().has(layer)
+		)
+	)
 #endregion

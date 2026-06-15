@@ -2,7 +2,7 @@
 @tool
 class_name NodeCameraEffectGlueFramed extends NodeCameraEffect
 ## A [Camera2D] effect that applies a deadzone on a frame, only
-## following the target position when it tries to leave.
+## following the target's position when it tries to leave the deadzone.
 ## [br[br]
 ## [b]NOTE[/b]: Currently only works for 2D.
 
@@ -14,31 +14,31 @@ var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DI
 	set = set_dimention,
 	get = get_dimention
 
-## The the node, either [Node2D] or [Node3D], this effect will follow.
+## The node, either [Node2D] or [Node3D], this effect will follow.
 ## [br][br]
 ## Also see [member dimention]. 
 var follow_target : Node:
 	set = set_follow_target,
 	get = get_follow_target
 
-## The deadzone this transition uses. Each coordinate uses a ratio
-## from 0-1 to calculate the frame's width and height, depending
+## The deadzone this effect uses. Each coordinate uses a ratio
+## (from 0.0 to 1.0) to calculate the frame's width and height, depending
 ## on the current viewport of the camera.
 var dead_zone := Vector2(0.2, 0.2)
 
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]true[/code].
+## [member dimention] is [code]TWO_DIMENSIONAL[/code].
 var offset_2d := Vector2.ZERO:
 	set = set_offset_2d,
 	get = get_offset_2d
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]false[/code].
+## [member dimention] is [code]THREE_DIMENSIONAL[/code].
 var offset_3d := Vector3.ZERO:
 	set = set_offset_3d,
 	get = get_offset_3d
 
 ## The normal that will be used in camera position calculations, if
-## [member dimention] is [code]false[/code].
+## [member dimention] is [code]THREE_DIMENSIONAL[/code].
 ## [br][br]
 ## Also see [member dimention]. 
 var normal := Vector3.UP:
@@ -163,6 +163,7 @@ func _get(property: StringName) -> Variant:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -175,6 +176,7 @@ func process_effect(
 		target, follow_target.global_position + offset_3d, normal, dead_zone
 	)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -190,10 +192,12 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if follow_target && !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	if follow_target:
 		return [LAYER_STAGES.STARTING]

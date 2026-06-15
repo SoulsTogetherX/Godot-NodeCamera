@@ -1,9 +1,9 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraLayerRecordStorage extends Object
-## Stores and orders [LayerRecord]s, in order of priority, with the use of priority
-## buckets. Using the available methods, you can use the priority buckets to
-## construct an iterable and cache-friendly flatlist.
+## Stores and orders [LayerRecord] resources, in order of priority, with the use of priority
+## buckets. Using the available methods, you can also construct an iterable and
+## cache-friendly flatlist from the priority buckets.
 
 #region Private Variables
 var _priority_buckets: Dictionary[int, Array] = {}
@@ -41,7 +41,8 @@ func _remove_from_bucket(record: LayerRecord, priority : int) -> void:
 
 
 #endregion Public Access Methods
-## Clears all data. Does not free the stored [LayerRecord]s' memory.
+## Clears all data, but does not free the [LayerRecord] resources themselves. Beware
+## memory leaks.
 func clear() -> void:
 	_priority_buckets.clear()
 	_priority_record.clear()
@@ -73,7 +74,7 @@ func reorder(
 	_remove_from_bucket(record, old_priority)
 	_insert_into_bucket(record, new_priority)
 
-## Returns the previously-constructed of this [NodeCameraLayerRecordStorage].
+## Returns the previously-constructed flatlist of this [NodeCameraLayerRecordStorage].
 func get_flat_list() -> Array[LayerRecord]:
 	return _flat_layer_list
 ## Returns if there are no stored records in this [NodeCameraLayerRecordStorage].

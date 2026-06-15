@@ -6,9 +6,11 @@ class_name NodeCameraTransitionGeneral extends NodeCameraTransition
 ## property in [NodeCamera2DState] and [NodeCamera3DState] objects.
 ## [br][br]
 ## [b]NOTE[/b]: For efficiency reasons, you may want to create your own
-## transition that's more selective in what properties it affects.
+## transition that are more selective in what properties they affect.
 
 #region Enum
+## An enum for bitmasking camera properties.
+## See [enum NodeCameraUtility.CAMERA_PROPERTY].
 const CAMERA_PROPERTY = NodeCameraUtility.CAMERA_PROPERTY
 #endregion
 
@@ -85,7 +87,7 @@ var fov : bool:
 	get():
 		return _op_mask & CAMERA_PROPERTY.FOV
 ## If [code]true[/code], this transition is expected to transition
-## the fov property.
+## the size property.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var size : bool:
 	set(val):
@@ -94,7 +96,7 @@ var size : bool:
 	get():
 		return _op_mask & CAMERA_PROPERTY.SIZE
 ## If [code]true[/code], this transition is expected to transition
-## the fov property.
+## the frustum_offset property.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var frustum_offset : bool:
 	set(val):

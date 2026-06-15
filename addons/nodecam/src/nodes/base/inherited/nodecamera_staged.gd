@@ -5,27 +5,25 @@ class_name NodeCameraStaged extends NodeCameraLayer
 ## A [NodeCameraLayer] node for any layer affected by stages. Namely
 ## [NodeCameraEffect] and [NodeCameraTransition].
 
-
 #region External Variables
 ## The inital stage this layer will start at, if added normally.
 ## [br][br]
-## Use methods like
-## [method NodeCameraExecutionScope.flag_overwrite_stage] if you
-## want to add this layer with a different starting stage.
+## Use the methods like [method NodeCameraExecutionScope.flag_overwrite_stage]
+## if you want to add this layer with a different starting stage.
 @export var inital_stage : LAYER_STAGES = LAYER_STAGES.STARTING
 #endregion
 
 
 
 #region Public Methods (Stage Helpers)
-## Flags the current node to have it's stage advanced one forward. Only
+## Flags the current node to have it's stage advance one step forward. Only
 ## works for the current scope of the [color=#D6D000][b]Runtime
 ## Method[/b][/color].
 ## [br][br]
 ## [b]Note[/b]: This method can only be called in a [color=#D6D000][b]
 ## Runtime Method[/b][/color]. Undefined behavior otherwise.
 ## [br][br]
-## Also see: [enum NodeCameraUtility.LAYER_STAGES] and
+## Also see [enum NodeCameraUtility.LAYER_STAGES] and
 ## [method notify_advance_stage].
 func advance_stage() -> void:
 	_scope.flag_advance_stage(self)
@@ -37,7 +35,7 @@ func advance_stage() -> void:
 ## [b]Note[/b]: This method can only be called in a [color=#D6D000][b]
 ## Runtime Method[/b][/color]. Undefined behavior otherwise.
 ## [br][br]
-## Also see: [enum NodeCameraUtility.LAYER_STAGES] and
+## Also see [enum NodeCameraUtility.LAYER_STAGES] and
 ## [method notify_advance_to_stage].
 func advance_to_stage(stage : LAYER_STAGES) -> void:
 	_scope.flag_advance_to_stage(self, stage)
@@ -48,7 +46,7 @@ func advance_to_stage(stage : LAYER_STAGES) -> void:
 ## [b]Note[/b]: This method can only be called in a [color=#D6D000][b]
 ## Runtime Method[/b][/color]. Undefined behavior otherwise.
 ## [br][br]
-## Also see: [enum NodeCameraUtility.LAYER_STAGES] and
+## Also see [enum NodeCameraUtility.LAYER_STAGES] and
 ## [method notify_overwrite_stage].
 func overwrite_stage(stage : LAYER_STAGES) -> void:
 	_scope.flag_overwrite_stage(self, stage)
@@ -56,10 +54,10 @@ func overwrite_stage(stage : LAYER_STAGES) -> void:
 
 
 #region Public Flag Methods
-## Forces all active [NodeCameraExecutionScope]s to notify this
+## Forces all active [NodeCameraExecutionScope] resources to notify that this
 ## [NodeCameraStaged]'s stage masks have changed.
 ## [br][br]
-## Also see: [method NodeCameraLayer.get_parent_scopes],
+## Also see [method NodeCameraLayer.get_parent_scopes],
 ## [method get_needed_process_stages], [method get_needed_linger_stages],
 ## and [method get_needed_change_stages].
 func notify_stage_masks_changed() -> void:
@@ -70,9 +68,9 @@ func notify_stage_masks_changed() -> void:
 
 #region Public Methods (Stages)
 ## Implement to return a list of requested [enum NodeCameraUtility.LAYER_STAGES]
-## for the process [color=#D6D000][b]Runtime Method[/b][/color]. All stages returned
-## here will also be treated as returned by [method get_needed_linger_stages] as well.
-## Ignores [code]LAYER_STAGES.HALTED[/code].
+## for the process [color=#D6D000][b]Runtime Method[/b][/color] to be run within. All
+## stages here will also be treated as returned by [method get_needed_linger_stages] as
+## well. Ignores [code]LAYER_STAGES.HALTED[/code].
 ## [br][br]
 ## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
 ## expected to change, use [method notify_stage_masks_changed].
@@ -82,10 +80,10 @@ func notify_stage_masks_changed() -> void:
 func get_needed_process_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraUtility.LAYER_STAGES]
-## to stall when reached, requiring an external stage change, [method advance_stage],
-## or [method overwrite_stage] to be called. All stages returned by
-## [method get_needed_process_stages] will also be treated as returned here as well.
-## Ignores [code]LAYER_STAGES.HALTED[/code].
+## that stall execution when reached, requiring an external stage change
+## (like [method advance_stage], [method advance_to_stage], or [method overwrite_stage])
+## to be called. All stages returned by [method get_needed_process_stages] will also be
+## treated as returned here as well. Ignores [code]LAYER_STAGES.HALTED[/code].
 ## [br][br]
 ## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
 ## expected to change, use [method notify_stage_masks_changed].
@@ -95,7 +93,8 @@ func get_needed_process_stages() -> PackedInt32Array:
 func get_needed_linger_stages() -> PackedInt32Array:
 	return []
 ## Implement to return a list of requested [enum NodeCameraUtility.LAYER_STAGES]
-## for the state change [color=#D6D000][b]Runtime Method[/b][/color].
+## to call the state change [color=#D6D000][b]Runtime Method[/b][/color] when chaned
+## to.
 ## [br][br]
 ## [b]NOTE[/b]: This will not be updated automatically. If the stages returned are
 ## expected to change, use [method notify_stage_masks_changed].

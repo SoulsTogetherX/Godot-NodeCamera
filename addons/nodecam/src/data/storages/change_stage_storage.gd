@@ -1,7 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraStageChangeStorage extends Object
-## 
+## Stores a buffer of requests to change layer's stages, and provides a method
+## to flush/handle those requests.
 
 #region Private Variables
 var _records : Array[ChangeStageRecord] = []
@@ -22,6 +23,10 @@ func _sort_helper(
 
 
 #region Public Methods
+## Requests a [param layer] node to change to stage [param stage], to be handled
+## later.
+## [br][br]
+## Also see [method flush].
 func add_to_queue(
 	layer : NodeCameraStaged,
 	stage : NodeCameraUtility.LAYER_STAGES
@@ -35,6 +40,9 @@ func add_to_queue(
 	)
 	_records.append(record)
 
+## Handles and clears all previous stage change requests.
+## [br][br]
+## Also see [method add_to_queue].
 func flush(
 	target : NodeCameraState, current : NodeCameraState
 ) -> void:

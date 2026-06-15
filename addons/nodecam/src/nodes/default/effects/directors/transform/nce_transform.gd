@@ -59,19 +59,16 @@ class_name NodeCameraEffectTransform extends NodeCameraEffect
 @export var fov : float = 75.0:
 	set = set_fov,
 	get = get_fov
-## The static [member Camera3D.near] value for [Camera3D] nodes.
-@export var near : float = 0.05:
-	set = set_near,
-	get = get_near
-## The static [member Camera3D.far] value for [Camera3D] nodes.
-@export var far : float = 4000.0:
-	set = set_far,
-	get = get_far
+## The static [member Camera3D.size] value for [Camera3D] nodes.
+@export var size : float = 1.0:
+	set = set_size,
+	get = get_size
 
 @export_group("Settings")
 ## If [code]true[/code], this effect will compile with previous effects
 ## that changes the camera's position.
 @export var incremental : bool = false
+
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
 @export var one_shot : bool = false:
@@ -98,8 +95,7 @@ func _handle_transform(target : NodeCameraState) -> void:
 		target.rotation_degrees += rotation_3D
 		
 		target.fov += fov
-		target.near += near
-		target.far += far
+		target.size += size
 		return
 	if target is NodeCamera2DState:
 		target.offset = offset
@@ -116,17 +112,18 @@ func _handle_transform(target : NodeCameraState) -> void:
 	target.rotation_degrees = rotation_3D
 	
 	target.fov = fov
-	target.near = near
-	target.far = far
+	target.size = size
 #endregion
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
 	_handle_transform(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -135,10 +132,13 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion
@@ -193,19 +193,14 @@ func get_zoom() -> Vector2:
 	return zoom
 
 func set_fov(val : float) -> void:
-	fov = val
+	fov = clampf(val, 1.0, 179.0)
 func get_fov() -> float:
 	return fov
 
-func set_near(val : float) -> void:
-	near = val
-func get_near() -> float:
-	return near
-
-func set_far(val : float) -> void:
-	far = val
-func get_far() -> float:
-	return far
+func set_size(val : float) -> void:
+	size = maxf(val, 1.0)
+func get_size() -> float:
+	return size
 
 
 # Settings

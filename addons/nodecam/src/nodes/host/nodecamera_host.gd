@@ -7,14 +7,14 @@ class_name NodeCameraHost extends Node
 
 #region Signals
 ## Emitted when the host is first registered in [NodeCameraManager], typically
-## when inside the tree and as a child to a [Camera2D] and [Camera3D] node.
+## when added as a child to a [Camera2D] and [Camera3D] node.
 ## [br][br]
 ## Also see [signal deactivate], [member disabled], [member run_in_engine],
 ## [method get_camera], and [method is_running].
 signal activate
 ## Emitted when the host was previously registered in [NodeCameraManager], but
-## later unregistered, typically when removed from the tree or as a child
-## to a [Camera2D] and [Camera3D] node.
+## later unregistered, typically when removed as a child to a [Camera2D] and
+## [Camera3D] node.
 ## [br][br]
 ## Also see [member disabled], [member run_in_engine], [method get_camera],
 ## and [method is_running].
@@ -28,12 +28,11 @@ signal camera_mask_changed
 
 
 #region Enums
-## Represents possible modes this [NodeCameraHost] can use to determine when to
-## update the camera on.
+## Represents possible camera frame modes this [NodeCameraHost] will run in.
 enum CALLBACK_MODES {
 	AUTO,		## If this [NodeCameraHost] is a child to a [Camera3D], this mode will act like [constant CALLBACK_MODES.PHYSICS]. If a child to a [Camera2D] instead, this mode will change (when initially registering) according to the [Camera2D]'s [member Camera2D.process_callback].
-	IDLE,		## This [NodeCameraHost] will run on the process frames. Also see [MainLoop._process].
-	PHYSICS,	## This [NodeCameraHost] will run on the physic frames. Also see [MainLoop._physic].
+	IDLE,		## This [NodeCameraHost] will run at the end of process frames. Also see [MainLoop._process].
+	PHYSICS,	## This [NodeCameraHost] will run at the end of physics frames. Also see [MainLoop._physics_process].
 	MANUAL		## This [NodeCameraHost] will not run automatically. Use [method process_tick] to run it.
 }
 #endregion
@@ -49,8 +48,8 @@ enum CALLBACK_MODES {
 @export var disabled : bool:
 	set = set_disabled,
 	get = get_disabled
-## If [code]false[/code], this [NodeCameraHost] will forcibly unregister
-## if run in the Engine editor.
+## If [code]false[/code], this [NodeCameraHost] will not register
+## while in Engine.
 @export var run_in_engine : bool:
 	set = set_run_in_engine,
 	get = get_run_in_engine
@@ -105,8 +104,8 @@ func get_camera() -> Node:
 
 
 #region Public Helper Methods
-## Ignores all active [NodeCameraTransition]s and instantly sets the camera to
-## the current state defined by active [NodeCameraEffect]s.
+## Ignores all active [NodeCameraTransition] nodes and instantly sets the camera to
+## the current state defined by the active [NodeCameraEffect] pipeline.
 ## [br][br]
 ## [b]NOTE[/b]: This does not affect the current status defined by all
 ## active [NodeCameraTransition] layers. If you also wish to affect those, use
@@ -114,15 +113,17 @@ func get_camera() -> Node:
 func teleport_status() -> void:
 	_scope.teleport_cam_status()
 ## Similar to [method teleport_status], but also forces all active
-## [NodeCameraTransition] to align with affect [NodeCameraEffect]s.
+## [NodeCameraTransition] to align with the properties set by the
+## active [NodeCameraEffect] pipeline.
 func teleport_overwrite_status() -> void:
 	_scope.teleport_overwrite_cam_status()
 
-## Forces the camera's effects and transitions to tick forward once.
+## Forces the camera's effects and transitions to tick forward one
+## camera frame.
 func process_tick(delta: float) -> void:
 	_scope.run_tick(delta)
 
-## Returns if this [NodeCameraHost] should be considered running.
+## Returns if this [NodeCameraHost] is running.
 func is_running() -> bool:
 	return (run_in_engine || !Engine.is_editor_hint()) && !disabled && _camera != null
 

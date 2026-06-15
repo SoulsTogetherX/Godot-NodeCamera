@@ -61,11 +61,14 @@ func _handle_transition(
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraTransition.process_transition] method.
 func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	_stage : LAYER_STAGES
 ) -> void:
 	_handle_transition(target, current)
+
+## Implements the [method NodeCameraTransition.transition_stage_changed] method.
 func transition_stage_changed(
 	target : NodeCameraState, current : NodeCameraState,
 	_stage : LAYER_STAGES
@@ -75,10 +78,13 @@ func transition_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if one_shot:
 		return []
 	return [LAYER_STAGES.RUNNING]
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion

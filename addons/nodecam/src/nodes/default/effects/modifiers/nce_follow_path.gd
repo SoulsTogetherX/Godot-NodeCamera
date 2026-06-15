@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectFollowPath extends NodeCameraEffect
-## An effect for clamping an effect to a path.
+## An effect that clamps camera position to a path.
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
@@ -77,6 +77,7 @@ func _property_get_revert(property: StringName) -> Variant:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
@@ -87,6 +88,7 @@ func process_effect(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if path_node:
 		return [LAYER_STAGES.RUNNING]

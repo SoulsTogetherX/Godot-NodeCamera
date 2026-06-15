@@ -14,54 +14,57 @@ var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DI
 
 ## The nodes, [Node2D] or [Node3D], that this layer will follow.
 ## [br][br]
-## Also see: [member dimention].
+## Also see [member dimention].
 var follow_targets : Array[Node]:
 	set = set_follow_targets,
 	get = get_follow_targets
 
-## Determines whether a 3D camera will look at the target position, or
-## reposition itself to the target position
+## Determines how this layer will process [member follow_target].
+## [br][br]
+## Also see [member dimention].
 var follow_type := NodeCameraUtility.FOLLOW_TYPE.POSITION:
 	set = set_follow_type,
 	get = get_follow_type
 	
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]true[/code].
+## [member dimention] is [code]TWO_DIMENSIONAL[/code].
 var offset_2d := Vector2.ZERO:
 	set = set_offset_2d,
 	get = get_offset_2d
 ## The offset that will be applied to the camera's position, if
-## [member dimention] is [code]false[/code].
+## [member dimention] is [code]THREE_DIMENSIONAL[/code].
 var offset_3d := Vector3.ZERO:
 	set = set_offset_3d,
 	get = get_offset_3d
 
 # Zoom
-## If [code]true[/code], the layer will automatically zoom in or
-## out to fit all following elements in.
-var change_size : bool = false:
-	set = set_change_size,
-	get = get_change_size
+## If [code]true[/code], the layer will automatically fit in or
+## out all given targets in the camera's view. Depending on [member dimention]
+## and [member Camera3D.projection], this can cause changes in properties
+## [code]zoom[/code], [code]fov[/code], or [code]size[/code].
+var fit_camera : bool = false:
+	set = set_fit_camera,
+	get = get_fit_camera
 ## The ratio padding the camera will automatically zoom with.
 ## [br][br]
-## Also see [member change_zoom].
-var size_padding : float = 0.5:
-	set = set_size_padding,
-	get = get_size_padding
+## Also see [member fit_camera].
+var fit_padding : float = 0.5:
+	set = set_fit_padding,
+	get = get_fit_padding
 
 # 2D Fit
-## The minimum zoom the camera will automatically be resized.
+## The minimum zoom the camera will automatically be resized to.
 ## [br][br]
-## Also see [member change_zoom].
-var size_min : float = 0.1:
-	set = set_size_min,
-	get = get_size_min
-## The maximum zoom the camera will automatically be resized.
+## Also see [member fit_camera] and [member fit_max].
+var fit_min : float = 0.1:
+	set = set_fit_min,
+	get = get_fit_min
+## The maximum zoom the camera will automatically be resized to.
 ## [br][br]
-## Also see [member m_max].
-var size_max : float = 10.0:
-	set = set_size_max,
-	get = get_size_max
+## Also see [member fit_camera] and [member fit_min].
+var fit_max : float = 10.0:
+	set = set_fit_max,
+	get = get_fit_max
 
 # Addtional Arguments
 ## If [code]true[/code], the layer will only set the effect's position
@@ -183,14 +186,14 @@ func _property_can_revert(property: StringName) -> bool:
 				offset_2d != Vector2.ZERO if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL
 				else offset_3d != Vector3.ZERO
 			)
-		&"change_size":
-			return change_size
-		&"size_min":
-			return size_min != (0.1 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 1.0)
-		&"size_max":
-			return size_max != (10.0 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 179.0)
-		&"size_padding":
-			return size_padding != 0.5
+		&"fit_camera":
+			return fit_camera
+		&"fit_min":
+			return fit_min != (0.1 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 1.0)
+		&"fit_max":
+			return fit_max != (10.0 if dimention == NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL else 179.0)
+		&"fit_padding":
+			return fit_padding != 0.5
 		&"one_shot":
 			return one_shot != false
 	return false
@@ -233,8 +236,8 @@ func _get(property: StringName) -> Variant:
 
 #region Private Methods
 func _handle_vector_3D(target : NodeCamera3DState, center : Vector3) -> void:
-	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
-		NodeCameraUtility.zoom_to_point_3D(
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.FIT:
+		NodeCameraUtility.fit_to_point_3D(
 			target, center
 		)
 		return
@@ -247,8 +250,8 @@ func _handle_vector_3D(target : NodeCamera3DState, center : Vector3) -> void:
 		return
 	target.global_position = center
 func _handle_vector_2D(target : NodeCamera2DState, center : Vector2) -> void:
-	if follow_type == NodeCameraUtility.FOLLOW_TYPE.SIZE:
-		NodeCameraUtility.zoom_to_point_2D(
+	if follow_type == NodeCameraUtility.FOLLOW_TYPE.FIT:
+		NodeCameraUtility.fit_to_point_2D(
 			target, center
 		)
 		return
@@ -269,7 +272,7 @@ func _set_target_pos(target : NodeCameraState) -> void:
 		center = (center / _follow_nodes.size()) + offset_2d
 		_handle_vector_2D(target, center + offset_2d)
 		
-		if !change_size:
+		if !fit_camera:
 			return
 		
 		var zoom_pos : Vector2 = (
@@ -277,12 +280,12 @@ func _set_target_pos(target : NodeCameraState) -> void:
 				(min_p - target.global_position).abs()
 			) + target.global_position
 		)
-		NodeCameraUtility.zoom_to_point_2D(
-			target, zoom_pos, size_padding
+		NodeCameraUtility.fit_to_point_2D(
+			target, zoom_pos, fit_padding
 		)
 		
 		target.zoom = Vector2.ONE * clampf(
-			target.zoom.x, size_min, size_max
+			target.zoom.x, fit_min, fit_max
 		)
 		return
 	
@@ -300,33 +303,35 @@ func _set_target_pos(target : NodeCameraState) -> void:
 		center = (center / float(_follow_nodes.size()))
 		_handle_vector_3D(target, center + offset_3d)
 		
-		if !change_size:
+		if !fit_camera:
 			return
 		
-		var size_pos : Vector3 = (
+		var fit_pos : Vector3 = (
 			(max_p - center).abs().max(
 				(min_p - center).abs()
 			) + center
 		)
-		NodeCameraUtility.zoom_to_point_3D(target, size_pos, size_padding)
+		NodeCameraUtility.fit_to_point_3D(target, fit_pos, fit_padding)
 		
 		if target.camera.projection == Camera3D.ProjectionType.PROJECTION_PERSPECTIVE:
 			target.fov = clampf(
-				target.fov, size_min, size_max
+				target.fov, fit_min, fit_max
 			)
 			return
 		target.size = clampf(
-			target.size, size_min, size_max
+			target.size, fit_min, fit_max
 		)
 #endregion
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
 	_set_target_pos(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -335,10 +340,13 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if follow_targets.is_empty() || one_shot:
 		return []
 	return [LAYER_STAGES.RUNNING]
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	if !follow_targets.is_empty():
 		return [LAYER_STAGES.STARTING]
@@ -357,6 +365,7 @@ func set_dimention(val : NodeCameraUtility.DIMENSION) -> void:
 	notify_property_list_changed()
 func get_dimention() -> NodeCameraUtility.DIMENSION:
 	return dimention
+
 
 func set_follow_targets(val : Array[Node]) -> void:
 	if val == follow_targets:
@@ -391,25 +400,25 @@ func get_offset_3d() -> Variant:
 	return offset_3d
 
 
-func set_change_size(val : bool) -> void:
-	change_size = val
-func get_change_size() -> bool:
-	return change_size
+func set_fit_camera(val : bool) -> void:
+	fit_camera = val
+func get_fit_camera() -> bool:
+	return fit_camera
 
-func set_size_min(val : float) -> void:
-	size_min = maxf(val, 0.0)
-func get_size_min() -> float:
-	return size_min
+func set_fit_min(val : float) -> void:
+	fit_min = maxf(val, 0.0)
+func get_fit_min() -> float:
+	return fit_min
 
-func set_size_max(val : float) -> void:
-	size_max = maxf(val, 0.0)
-func get_size_max() -> float:
-	return size_max
+func set_fit_max(val : float) -> void:
+	fit_max = maxf(val, 0.0)
+func get_fit_max() -> float:
+	return fit_max
 
-func set_size_padding(val : float) -> void:
-	size_padding = val
-func get_size_padding() -> float:
-	return size_padding
+func set_fit_padding(val : float) -> void:
+	fit_padding = val
+func get_fit_padding() -> float:
+	return fit_padding
 
 
 func set_one_shot(val : bool) -> void:

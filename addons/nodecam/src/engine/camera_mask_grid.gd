@@ -1,3 +1,4 @@
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraMaskGrid extends Control
 ## Code copied from [url=https://github.com/godotengine/godot/blob/master/editor/inspector/editor_properties.cpp]
@@ -441,3 +442,5 @@ func get_grid_size() -> Vector2:
 	var font_size: int = theme.get_font_size("font_size", "Label")
 	return Vector2(0.0, font.get_height(font_size) * 3.0)
 #endregion
+
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

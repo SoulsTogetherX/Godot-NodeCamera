@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectRotate extends NodeCameraEffect
-## An effect for camera rotation.
+## An effect that sets a camera's rotation.
 
 #region External Variables
 @export_group("2D")
@@ -17,8 +17,7 @@ class_name NodeCameraEffectRotate extends NodeCameraEffect
 ## [br][br]
 ## [b]NOTE[/b]: This property is edited in degrees in the inspector.
 @export_custom(
-	PROPERTY_HINT_NONE,
-	"radians"
+	PROPERTY_HINT_NONE, "radians"
 ) var rotation_3D : Vector3 = Vector3.ZERO:
 	set = set_rotation_3D,
 	get = get_rotation_3D
@@ -27,6 +26,7 @@ class_name NodeCameraEffectRotate extends NodeCameraEffect
 ## If [code]true[/code], this effect will compile with previous effects
 ## that changes the camera's rotation.
 @export var incremental : bool = false
+
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
 @export var one_shot : bool = false:
@@ -52,11 +52,13 @@ func _handle_rotate(target : NodeCameraState) -> void:
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
 	_handle_rotate(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -65,10 +67,13 @@ func effect_stage_changed(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion

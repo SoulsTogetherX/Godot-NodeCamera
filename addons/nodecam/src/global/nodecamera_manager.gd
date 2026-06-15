@@ -1,9 +1,9 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 extends Node
-## The main singleton in charge of registering [NodeCameraHost]s, storing
-## top-level [NodeCameraLayer]s, and executing/clearing
-## [NodeCameraHostExecutionScope]s.
+## The main singleton in charge of registering [NodeCameraHost] nodes, storing
+## top-level [NodeCameraLayer] nodes, and executing/clearing
+## [NodeCameraHostExecutionScope] resources.
 
 #region Private Variables
 var _top_level_storage := NodeCameraLayerStorage.new()
@@ -11,37 +11,16 @@ var _top_level_storage := NodeCameraLayerStorage.new()
 var _process_hosts : Array[NodeCameraHostExecutionScope]
 var _physics_hosts : Array[NodeCameraHostExecutionScope]
 
-#		Dictionary[NodeCameraHost, Array[NodeCamera2DstExecutionScope]
+#	Dictionary[NodeCameraHost, Array[NodeCamera2DstExecutionScope]
 var _scope_array_by_host : Dictionary[NodeCameraHost, Array]
 #endregion
 
 
 
 #region Virtual Methods (Engine)
-func _init() -> void:
-	process_priority = 99999999999
-	process_physics_priority = 99999999999
-
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_top_level_storage.free()
-#endregion
-
-
-#region Global Methods (Helper)
-## Returns if [param parent_layer] is currently routing to the child
-## layer [param layer]. Only works for direct pairings. Used internally.
-func vaild_route(
-	parent_layer : NodeCameraGroup, layer : NodeCameraLayer
-) -> bool:
-	return (
-		(layer.camera_mask & parent_layer.camera_mask) &&
-		layer._parent_group == parent_layer &&
-		(
-			!(parent_layer is NodeCameraRoutable) ||
-			parent_layer._route_to_layers().has(layer)
-		)
-	)
 #endregion
 
 
@@ -111,8 +90,8 @@ func _host_update_mask(host : NodeCameraHost) -> void:
 
 
 #region Public Methods (Register Host)
-## Registers and sets up [param host] to be processed according to
-## the available top-level [NodeCameraLayer]s.
+## Registers and sets up [param host] to process the available
+## top-level [NodeCameraLayer] nodes.
 func register_host(host : NodeCameraHost) -> void:
 	if is_host_registered(host):
 		return
@@ -153,28 +132,28 @@ func is_host_registered(host : NodeCameraHost) -> bool:
 
 
 #region Public Methods (Register Host)
-## Registers [param layer] has a top-level layer.
+## Registers [param layer] as a top-level layer.
 ## [br][br]
-## [b]NOTE[/b]: Attempting to register a non-top level layer as one can
+## [b]NOTE[/b]: Attempting to register a group-level layer can
 ## cause an infinite loop.
 func register_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.register_layer(layer)
-## Unregisters [param layer] has a top-level layer.
+## Unregisters [param layer] as a top-level layer.
 func unregister_layer(layer : NodeCameraLayer) -> void:
 	_top_level_storage.unregister_layer(layer)
 
-## Returns if [param layer] has been registered as top-level.
+## Returns if [param layer] has been registered.
 func is_layer_registered(layer : NodeCameraLayer) -> bool:
 	return _top_level_storage.is_layer_registered(layer)
 #endregion
 
 
 #region Accessor Methods
-## Returns an array of all registered [NodeCameraHost]s.
+## Returns an array of all registered [NodeCameraHost] nodes.
 func get_hosts() -> Array[NodeCameraHost]:
 	return _scope_array_by_host.keys()
 
-## Returns the [NodeCameraLayerStorage] holding on top-level layers.
+## Returns the [NodeCameraLayerStorage] holding all top-level layers.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing this may cause an engine crash.
 func get_layer_storage() -> NodeCameraLayerStorage:
