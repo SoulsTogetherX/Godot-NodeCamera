@@ -41,9 +41,9 @@ In this addon, all NodeCamera Nodes are considered **Layers**. There are three p
 
 Technical info:
 
-	Effects are always run before Transitions.
+    Effects are always run before Transitions.
 
-	The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
+    The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
 
 There are also a few another notable layers.
 
@@ -133,7 +133,7 @@ These methods all possess similar usages and arguments. First, we'll discuss the
 
 There are four notable parameters: `delta`, `target`, `current`, and `stage`.
 
-- `delta`, as expected, represents the time (in seconds) since the last frame call (or `0.0` when the host's mode is manual). This is only given to `process_effect` and `process_transition` as those are expected to run every frame.
+- `delta`, as expected, represents the time (in seconds) since the last frame call (or the delta passed in when host's mode is manual). This is only given to `process_effect` and `process_transition` as those are expected to run every frame.
 
 - `target` and `current` are `NodeCameraState` objects. More specifically, they are either `NodeCamera2DState` or `NodeCamera3DState` objects, containing all relevant properties of a `Camera2D` or `Camera3D` node respectively (the type provided is based on what camera the relevant **NodeCameraHost** is a child of).
 
@@ -179,7 +179,7 @@ Technical info:
 
     These methods are not called instantly upon stage change. They are instead added to a queue and processed at the start of the next camera frame.
 
-	The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
+    The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
 
 &thinsp;
 

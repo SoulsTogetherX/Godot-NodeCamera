@@ -133,7 +133,7 @@ These methods all possess similar usages and arguments. First, we'll discuss the
 
 There are four notable parameters: `delta`, `target`, `current`, and `stage`.
 
-- `delta`, as expected, represents the time (in seconds) since the last frame call (or `0.0` when the host's mode is manual). This is only given to `process_effect` and `process_transition` as those are expected to run every frame.
+- `delta`, as expected, represents the time (in seconds) since the last frame call (or the delta passed in when host's mode is manual). This is only given to `process_effect` and `process_transition` as those are expected to run every frame.
 
 - `target` and `current` are `NodeCameraState` objects. More specifically, they are either `NodeCamera2DState` or `NodeCamera3DState` objects, containing all relevant properties of a `Camera2D` or `Camera3D` node respectively (the type provided is based on what camera the relevant **NodeCameraHost** is a child of).
 
