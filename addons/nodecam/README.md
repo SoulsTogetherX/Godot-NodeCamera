@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://godotengine.org/download/windows/">
-      <img alt="Static Badge" src="https://img.shields.io/badge/Godot-4.5%2B-blue">
+	  <img alt="Static Badge" src="https://img.shields.io/badge/Godot-4.5%2B-blue">
   </a>
 </p>
 
@@ -15,6 +15,8 @@ NodeCamera is a Godot 4.5 addon created to simplify the creation of custom camer
 It allows for complex and simple camera changes and transitions between changes. Feel free to use the [premade effects and transitions](#premade-effects-and-transitions) for a smooth experience, or [make your own](#make-your-own-effects-and-transition) to suit your needs.
 
 Check out the recommended [good practices](#good-practices) too as reference.
+
+Or read the [installation instructions](#installation) here.
 
 ## How To Use
 
@@ -32,9 +34,9 @@ In this addon, all NodeCamera Nodes are considered **Layers**. There are three p
 
 Technical info:
 
-    Effects are always run before Transitions.
+	Effects are always run before Transitions.
 
-    The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
+	The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
 
 There are also a few another notable layers.
 
@@ -170,7 +172,7 @@ Technical info:
 
     These methods are not called instantly upon stage change. They are instead added to a queue and processed at the start of the next camera frame.
 
-    The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
+	The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
 
 &thinsp;
 
@@ -265,6 +267,12 @@ The point of this addon is to allow for high customizability in camera managemen
 
 &thinsp;
 
+- Use the NodeCameraUtility class.
+
+  This is a static class dedicated to holding a variety of helper functions to aid the creation of your own effects and transitions. Try to read it once over before reinventing the wheel.
+
+&thinsp;
+
 - Use global layers for consistent effects across different levels.
 
   If you have a way to allow for persistent layers between levels, it's possible to have a persistent camera effect or transition always active.
@@ -316,6 +324,33 @@ The point of this addon is to allow for high customizability in camera managemen
 - Use camera masks only if you expect to use more than one camera.
 
   Camera masks are powerful, allowing you to use different effects and transitions for different cameras (whether for multiplayer or to separate 2D and 3D camera logic), but can also be confusing when not needed. Don't touch the camera masks if you don't need to.
+
+## Installation
+
+#### Asset Library (Recommended - Stable)
+
+- In Godot, open the AssetLib tab.
+- Search for and select "NodeCamera".
+- Download then install the plugin (be sure to only select the `nodecam` directory).
+- Enable the plugin inside Project/Project Settings/Plugins.
+
+#### Github Releases (Recommended - Stable)
+
+- Download a release build.
+- Extract the zip file and move the `addons/nodecam` directory into the project `addon` folder location.
+- Enable the plugin inside Project/Project Settings/Plugins.
+
+#### Github Main (Latest - Unstable)
+
+- Download the latest main branch.
+- Extract the zip file and move the `addons/nodecam` directory into project's `addon` folder location.
+- Enable the plugin inside Project/Project Settings/Plugins.
+
+For more help, see [Godot's official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html).
+
+## Other Camera Addons
+
+- [Phantom Camera](https://github.com/ramokz/phantom-camera) by [ramokz](https://github.com/ramokz).
 
 ## Known Issues
 

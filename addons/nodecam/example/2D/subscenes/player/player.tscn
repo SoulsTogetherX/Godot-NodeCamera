@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://y3x5fmg8ygou"]
 
 [ext_resource type="Script" uid="uid://qyglgh2q180d" path="res://addons/nodecam/example/2D/subscenes/player/player.gd" id="1_1wdfc"]
-[ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/assets/examples/2D/icon.svg" id="2_v0say"]
+[ext_resource type="Texture2D" uid="uid://diw0rntn2xc8y" path="res://gitImages/logo.png" id="2_mw6gp"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mw6gp"]
 radius = 12.5
@@ -12,8 +12,8 @@ script = ExtResource("1_1wdfc")
 
 [node name="Icon" type="Sprite2D" parent="." unique_id=894546939]
 position = Vector2(0, -13)
-scale = Vector2(0.2, 0.2)
-texture = ExtResource("2_v0say")
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_mw6gp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1201310913]
 position = Vector2(0, -13)

@@ -494,15 +494,18 @@ static func fit_camera_to_points_3D(
 	var cam_to_world := target.transform.affine_inverse()
 	
 	var max_zoom := 0.0
-	for global_point : Vector3 in points:
-		var local: Vector3 = cam_to_world * global_point
-		
-		if local.z >= 0.0:
-			return
-		var depth := max(-local.z, 0.000001)
-		
-		match camera.projection:
-			Camera3D.PROJECTION_PERSPECTIVE:
+	var local : Vector3
+	var depth : float
+	
+	match camera.projection:
+		Camera3D.PROJECTION_PERSPECTIVE:
+			for global_point : Vector3 in points:
+				local = cam_to_world * global_point
+				
+				if local.z >= 0.0:
+					return
+				depth = maxf(-local.z, 0.000001)
+				
 				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
 					max_zoom = maxf(
 						max_zoom, atan(
@@ -523,7 +526,14 @@ static func fit_camera_to_points_3D(
 				)
 				continue
 			
-			Camera3D.PROJECTION_ORTHOGONAL:
+		Camera3D.PROJECTION_ORTHOGONAL:
+			for global_point : Vector3 in points:
+				local = cam_to_world * global_point
+				
+				if local.z >= 0.0:
+					return
+				depth = maxf(-local.z, 0.000001)
+				
 				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
 					max_zoom = maxf(
 						max_zoom, maxf(
@@ -538,7 +548,14 @@ static func fit_camera_to_points_3D(
 				)
 				continue
 			
-			Camera3D.PROJECTION_FRUSTUM:
+		Camera3D.PROJECTION_FRUSTUM:
+			for global_point : Vector3 in points:
+				local = cam_to_world * global_point
+				
+				if local.z >= 0.0:
+					return
+				depth = maxf(-local.z, 0.000001)
+				
 				if camera.keep_aspect == Camera3D.KEEP_HEIGHT:
 					max_zoom = maxf(
 						max_zoom, maxf(
@@ -555,12 +572,11 @@ static func fit_camera_to_points_3D(
 				)
 	
 	max_zoom *= (padding + 1.0) * 2.0
-	
 	match camera.projection:
 		Camera3D.PROJECTION_PERSPECTIVE:
 			camera.fov = rad_to_deg(max_zoom)
 		Camera3D.PROJECTION_ORTHOGONAL, Camera3D.PROJECTION_FRUSTUM:
-			camera.size = max(max_zoom, 0.0001)
+			camera.size = maxf(max_zoom, 0.0001)
 #endregion
 
 
