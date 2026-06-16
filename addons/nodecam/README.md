@@ -18,6 +18,10 @@ Check out the recommended [good practices](#good-practices) too as reference.
 
 Or read the [installation instructions](#installation) here.
 
+## Overview Video
+
+[<img src="https://github.com/user-attachments/assets/f418f797-3f18-41b8-87c9-2a8d0b23cf37" alt="NodeCamera Intro Video" width="100%">](https://www.youtube.com/watch?v=OVq-GQzFglk)
+
 ## How To Use
 
 In this addon, all NodeCamera Nodes are considered **Layers**. There are three primary layers.
@@ -327,9 +331,9 @@ The point of this addon is to allow for high customizability in camera managemen
 
 ## Installation
 
-#### Asset Library (Recommended - Stable)
+#### Asset Library or Asset Store (Recommended - Stable)
 
-- In Godot, open the AssetLib tab.
+- In Godot, open the [AssetLib](https://godotengine.org/asset-library/asset) or [AssetStore](https://store.godotengine.org/) tab.
 - Search for and select "NodeCamera".
 - Download then install the plugin (be sure to only select the `nodecam` directory).
 - Enable the plugin inside Project/Project Settings/Plugins.
