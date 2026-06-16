@@ -6,7 +6,7 @@ class_name NodeCameraRoutable extends NodeCameraGroup
 ## deactivating and reactivating child layers, via manipulating their stages.
 
 #region External Variables
-## The stage any layer will be overwriten to if routed to.
+## The stage any layer will be overwriten as if routed to.
 ## [br][br]
 ## Also see [method NodeCameraExecutionScope.flag_overwrite_stage].
 @export 
@@ -69,15 +69,15 @@ func _direct_route_changed() -> void:
 
 
 #region Routing Methods
-## Implement this method to return a list of vaild [NodeCameraLayer],
-## children to this node, that should be activated.
+## Implement this method to return a list of vaild [NodeCameraLayer]
+## (children of the current node) that should be activated.
 ## [br][br]
-## This will not be updated automatically. If changed, use method
+## This will not be updated automatically. If changed, use
 ## [method flag_route_layers_changed] to flag this layer as dirty.
 func _route_to_layers() -> Array[NodeCameraLayer]:
 	return []
 
-## Flags this [NodeCameraRoutable] to update the layers it's routed to.
+## Flags this [NodeCameraRoutable] to update the layers it's routing to.
 ## Only call if the layers returned by [method _route_to_layers] is
 ## expected to be different.
 func flag_route_layers_changed() -> void:

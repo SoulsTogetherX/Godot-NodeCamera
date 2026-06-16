@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectPosition extends NodeCameraEffect
-## An effect for camera position.
+## An effect that sets a camera's position.
 
 #region External Variables
 @export_group("2D")
@@ -17,41 +17,56 @@ class_name NodeCameraEffectPosition extends NodeCameraEffect
 	get = get_position_3D
 
 @export_group("Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's position.
+@export var incremental : bool = false
+
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
-## [br][br]
-## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
 #endregion
 
 
+#region Private Methods
+func _handle_position(target : NodeCameraState) -> void:
+	if incremental:
+		if target is NodeCamera2DState:
+			target.global_position += position_2D
+			return
+		target.global_position += position_3D
+		return
+	if target is NodeCamera2DState:
+		target.global_position = position_2D
+		return
+	target.global_position = position_3D
+#endregion
+
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
+	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.global_position = position_2D
-	else:
-		target.global_position = position_3D
+	_handle_position(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
-	target : NodeCameraState, stage : LAYER_STAGES
+	target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.global_position = position_2D
-	else:
-		target.global_position = position_3D
+	_handle_position(target)
 #endregion
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion

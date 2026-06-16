@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectZoom extends NodeCameraEffect
-## An effect for camera zoom.
+## An effect that sets a camera's zoom.
 
 #region External Variables
 @export_group("2D")
@@ -15,20 +15,18 @@ class_name NodeCameraEffectZoom extends NodeCameraEffect
 @export var fov : float = 75.0:
 	set = set_fov,
 	get = get_fov
-## The static [member Camera3D.near] value for [Camera3D] nodes.
-@export var near : float = 0.05:
-	set = set_near,
-	get = get_near
-## The static [member Camera3D.far] value for [Camera3D] nodes.
-@export var far : float = 4000.0:
-	set = set_far,
-	get = get_far
+## The static [member Camera3D.fov] value for [Camera3D] nodes.
+@export var size : float = 1.0:
+	set = set_size,
+	get = get_size
 
 @export_group("Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's zoom.
+@export var incremental : bool = false
+
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
-## [br][br]
-## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
@@ -36,34 +34,46 @@ class_name NodeCameraEffectZoom extends NodeCameraEffect
 
 
 
+#region Private Methods
+func _handle_zoom(target : NodeCameraState) -> void:
+	if incremental:
+		if target is NodeCamera2DState:
+			target.zoom =+ zoom
+			return
+		target.fov += fov
+		target.size += size
+		return
+	if target is NodeCamera2DState:
+		target.zoom = zoom
+		return
+	target.fov = fov
+	target.size = size
+#endregion
+
+
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffect.process_effect] method.
 func process_effect(
 	delta : float, target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.zoom = zoom
-	else:
-		target.fov = fov
-		target.near = near
-		target.far = far
+	_handle_zoom(target)
 
+## Implements the [method NodeCameraEffect.effect_stage_changed] method.
 func effect_stage_changed(
 	target : NodeCameraState, stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.zoom = zoom
-	else:
-		target.fov = fov
-		target.near = near
-		target.far = far
+	_handle_zoom(target)
 #endregion
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion
@@ -77,19 +87,14 @@ func get_zoom() -> Vector2:
 
 
 func set_fov(val : float) -> void:
-	fov = val
+	fov = clampf(val, 1.0, 179.0)
 func get_fov() -> float:
 	return fov
 
-func set_near(val : float) -> void:
-	near = val
-func get_near() -> float:
-	return near
-
-func set_far(val : float) -> void:
-	far = val
-func get_far() -> float:
-	return far
+func set_size(val : float) -> void:
+	size = maxf(val, 1.0)
+func get_size() -> float:
+	return size
 
 
 func set_one_shot(val : bool) -> void:

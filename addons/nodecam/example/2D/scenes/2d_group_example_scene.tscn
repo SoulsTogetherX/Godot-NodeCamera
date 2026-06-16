@@ -7,12 +7,12 @@
 [ext_resource type="PackedScene" uid="uid://y3x5fmg8ygou" path="res://addons/nodecam/example/2D/subscenes/player/player.tscn" id="6_anv1s"]
 [ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="7_dieih"]
 [ext_resource type="Texture2D" uid="uid://cuawbbck5o4sj" path="res://addons/nodecam/assets/examples/2D/icon.svg" id="7_prg43"]
-[ext_resource type="Script" uid="uid://73hs5vn6ig5v" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_group_glue.gd" id="8_jnvjb"]
+[ext_resource type="Script" uid="uid://73hs5vn6ig5v" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_group.gd" id="8_jnvjb"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="9_xy1ep"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="10_fmotm"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="11_w7iex"]
+[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="11_w7iex"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="12_lghhq"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="13_5mhkk"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="13_5mhkk"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -324,6 +324,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_orevw")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1421027814]
 visible = false
@@ -340,11 +341,10 @@ scale = Vector2(0.2, 0.2)
 texture = ExtResource("7_prg43")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=126404351]
-position = Vector2(-169, 54)
-offset = Vector2(-0.45240998, -2.172926)
+position = Vector2(112, 43.09401)
 ignore_rotation = false
-zoom = Vector2(2, 2)
 process_callback = 0
+limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("7_dieih")
@@ -354,48 +354,57 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="Global" type="Node" parent="NodeCameraFolder" unique_id=1457903025]
 
-[node name="EffectGroupGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1693278771]
+[node name="EffectGroupGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1693278771 node_paths=PackedStringArray("follow_targets")]
 script = ExtResource("8_jnvjb")
-follow_targets = Array[NodePath]([NodePath("../../../Player"), NodePath("../../../PlayerPlaceholder")])
-change_zoom = true
-zoom_max = 8.0
-zoom_margin = 100
-metadata/_custom_type_script = "uid://73hs5vn6ig5v"
+dimention = 0
+follow_targets = [NodePath("../../../Player"), NodePath("../../../PlayerPlaceholder")]
+follow_type = 0
+offset = Vector2(0, 0)
+fit_camera = true
+fit_padding = 0.5
+fit_min = 0.1
+fit_max = 10.0
+one_shot = false
+priority = 1
 
 [node name="Boundary" type="Node" parent="NodeCameraFolder/Global" unique_id=294391842]
 script = ExtResource("11_w7iex")
 limits_path = NodePath("../../../BoundaryShape")
-metadata/_custom_type_script = "uid://soqkn57afvil"
+priority = -99999
 
 [node name="ZoomSwitcher" type="Node" parent="NodeCameraFolder" unique_id=387830168]
 script = ExtResource("9_xy1ep")
+priority = -1
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
-[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=408141874]
+[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=116053314]
 script = ExtResource("10_fmotm")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1388197684]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=311103089]
 script = ExtResource("12_lghhq")
 ease_type = 1
-trans_type = 1
-duration = 0.1
-_op_mask = 18
+duration = 0.3
+manual_step = false
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
-[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1504007739]
+[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=838694654]
 script = ExtResource("10_fmotm")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=1489573747]
+[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=1582356565]
 script = ExtResource("13_5mhkk")
 zoom = Vector2(4, 4)
+one_shot = true
 metadata/_custom_type_script = "uid://g244xvmo4uo5"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=414836994]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=675969377]
 script = ExtResource("12_lghhq")
 ease_type = 1
-trans_type = 1
-duration = 0.1
-_op_mask = 18
+duration = 0.3
+manual_step = false
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"

@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://bungsjf33psk2"]
+
+[ext_resource type="Script" uid="uid://cabw2xkrjj8lg" path="res://addons/nodecam/example/3D/subscenes/npc/npc_look.gd" id="1_fksqc"]
+[ext_resource type="Script" uid="uid://uhswg2grxmqh" path="res://addons/nodecam/example/3D/subscripts/modules/float_module.gd" id="2_g3mpo"]
+[ext_resource type="Script" uid="uid://dhw6xuwd1p80e" path="res://addons/nodecam/example/3D/subscripts/modules/interact_module.gd" id="3_j1ugi"]
+[ext_resource type="Texture2D" uid="uid://bp8dhks7pwd1v" path="res://addons/nodecam/assets/examples/2D/other/ZoomSignSmall.png" id="4_ygqls"]
+[ext_resource type="Script" uid="uid://kxv0p1otmwld" path="res://addons/nodecam/example/2D/subscripts/sign_zoom.gd" id="5_y6xk4"]
+[ext_resource type="Script" uid="uid://cwo6q841vte44" path="res://addons/nodecam/example/2D/subscripts/modules/float_module.gd" id="6_37knu"]
+[ext_resource type="Script" uid="uid://43ebgvvbo4w" path="res://addons/nodecam/example/2D/subscripts/modules/interact_module.gd" id="7_1o5b4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fksqc"]
+albedo_color = Color(0.45882353, 0.6509804, 1, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_8tksb"]
+material = SubResource("StandardMaterial3D_fksqc")
+radius = 5.0
+height = 20.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1f57e"]
+radius = 34.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5ptje"]
+size = Vector2(63.25, 66)
+
+[node name="NPC" type="Node3D" unique_id=847889789]
+script = ExtResource("1_fksqc")
+
+[node name="Visual" type="Node3D" parent="." unique_id=497733603]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual" unique_id=181193490]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+mesh = SubResource("CapsuleMesh_8tksb")
+
+[node name="Label3D" type="Label3D" parent="Visual" unique_id=1844554967]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30.775852, 0)
+visible = false
+pixel_size = 0.15
+billboard = 1
+text = "Hello"
+
+[node name="FloatModule" type="Node" parent="Visual/Label3D" unique_id=1553469010]
+script = ExtResource("2_g3mpo")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=336948018]
+collision_layer = 0
+monitorable = false
+script = ExtResource("3_j1ugi")
+force_stop_player = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1507623329]
+shape = SubResource("SphereShape3D_1f57e")
+
+[node name="ZoomSignSmall" type="Sprite2D" parent="." unique_id=1676818547]
+texture = ExtResource("4_ygqls")
+script = ExtResource("5_y6xk4")
+selection = 1
+
+[node name="Label" type="Label" parent="ZoomSignSmall" unique_id=2117998550]
+visible = false
+z_index = 2
+offset_left = -31.0
+offset_top = -66.0
+offset_right = 31.0
+offset_bottom = -43.0
+text = "Interact"
+horizontal_alignment = 1
+
+[node name="Node" type="Node" parent="ZoomSignSmall/Label" unique_id=1398305294]
+script = ExtResource("6_37knu")
+
+[node name="InteractModule" type="Area2D" parent="ZoomSignSmall" unique_id=653622733]
+script = ExtResource("7_1o5b4")
+force_stop_player = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZoomSignSmall/InteractModule" unique_id=1894696306]
+shape = SubResource("RectangleShape2D_5ptje")

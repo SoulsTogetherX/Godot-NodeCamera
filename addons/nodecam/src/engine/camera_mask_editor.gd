@@ -1,3 +1,4 @@
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraMaskProperty extends EditorProperty
 ## Code copied from [url=https://github.com/godotengine/godot/blob/master/editor/inspector/editor_properties.cpp]
@@ -175,3 +176,5 @@ func get_layer_name(p_index: int) -> String:
 			return property_name
 	return ""
 #endregion
+
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

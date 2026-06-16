@@ -1,7 +1,7 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraEffectOffset extends NodeCameraEffect
-## An effect for camera offset.
+## An effect that sets a camera's offset.
 
 #region External Variables
 @export_group("2D")
@@ -21,10 +21,12 @@ class_name NodeCameraEffectOffset extends NodeCameraEffect
 	get = get_v_offset
 
 @export_group("Settings")
+## If [code]true[/code], this effect will compile with previous effects
+## that changes the camera's offset.
+@export var incremental : bool = false
+
 ## If [code]true[/code], the layer will only set the effect's zoom
 ## for one frame in [method effect_stage_changed]'s starting stage.
-## [br][br]
-## Also see [enum NodeCameraExecutionScope.LAYER_STAGES].
 @export var one_shot : bool = false:
 	set = set_one_shot,
 	get = get_one_shot
@@ -32,32 +34,46 @@ class_name NodeCameraEffectOffset extends NodeCameraEffect
 
 
 
-#region Virtual Methods (User Overwrite)
-func process_effect(
-	delta : float, target : NodeCameraState, stage : LAYER_STAGES
-) -> void:
+#region Private Methods
+func _handle_offset(target : NodeCameraState) -> void:
+	if incremental:
+		if target is NodeCamera2DState:
+			target.offset += offset
+			return
+		target.h_offset += h_offset
+		target.v_offset += v_offset
+		return
 	if target is NodeCamera2DState:
 		target.offset = offset
-	else:
-		target.h_offset = h_offset
-		target.v_offset = v_offset
+		return
+	target.h_offset = h_offset
+	target.v_offset = v_offset
+#endregion
 
-func effect_stage_changed(
-	target : NodeCameraState, stage : LAYER_STAGES
+
+#region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraEffectOffset.process_effect] method.
+func process_effect(
+	_delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
-	if target is NodeCamera2DState:
-		target.offset = offset
-	else:
-		target.h_offset = h_offset
-		target.v_offset = v_offset
+	_handle_offset(target)
+
+## Implements the [method NodeCameraEffectOffset.effect_stage_changed] method.
+func effect_stage_changed(
+	target : NodeCameraState, _stage : LAYER_STAGES
+) -> void:
+	_handle_offset(target)
 #endregion
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	if !one_shot:
 		return [LAYER_STAGES.RUNNING]
 	return []
+
+## Implements the [method NodeCameraStaged.get_needed_change_stages] method.
 func get_needed_change_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.STARTING]
 #endregion

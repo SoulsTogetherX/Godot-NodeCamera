@@ -1,9 +1,8 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraLayerStorage extends Object
-## Stores and orders [NodeCameraLayer]s, in order of priority, via a flat array.
-## Emits signals when an operation of interest is performed by stored layers,
-## or when a layer is added/removed.
+## Stores and orders [NodeCameraLayer] nodes, in order of priority, via a flat array.
+## Emits signals when a layer is added/removed.
 
 #region Signals
 ## Emitted when a layer is added to this [NodeCameraLayerStorage].
@@ -28,7 +27,8 @@ func _priority_check(l1 : NodeCameraLayer, l2 : NodeCameraLayer) -> bool:
 
 
 #region Public Methods (Register Layer)
-## Registers a layer into this [NodeCameraLayerStorage] according to it's priority.
+## Registers a layer into this [NodeCameraLayerStorage],
+## according to it's priority.
 func register_layer(layer : NodeCameraLayer) -> void:
 	if is_layer_registered(layer):
 		return
@@ -44,8 +44,8 @@ func unregister_layer(layer : NodeCameraLayer) -> void:
 		return
 	
 	layer._parent_scopes = []
-	# Since different layers can have same priorities, we need
-	# to look through entire array.
+	# Since different layers can have same priorities, it's faster
+	# to look through entire array for smaller arrays.
 	_layers.erase(layer)
 	
 	layer_removed.emit(layer)
@@ -80,13 +80,15 @@ func is_scope_registered(scope : NodeCameraExecutionScope) -> bool:
 func get_registered() -> Array[NodeCameraLayer]:
 	return _layers
 ## Return the [NodeCameraLayer] registered at the array index [param idx].
+## [br][br]
+## Also see [method size].
 func get_registered_at(idx : int) -> NodeCameraLayer:
 	return _layers[idx]
 
-## Returns the number of [NodeCameraLayer] stored.
+## Returns the number of [NodeCameraLayer] nodes stored.
 func size() -> int:
 	return _layers.size()
-## Returns if there are no [NodeCameraLayer]s stored.
+## Returns if there are no [NodeCameraLayer] nodes stored.
 func is_empty() -> bool:
 	return _layers.is_empty()
 #endregion

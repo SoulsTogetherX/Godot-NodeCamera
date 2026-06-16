@@ -2,12 +2,8 @@
 @tool
 @icon("uid://gs4cuiaqel64")
 class_name NodeCameraGroup extends NodeCameraLayer
-## A [NodeCameraLayer] node able to be registered to by other layers.
-
-#region External Variables
-@export var resize : bool
-#endregion
-
+## A [NodeCameraLayer] node that facilitates a unique [NodeCameraExecutionScope]
+## and registers all child [NodeCameraLayer] nodes within it.
 
 #region Private Variables
 var _layer_storage : NodeCameraLayerStorage
@@ -35,10 +31,9 @@ func _register() -> void:
 #region Virtual Methods (Overwritable)
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can be
-## called within this method, if overloaded.
+## called within this method.
 ## [br][br]
-## This method calls all effects of the [NodeCameraGroup]'s current runtime
-## scope.
+## This method calls all registered effects.
 func process_effect(
 	delta : float, target : NodeCameraState, _stage : LAYER_STAGES
 ) -> void:
@@ -46,10 +41,9 @@ func process_effect(
 
 ## This is a [color=#D6D000][b]Runtime Method[/b][/color]. All
 ## [color=#D6D000][b]Runtime Method[/b][/color] requiring methods can be
-## called within this method, if overloaded.
+## called within this method.
 ## [br][br]
-## This method calls all transitions of the [NodeCameraGroup]'s current runtime
-## scope.
+## This method calls all registered transitions.
 func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	_stage : LAYER_STAGES
@@ -59,16 +53,14 @@ func process_transition(
 
 
 #region Virtual Methods (Register)
-## Call this method to register [param layer] to this [NodeCameraGroup], later
-## attempted to add to all attached scopes for this [NodeCameraGroup].
+## Call this method to register [param layer] to this [NodeCameraGroup].
 ## [br][br]
 ## Also see [method get_layer_storage].
 func register_layer(layer : NodeCameraLayer) -> void:
 	_layer_storage.register_layer(layer)
 	if _layer_storage.size() == 1 && !disabled:
 		_register()
-## Call this method to unregister [param layer] to this [NodeCameraGroup], later
-## removed from all attached scopes for this [NodeCameraGroup].
+## Call this method to unregister [param layer] to this [NodeCameraGroup].
 ## [br][br]
 ## Also see [method get_layer_storage].
 func unregister_layer(layer : NodeCameraLayer) -> void:

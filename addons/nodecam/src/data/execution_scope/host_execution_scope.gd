@@ -8,6 +8,8 @@ var _host : NodeCameraHost
 
 var _target_state : NodeCameraState
 var _current_state : NodeCameraState
+
+var _defer_queue : Array[Callable] = []
 #endregion
 
 
@@ -75,13 +77,17 @@ func _sync_layer_stage(
 	var changed_mask := get_changed_mask(record)
 	
 	if update_start && record.stage & changed_mask:
-		_force_stage_change(layer, record.stage)
+		record.scope._stage_change_storage.add_to_queue(
+			layer, record.stage
+		)
 	
 	if !(record.stage & linger_mask):
 		while record.stage > LAYER_STAGES.HALTED:
 			record.stage >>= 1
 			if record.stage & changed_mask:
-				_force_stage_change(layer, record.stage)
+				record.scope._stage_change_storage.add_to_queue(
+					layer, record.stage
+				)
 			
 			if record.stage & linger_mask:
 				break
@@ -91,11 +97,6 @@ func _sync_layer_stage(
 	if record.stage & process_mask:
 		return record.scope._set_pause_layer(record, false)
 	return record.scope._set_pause_layer(record, true)
-func _force_stage_change(layer : NodeCameraStaged, stage : LAYER_STAGES) -> void:
-	if layer is NodeCameraEffect:
-		layer.effect_stage_changed(_target_state, stage)
-	elif layer is NodeCameraTransition:
-		layer.transition_stage_changed(_target_state, _current_state, stage)
 
 
 func _advance_stage_record(record : LayerRecord) -> int:
@@ -187,6 +188,7 @@ func _propagate_call_record(
 	scope.flag_tick_mask_direct_changed(mask)
 	return mask
 
+
 func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 	for record : LayerRecord in scope.get_records():
 		if (
@@ -194,28 +196,75 @@ func _force_halt_records(scope : NodeCameraExecutionScope) -> void:
 			record is StagedLayerRecord && record.layer &&
 			get_changed_mask(record) & LAYER_STAGES.HALTED
 		):
-			_host_scope._force_stage_change(record.layer, LAYER_STAGES.HALTED)
+			scope._stage_change_storage.add_to_queue(
+				record.layer, record.stage
+			)
+	flush_change_storage(scope._stage_change_storage)
+#endregion
+
+
+#region Defer Methods
+## [b]For internal use only[/b].
+## [br][br]
+## Defers a [Callable] to be called at the begining of the next camera frame.
+func defer_method(foo : Callable) -> void:
+	_defer_queue.append(foo)
+## [b]For internal use only[/b].
+## [br][br]
+## Calls all [Callable] methods defered in [method defer_method] since the last camera
+## frame.
+func run_defered_methods() -> void:
+	var i : int = 0
+	# while loop becuase defered methods can be added while
+	# this is running.
+	while i < _defer_queue.size():
+		if _defer_queue[i].is_valid():
+			_defer_queue[i].call()
+		i += 1
+	_defer_queue.clear()
+#endregion
+
+
+#region Stage Change Methods
+## [b]For internal use only[/b].
+## [br][br]
+## Calls all stage_change, requested this frame, in order.
+## Their order is decided first by their 'effect'/'transition' classification,
+## then the stage they are being changed to, and finally by the node's
+## priority.
+func flush_change_storage(
+	change_storage : NodeCameraStageChangeStorage
+) -> void:
+	change_storage.flush(_target_state, _current_state)
 #endregion
 
 
 #region Camera Movement Methods
-## Sets the attached [NodeCameraHost]'s camera's values to the transitional
-## 'current` [NodeCameraState].
+## Sets the attached [NodeCameraHost]'s camera's values to the transition-bound
+## 'current' [NodeCameraState].
+## [br][br]
+## Also see [method NodeCameraHost.apply_status]'s derived classes.
 func align_cam_position() -> void:
 	_current_state.apply_status()
 ## Sets the attached [NodeCameraHost]'s camera's values to the effects-bound
-## 'target` [NodeCameraState].
+## 'target' [NodeCameraState].
+## [br][br]
+## Also see [method NodeCameraHost.apply_status]'s derived classes.
 func teleport_cam_status() -> void:
 	_target_state.apply_status()
 
-## Overwrites the transitional 'current' and effects-bound 'target`
-## [NodeCameraState]s to the attached [NodeCameraHost]'s camera's values
+## Overwrites the transition-bound 'current' and effects-bound 'target`
+## [NodeCameraState] resources to the attached [NodeCameraHost]'s camera's values
+## [br][br]
+## Also see [method NodeCameraHost.apply_status]'s derived classes.
 func overwrite_cam_status() -> void:
 	_current_state.overwrite_status()
 	_target_state.overwrite_status()
 ## Sets the attached [NodeCameraHost]'s camera's values, and overwrites the
-## transitional 'current' [NodeCameraState], to the effects-bound 'target`
+## transition-bound 'current' [NodeCameraState], to the effects-bound 'target`
 ## [NodeCameraState].
+## [br][br]
+## Also see [method NodeCameraHost.apply_status]'s derived classes.
 func teleport_overwrite_cam_status() -> void:
 	_target_state.apply_status()
 	_current_state.overwrite_status()
@@ -223,15 +272,18 @@ func teleport_overwrite_cam_status() -> void:
 
 
 #region Tick Methods
-## Runs all effect and transition [LayerRecord]s in order of priority.
+## Runs all effect and transition [LayerRecord] resources in order of priority.
 ## [br][br]
 ## [b]NOTE[/b]: Operations happen in a set order:[br]
 ## 1.) Runs all effects in order of priority.[br]
 ## 2.) If there are no transitions, overwrite the 'current'
 ## state with the 'target' state, then set the camera to the
 ## 'target' state and return.[br]
-## 3.) Runs all transitions in order of priority.[br]
-## 4.) Set the camera to be the 'current' state.
+## 3.) If there are transitions, runs all transitions in
+## order of priority.[br]
+## 4.) If any camera properies have not be changed this frame,
+## overwrite them with the 'target' state.
+## 5.) Set the camera to be the 'current' state.
 func run_tick(delta: float) -> void:
 	if _effect_storage.is_empty():
 		return
@@ -243,6 +295,7 @@ func run_tick(delta: float) -> void:
 		return
 	
 	run_transitions(delta, _target_state, _current_state)
+	_current_state.assign_unchanged(_target_state)
 	_current_state.apply_status()
 #endregion
 

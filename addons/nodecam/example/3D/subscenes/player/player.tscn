@@ -2,7 +2,11 @@
 
 [ext_resource type="Script" uid="uid://c404ec6kgojmr" path="res://addons/nodecam/example/3D/subscenes/player/player.gd" id="1_2lmn4"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2lmn4"]
+albedo_color = Color(1, 0, 1, 1)
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_cbuk4"]
+material = SubResource("StandardMaterial3D_2lmn4")
 radius = 5.0
 height = 20.0
 
@@ -11,6 +15,7 @@ radius = 5.0
 height = 20.0
 
 [node name="Player" type="CharacterBody3D" unique_id=1684348752]
+collision_layer = 2
 script = ExtResource("1_2lmn4")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=766118707]

@@ -1,5 +1,8 @@
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
 class_name NodeCameraExportPlugin extends EditorExportPlugin
+## An [EditorExportPlugin] used to prevent any engine-specific scripts
+## and assets from being exported along with the rest of the game.
 
 #region Constants
 ## The name of this plugin.
@@ -31,3 +34,5 @@ func _export_file(
 	if path.begins_with(ENGINE_DIR):
 		skip()
 #endregion
+
+# Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.

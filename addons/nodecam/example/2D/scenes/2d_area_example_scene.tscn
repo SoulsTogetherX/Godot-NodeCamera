@@ -11,8 +11,8 @@
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="9_jw882"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="10_lyn83"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="11_oufw8"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="16_jq2dx"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="17_d0och"]
+[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="16_jq2dx"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="17_d0och"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -330,6 +330,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_ryv8l")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="TriggerAreas" type="Node2D" parent="." unique_id=1837395728]
 visible = false
@@ -382,11 +383,12 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_4nij2")
+dimention = 0
 follow_target = NodePath("../../../Player")
+follow_type = 0
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
-metadata/_custom_type_script = "uid://b5sp1401joes8"
 
 [node name="RoomSwitcher" type="Node" parent="NodeCameraFolder" unique_id=1853261076]
 script = ExtResource("9_jw882")
@@ -399,7 +401,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=294391842]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/RightRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=1654341102]
 script = ExtResource("10_lyn83")
@@ -416,7 +417,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=2082263700]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/MiddleRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=78401273]
 script = ExtResource("10_lyn83")
@@ -433,7 +433,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=346299771]
 script = ExtResource("16_jq2dx")
 limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1089299179]
 script = ExtResource("10_lyn83")
@@ -460,10 +459,10 @@ metadata/_custom_type_script = "uid://g244xvmo4uo5"
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1388197684]
 script = ExtResource("10_lyn83")
 ease_type = 1
-trans_type = 1
-duration = 0.1
+duration = 0.3
 manual_step = false
-_op_mask = 18
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
 [node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1504007739]
@@ -479,8 +478,8 @@ metadata/_custom_type_script = "uid://g244xvmo4uo5"
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=414836994]
 script = ExtResource("10_lyn83")
 ease_type = 1
-trans_type = 1
-duration = 0.1
+duration = 0.3
 manual_step = false
-_op_mask = 18
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"

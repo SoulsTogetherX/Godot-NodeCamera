@@ -1,9 +1,9 @@
 # Made by Xavier Alvarez. A part of the "NodeCam" Godot addon.
 @tool
-class_name NodeCameraRecordStorage extends Object
-## Stores and orders [LayerRecord]s, in order of priority, with the use of priority
-## buckets. Using the available methods, you can use the priority buckets to
-## construct an iterable and cache-friendly flatlist.
+class_name NodeCameraLayerRecordStorage extends Object
+## Stores and orders [LayerRecord] resources, in order of priority, with the use of priority
+## buckets. Using the available methods, you can also construct an iterable and
+## cache-friendly flatlist from the priority buckets.
 
 #region Private Variables
 var _priority_buckets: Dictionary[int, Array] = {}
@@ -41,7 +41,8 @@ func _remove_from_bucket(record: LayerRecord, priority : int) -> void:
 
 
 #endregion Public Access Methods
-## Clears all data. Does not free the stored [LayerRecord]s' memory.
+## Clears all data, but does not free the [LayerRecord] resources themselves. Beware
+## memory leaks.
 func clear() -> void:
 	_priority_buckets.clear()
 	_priority_record.clear()
@@ -56,15 +57,15 @@ func rebuild() -> void:
 			if !(record.tick_mask & NodeCameraExecutionScope.TICK_TYPE.PAUSE):
 				_flat_layer_list.append(record)
 
-## Add [param record], with [param priority], to the [NodeCameraRecordStorage].
+## Add [param record], with [param priority], to the [NodeCameraLayerRecordStorage].
 func add(record: LayerRecord, priority : int) -> void:
 	_insert_into_bucket(record, priority)
 ## Removes [param record], with [param priority], if found inside
-## the [NodeCameraRecordStorage].
+## the [NodeCameraLayerRecordStorage].
 func remove(record: LayerRecord, priority : int) -> void:
 	_remove_from_bucket(record, priority)
 ## Changes the priority of [param record], with [param old_priority],
-## to [param new_priority], if found inside the [NodeCameraRecordStorage].
+## to [param new_priority], if found inside the [NodeCameraLayerRecordStorage].
 func reorder(
 	record: LayerRecord, new_priority : int, old_priority : int
 ) -> void:
@@ -73,15 +74,15 @@ func reorder(
 	_remove_from_bucket(record, old_priority)
 	_insert_into_bucket(record, new_priority)
 
-## Returns the previously-constructed of this [NodeCameraRecordStorage].
+## Returns the previously-constructed flatlist of this [NodeCameraLayerRecordStorage].
 func get_flat_list() -> Array[LayerRecord]:
 	return _flat_layer_list
-## Returns if there are no stored records in this [NodeCameraRecordStorage].
+## Returns if there are no stored records in this [NodeCameraLayerRecordStorage].
 ## [br][br]
 ## [b]NOTE[/b]: This is different from the size of [method get_flat_list].
 func is_empty() -> bool:
 	return _priority_record.is_empty()
-## Returns if there are no stored records in this [NodeCameraRecordStorage]
+## Returns if there are no stored records in this [NodeCameraLayerRecordStorage]
 ## that are not paused.
 func is_flat_list_empty() -> bool:
 	return _flat_layer_list.is_empty()

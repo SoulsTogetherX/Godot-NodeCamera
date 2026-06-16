@@ -1,0 +1,293 @@
+[gd_scene format=3 uid="uid://bvgugy7m1um5"]
+
+[ext_resource type="PackedScene" uid="uid://ckipkreqa6o1i" path="res://addons/nodecam/example/3D/subscenes/player/player.tscn" id="1_ioc8q"]
+[ext_resource type="PackedScene" uid="uid://cqx874axh2pdw" path="res://addons/nodecam/example/3D/subscenes/exclamation_mark/exclamation_mark.tscn" id="2_go6h7"]
+[ext_resource type="Script" uid="uid://d0kobwrqqmnd6" path="res://addons/nodecam/src/nodes/host/nodecamera_host.gd" id="2_l463q"]
+[ext_resource type="PackedScene" uid="uid://bungsjf33psk2" path="res://addons/nodecam/example/3D/subscenes/npc/npc_look.tscn" id="2_q6p4q"]
+[ext_resource type="Script" uid="uid://b5sp1401joes8" path="res://addons/nodecam/src/nodes/default/effects/directors/target/nce_glue.gd" id="3_q6p4q"]
+[ext_resource type="Script" uid="uid://xbw3mcx4uq1" path="res://addons/nodecam/src/nodes/default/effects/effects/nce_shake.gd" id="4_wtf55"]
+[ext_resource type="Script" uid="uid://b1bqxnw315bxm" path="res://addons/nodecam/src/nodes/default/transitions/nct_instant.gd" id="5_f44f8"]
+[ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/nct_lerp.gd" id="6_oe5b5"]
+[ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="7_wg44x"]
+[ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="8_hnrjk"]
+[ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="9_6yk47"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="11_wtf55"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sfail"]
+
+[sub_resource type="Sky" id="Sky_a0avs"]
+sky_material = SubResource("ProceduralSkyMaterial_sfail")
+
+[sub_resource type="Environment" id="Environment_sfail"]
+background_mode = 2
+sky = SubResource("Sky_a0avs")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_a0avs"]
+radius = 1.0
+
+[node name="Root" type="Node3D" unique_id=570835729]
+
+[node name="Environment" type="Node" parent="." unique_id=1388416845]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment" unique_id=1503986863]
+environment = SubResource("Environment_sfail")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment" unique_id=1942860298]
+transform = Transform3D(-4.371139e-08, -0.707107, 0.707107, 0, 0.7071069, 0.7071069, -0.9999998, 3.0908623e-08, -3.0908623e-08, 0, 8, 0)
+metadata/_edit_lock_ = true
+
+[node name="Floor" type="CSGBox3D" parent="Environment" unique_id=190092471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -46, 0)
+calculate_tangents = false
+use_collision = true
+collision_mask = 0
+size = Vector3(1000, 65, 1000)
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Rooms" type="CSGCombiner3D" parent="Environment" unique_id=460929477]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+calculate_tangents = false
+use_collision = true
+collision_mask = 0
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="Walls" type="CSGBox3D" parent="Environment/Rooms" unique_id=805273885]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 43.5, -48)
+size = Vector3(358, 167, 569)
+
+[node name="Room1" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=745969713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -5.5, -187)
+operation = 2
+size = Vector3(315, 269, 167)
+
+[node name="Room2" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=958812325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4999998, -181.5, -5)
+operation = 2
+size = Vector3(315, 603, 167)
+
+[node name="Pillar" type="CSGCylinder3D" parent="Environment/Rooms/Walls/Room2" unique_id=1461172101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, -14.375, 5)
+operation = 2
+radius = 5.0
+height = 200.25
+
+[node name="Room3" type="CSGBox3D" parent="Environment/Rooms/Walls" unique_id=1139157953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -42, 180)
+operation = 2
+size = Vector3(315, 322, 167)
+
+[node name="Door1" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=591166032]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, -106)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door2" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=1748664798]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, -132, -40, 85)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="Door3" type="CSGCylinder3D" parent="Environment/Rooms/Walls" unique_id=875650275]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -2, 0, 1, -8.742278e-08, 116, -40, 273)
+operation = 2
+radius = 14.447
+height = 60.0
+sides = 32
+
+[node name="PlayerGroup" type="Node" parent="." unique_id=1528663138]
+
+[node name="Player" parent="PlayerGroup" unique_id=1684348752 node_paths=PackedStringArray("cam", "spring_rotation") instance=ExtResource("1_ioc8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240, -16, 120)
+cam = NodePath("../../CameraGroup/Camera3D")
+spring_rotation = NodePath("CameraArm")
+mouse_sensitivity = 0.01
+
+[node name="CameraArm" type="SpringArm3D" parent="PlayerGroup/Player" unique_id=435691967]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0)
+shape = SubResource("SphereShape3D_a0avs")
+spring_length = 50.0
+
+[node name="CameraPos" type="Node3D" parent="PlayerGroup/Player/CameraArm" unique_id=694373666]
+
+[node name="Other" type="Node" parent="." unique_id=924042481]
+
+[node name="NPC" parent="Other" unique_id=847889789 node_paths=PackedStringArray("selector") instance=ExtResource("2_q6p4q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111, -13, 136)
+selection = 1
+selector = NodePath("../../CameraGroup/Nodes/NPCTalk")
+text = "Talk"
+
+[node name="ExclamationMarkGroup" type="Node" parent="." unique_id=1122873620]
+
+[node name="PersonMark" parent="ExclamationMarkGroup" unique_id=1555169271 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("2_go6h7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -298, -5, -17)
+layer_controlled = NodePath("../../CameraGroup/Nodes/NPCTalk/Normal/PersonSelector")
+text = "Perspective"
+
+[node name="ShakeMark" parent="ExclamationMarkGroup" unique_id=1055615509 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("2_go6h7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, -5, -17)
+layer_controlled = NodePath("../../CameraGroup/Nodes/Global/Effects/EffectShake")
+text = "Shake"
+
+[node name="LerpPosMark" parent="ExclamationMarkGroup" unique_id=144333531 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("2_go6h7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84, -5, -17)
+layer_controlled = NodePath("../../CameraGroup/Nodes/Global/Transition/TransitionLerpPos")
+text = "Lerp Position"
+
+[node name="LerpRotMark" parent="ExclamationMarkGroup" unique_id=1661836540 node_paths=PackedStringArray("layer_controlled") instance=ExtResource("2_go6h7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 175, -5, -17)
+layer_controlled = NodePath("../../CameraGroup/Nodes/Global/Transition/TransitionLerpRot")
+text = "Lerp Rotation"
+
+[node name="CameraGroup" type="Node" parent="." unique_id=1897841386]
+
+[node name="Nodes" type="Node" parent="CameraGroup" unique_id=1836635731]
+
+[node name="Oneshot" type="Node" parent="CameraGroup/Nodes" unique_id=1851248122]
+
+[node name="TransitionInstant" type="Node" parent="CameraGroup/Nodes/Oneshot" unique_id=2063809559]
+script = ExtResource("5_f44f8")
+one_shot = true
+_op_mask = 2
+priority = 999999
+metadata/_custom_type_script = "uid://b1bqxnw315bxm"
+
+[node name="Global" type="Node" parent="CameraGroup/Nodes" unique_id=339595484]
+
+[node name="Effects" type="Node" parent="CameraGroup/Nodes/Global" unique_id=527244336]
+
+[node name="EffectShake" type="Node" parent="CameraGroup/Nodes/Global/Effects" unique_id=651970385]
+script = ExtResource("4_wtf55")
+amplitude = 2.0
+inital_stage = 1
+metadata/_custom_type_script = "uid://xbw3mcx4uq1"
+
+[node name="Transition" type="Node" parent="CameraGroup/Nodes/Global" unique_id=1242182626]
+
+[node name="TransitionLerpPos" type="Node" parent="CameraGroup/Nodes/Global/Transition" unique_id=426908782]
+script = ExtResource("6_oe5b5")
+factor = 0.999
+scale_factor_to_delta = true
+auto_halt = false
+inital_stage = 1
+priority = 1
+metadata/_custom_type_script = "uid://d0offmj7e061w"
+
+[node name="TransitionLerpRot" type="Node" parent="CameraGroup/Nodes/Global/Transition" unique_id=681466926]
+script = ExtResource("6_oe5b5")
+factor = 0.999
+scale_factor_to_delta = true
+auto_halt = false
+_op_mask = 6
+inital_stage = 1
+priority = 1
+metadata/_custom_type_script = "uid://d0offmj7e061w"
+
+[node name="NPCTalk" type="Node" parent="CameraGroup/Nodes" unique_id=2024977911]
+script = ExtResource("7_wg44x")
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="Normal" type="Node" parent="CameraGroup/Nodes/NPCTalk" unique_id=483923724]
+script = ExtResource("8_hnrjk")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="PersonSelector" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal" unique_id=551327699]
+script = ExtResource("7_wg44x")
+metadata/_custom_type_script = "uid://mlgr1bvxdhab"
+
+[node name="ThirdPerson" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector" unique_id=2016782265]
+script = ExtResource("8_hnrjk")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThirdPerson" unique_id=1977991422 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("3_q6p4q")
+dimention = 1
+follow_target = NodePath("../../../../../../../PlayerGroup/Player/CameraArm/CameraPos")
+follow_type = 0
+offset = Vector3(0, 0, 0)
+one_shot = false
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThirdPerson" unique_id=451275810]
+script = ExtResource("9_6yk47")
+duration = 0.2
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="FirstPerson" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector" unique_id=1012129866]
+script = ExtResource("8_hnrjk")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/FirstPerson" unique_id=465575246 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("3_q6p4q")
+dimention = 1
+follow_target = NodePath("../../../../../../../PlayerGroup/Player")
+follow_type = 0
+offset = Vector3(0, 15, 0)
+one_shot = false
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/FirstPerson" unique_id=683054609]
+script = ExtResource("9_6yk47")
+duration = 0.2
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="EffectRotateGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal" unique_id=1996352753 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("3_q6p4q")
+dimention = 1
+follow_target = NodePath("../../../../../PlayerGroup/Player/CameraArm/CameraPos")
+follow_type = 2
+offset = Vector3(0, 0, 0)
+one_shot = false
+
+[node name="EffectZoom" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal" unique_id=1859438006]
+script = ExtResource("11_wtf55")
+metadata/_custom_type_script = "uid://g244xvmo4uo5"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal" unique_id=2143691714]
+script = ExtResource("9_6yk47")
+_op_mask = 67
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Talk" type="Node" parent="CameraGroup/Nodes/NPCTalk" unique_id=838214453]
+script = ExtResource("8_hnrjk")
+metadata/_custom_type_script = "uid://b8n7cds782fje"
+
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=1042589731 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("3_q6p4q")
+dimention = 1
+follow_target = NodePath("../../../../../Other/NPC")
+follow_type = 0
+offset = Vector3(40, 30, -40)
+one_shot = false
+
+[node name="EffectLookAt" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=619425253 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("3_q6p4q")
+dimention = 1
+follow_target = NodePath("../../../../../Other/NPC")
+follow_type = 3
+offset = Vector3(0, 0, 0)
+one_shot = false
+priority = -1
+
+[node name="EffectZoom" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=145987222]
+script = ExtResource("11_wtf55")
+fov = 100.0
+metadata/_custom_type_script = "uid://g244xvmo4uo5"
+
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Talk" unique_id=208703726]
+script = ExtResource("9_6yk47")
+_op_mask = 67
+inital_stage = 1
+metadata/_custom_type_script = "uid://c05scmmmeq0mg"
+
+[node name="Camera3D" type="Camera3D" parent="CameraGroup" unique_id=375481945]
+
+[node name="NodeCameraHost" type="Node" parent="CameraGroup/Camera3D" unique_id=286738078]
+script = ExtResource("2_l463q")
+metadata/_custom_type_script = "uid://d0kobwrqqmnd6"

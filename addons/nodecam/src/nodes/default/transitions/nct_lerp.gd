@@ -5,7 +5,14 @@ class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
 
 #region External Variables
 ## The lerp factor used.
-@export_range(0, 1, 0.001) var factor : float = 0.05
+@export_range(0, 1, 0.001, "or_less", "or_greater")
+var factor : float = 0.95
+
+## If [code]true[/code], this layer will scale the factor according to
+## the delta.
+## [br][br]
+## Ths can make the lerping feel sluggish.
+@export var scale_factor_to_delta : bool = false
 
 ## If [code]true[/code], this layer will halt if [b]ALL[/b]
 ## transitioning properties are within [member threshold] distance.
@@ -18,11 +25,15 @@ class_name NodeCameraTransitionLerp extends NodeCameraTransitionGeneral
 
 
 #region Virtual Methods (User Overwrite)
+## Implements the [method NodeCameraTransition.process_transition] method.
 func process_transition(
 	delta : float, target : NodeCameraState, current : NodeCameraState,
 	stage : LAYER_STAGES
 ) -> void:
-	var f := 1.0 - pow(factor, delta)
+	var f := (
+		1.0 - pow(1.0 - factor, delta) if scale_factor_to_delta
+		else factor
+	)
 	var disable_check : bool = true
 	
 	# BOTH
@@ -34,8 +45,6 @@ func process_transition(
 			disable_check &&
 			current.global_position.distance_squared_to(target.global_position) < threshold
 		)
-	else:
-		current.global_position = target.global_position
 	
 	
 	# 2D
@@ -46,8 +55,6 @@ func process_transition(
 				disable_check &&
 				abs(current.rotation - target.rotation) < threshold
 			)
-		else:
-			current.rotation = target.rotation
 		
 		
 		if _op_mask & CAMERA_PROPERTY.OFFSET:
@@ -56,8 +63,6 @@ func process_transition(
 				disable_check &&
 				current.offset.distance_squared_to(target.offset) < threshold
 			)
-		else:
-			current.offset = target.offset
 		
 		if _op_mask & CAMERA_PROPERTY.ZOOM:
 			current.zoom = current.zoom.lerp(target.zoom, f)
@@ -65,8 +70,6 @@ func process_transition(
 				disable_check &&
 				current.zoom.distance_squared_to(target.zoom) < threshold
 			)
-		else:
-			current.zoom = target.zoom
 	
 	# 3D
 	if current is NodeCamera3DState:
@@ -80,8 +83,6 @@ func process_transition(
 				disable_check &&
 				current.rotation.distance_squared_to(target.rotation) < threshold
 			)
-		else:
-			current.rotation = target.rotation
 		
 		
 		if _op_mask & CAMERA_PROPERTY.H_OFFSET:
@@ -90,8 +91,6 @@ func process_transition(
 				disable_check &&
 				abs(current.h_offset - target.h_offset) < threshold
 			)
-		else:
-			current.h_offset = target.h_offset
 		
 		if _op_mask & CAMERA_PROPERTY.V_OFFSET:
 			current.v_offset = lerpf(current.v_offset, target.v_offset, f)
@@ -99,8 +98,6 @@ func process_transition(
 				disable_check &&
 				abs(current.v_offset - target.v_offset) < threshold
 			)
-		else:
-			current.v_offset = target.v_offset
 		
 		
 		if _op_mask & CAMERA_PROPERTY.FOV:
@@ -109,8 +106,6 @@ func process_transition(
 				disable_check &&
 				abs(current.fov - target.fov) < threshold
 			)
-		else:
-			current.fov = target.fov
 		
 		if _op_mask & CAMERA_PROPERTY.NEAR:
 			current.near = lerpf(current.near, target.near, f)
@@ -118,8 +113,6 @@ func process_transition(
 				disable_check &&
 				abs(current.near - target.near) < threshold
 			)
-		else:
-			current.near = target.near
 		
 		if _op_mask & CAMERA_PROPERTY.FAR:
 			current.far = lerpf(current.far, target.far, f)
@@ -127,8 +120,6 @@ func process_transition(
 				disable_check &&
 				abs(current.far - target.far) < threshold
 			)
-		else:
-			current.far = target.far
 	
 	if disable_check && auto_halt:
 		advance_stage()
@@ -136,6 +127,7 @@ func process_transition(
 
 
 #region Public Methods (Stages)
+## Implements the [method NodeCameraStaged.get_needed_process_stages] method.
 func get_needed_process_stages() -> PackedInt32Array:
 	return [LAYER_STAGES.RUNNING]
 #endregion

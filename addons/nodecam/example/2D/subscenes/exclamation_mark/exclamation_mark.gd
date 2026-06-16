@@ -9,8 +9,7 @@ extends Node2D
 
 
 #region OnReady Varables
-@onready var _label: Label = $Label
-@onready var _sprite: Sprite2D = $Sprite
+@onready var _label: Label = $Sprite/Label
 #endregion
 
 
@@ -25,10 +24,10 @@ func _ready() -> void:
 
 
 #region Interaction Methods
-func _on_player_enter(player : Node2D) -> void:
+func entered_interaction() -> void:
 	modulate = Color.RED
 	_label.visible = true
-func _on_player_exit(player : Node2D) -> void:
+func exited_interaction() -> void:
 	_set_active_color()
 	_label.visible = false
 
@@ -44,9 +43,9 @@ func _on_interact() -> void:
 		return
 	
 	if active:
-		layer_controlled.notify_overwrite_stage(NodeCameraExecutionScope.LAYER_STAGES.STARTING)
+		layer_controlled.notify_overwrite_stage(NodeCameraUtility.LAYER_STAGES.STARTING)
 		return
-	layer_controlled.notify_overwrite_stage(NodeCameraExecutionScope.LAYER_STAGES.HALTED)
+	layer_controlled.notify_overwrite_stage(NodeCameraUtility.LAYER_STAGES.HALTED)
 
 func _set_active_color() -> void:
 	modulate = Color.YELLOW if active else Color.WHITE

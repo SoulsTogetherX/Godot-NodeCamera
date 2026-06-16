@@ -20,31 +20,25 @@ enum DIRTY_FLAGS {
 	TICK_MASK_CHANGED_DIRECT	= 1 << 11,	## Flags the scope to rebuild it's flatlists (effect, transition, both, or neither)
 }
 
-## The bitwise flags for [LayerRecord] stages.
-## [br][br]
-## Stages go in order: [code]STARTING > RUNNING > ENDING > HALTED[/code].
-enum LAYER_STAGES {
-	HALTED		= 1 << 0,	## [LayerRecord] has finished execution and about to be removed.
-	ENDING		= 1 << 1,	## [LayerRecord] has ended execution and is clearing itself up.
-	RUNNING		= 1 << 2,	## [LayerRecord] is running its execution.
-	STARTING	= 1 << 3,	## [LayerRecord] has started execution and is setting itself up.
-}
+## See [enum NodeCameraUtility.LAYER_STAGES].
+const LAYER_STAGES = NodeCameraUtility.LAYER_STAGES
+
 ## [b]For internal use only[/b].
 ## [br][br]
 ## A [enum TICK_TYPE] bit unused for [LayerRecord]. Instead signals
 ## that the layer should use the stage [member NodeCameraStaged.inital_stage]
-## by default on creation.
+## on creation.
 const LAYER_STAGES_INHERITED := 1 << 4
 ## [b]For internal use only[/b].
 ## [br][br]
 ## A [enum TICK_TYPE] bit unused for [LayerRecord]. Used as a mask
-## for all vaild [enum LAYER_STAGES],
+## for all vaild [enum NodeCameraUtility.LAYER_STAGES],
 const LAYER_STAGES_ALL := 0b1111
 
 ## Defines what type a [LayerRecord] is defined as (effect,
 ## transition, both, or neither).
 enum TICK_TYPE {
-	NONE		= 0b000,	## This [LayerRecord] is not used for anything. Will normally be deleted soon.
+	NONE		= 0b000,	## This [LayerRecord] is not used for anything. Will be deleted soon.
 	EFFECTS		= 0b001,	## This [LayerRecord] is an effect.
 	TRANSITIONS	= 0b010,	## This [LayerRecord] is a transition.
 	BOTH		= 0b011,	## This [LayerRecord] is both an effect and transition.
@@ -58,8 +52,10 @@ var _host_scope : NodeCameraHostExecutionScope
 var _container_record : GroupLayerRecord
 var _layer_storage : NodeCameraLayerStorage
 
-var _effect_storage := NodeCameraRecordStorage.new()
-var _transition_storage := NodeCameraRecordStorage.new()
+var _effect_storage := NodeCameraLayerRecordStorage.new()
+var _transition_storage := NodeCameraLayerRecordStorage.new()
+
+var _stage_change_storage := NodeCameraStageChangeStorage.new()
 
 var _record_by_layer : Dictionary[NodeCameraLayer, LayerRecord]
 
@@ -95,6 +91,9 @@ func _notification(what: int) -> void:
 
 
 #region Initialize Methods
+## Assigns the layer storage that this execution scope will use.
+## [br][br]
+## [b]WARNING[b]: Messing with this will cause undefined behavior.
 func settup_layer_storage(storage : NodeCameraLayerStorage) -> void:
 	if _layer_storage != null:
 		_layer_storage.unregister_scope(self)
@@ -134,7 +133,7 @@ func flag_add_layer(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
 	if _layer_to_dirty_op.get(layer, 0) & DIRTY_FLAGS.REMOVE_LAYER:
-		# Can't remove and add
+		# If add, don't remove
 		_layer_to_dirty_op[layer] = (_layer_to_dirty_op.get(
 			layer, 0
 		) & ~DIRTY_FLAGS.REMOVE_LAYER) | DIRTY_FLAGS.ADD_LAYER
@@ -175,17 +174,19 @@ func flag_camera_mask_changed(layer : NodeCameraLayer, old_mask : int) -> void:
 		flag_remove_layer(layer)
 
 ## Flags this scope to construct children records/scope via the given
-## layers. Previous layers must a child layer of next layer in the
-## array. Due to this, all but the first layer, in the list, must be a
+## layers. Previous layers, in the array, must be a child layer of next
+## layer. Due to this, all but the first layer, in the list, must be a
 ## [NodeCameraGroup] node. The final layer will start with the
 ## stage [param stage].
+## [br][br]
+## Also see [const LAYER_STAGES_INHERITED].
 func flag_list_construct(
 	layers : Array[NodeCameraLayer], stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> void:
 	_layers_list_overwrite.append([layers, LAYER_STAGES_INHERITED])
 	_flag_request(DIRTY_FLAGS.LIST_CONSTRUCT)
 
-## Flags this scope to pause [param layer] next mutation batch.
+## Flags this scope to pause [param layer].
 func flag_pause(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -204,7 +205,7 @@ func flag_pause(layer : NodeCameraLayer) -> void:
 		layer, 0
 	) | DIRTY_FLAGS.PAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.PAUSE_LAYER)
-## Flags this scope to unpause [param layer] next mutation batch.
+## Flags this scope to unpause [param layer].
 func flag_unpause(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -224,13 +225,14 @@ func flag_unpause(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.UNPAUSE_LAYER
 	_flag_request(DIRTY_FLAGS.UNPAUSE_LAYER)
 
-## Flags this scope to advance the [param layer]'s stage,
-## to the next stage, next mutation batch.
+## Flags this scope to advance the [param layer]'s stage to the
+## next stage.
 ## [br][br]
 ## [b]NOTE[/b]: Using this on a [NodeCameraGroup] layer will propagate it
 ## to it's children instead.
 ## [br][br]
-## Also see [enum LAYER_STAGES].
+## Also see [method flag_advance_to_stage], [method flag_overwrite_stage],
+## and [enum NodeCameraUtility.LAYER_STAGES].
 func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	if !layer: return
 	
@@ -239,16 +241,16 @@ func flag_advance_stage(layer : NodeCameraLayer) -> void:
 	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = DIRTY_FLAGS.STAGE_CHANGED
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
-## Flags this scope to advance the [param layer]'s stage,
-## until [stage] is reached, next mutation batch. Does nothing if
-## [param layer] is already passed the given stage.
+## Flags this scope to advance the [param layer]'s stage until [param stage]
+## is reached. Does nothing if [param layer] has already passed the given stage.
 ## [br][br]
 ## [b]NOTE[/b]: Using this on a [NodeCameraGroup] layer will propagate it
 ## to it's children instead.
 ## [br][br]
-## Also see [enum LAYER_STAGES].
+## Also see [method flag_advance_stage], [method flag_overwrite_stage],
+## [enum NodeCameraUtility.LAYER_STAGES], and [const LAYER_STAGES_INHERITED].
 func flag_advance_to_stage(
-	layer : NodeCameraLayer, stage : LAYER_STAGES
+	layer : NodeCameraLayer, stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> void:
 	if !layer: return
 	
@@ -257,14 +259,15 @@ func flag_advance_to_stage(
 	) | DIRTY_FLAGS.STAGE_CHANGED
 	_layer_to_force_stage[layer] = DIRTY_FLAGS.STAGE_CHANGED | stage
 	_flag_request(DIRTY_FLAGS.STAGE_CHANGED)
-## Flags this scope to advance the [param layer]'s stage next mutation batch.
+## Flags this scope to advance the [param layer]'s stage.
 ## [br][br]
 ## [b]NOTE[/b]: Using this on a [NodeCameraGroup] layer will propagate it
 ## to it's children instead.
 ## [br][br]
-## Also see [enum LAYER_STAGES].
+## Also see [method flag_advance_stage], [method flag_advance_to_stage],
+## [enum NodeCameraUtility.LAYER_STAGES], and [const LAYER_STAGES_INHERITED].
 func flag_overwrite_stage(
-	layer : NodeCameraLayer, stage : LAYER_STAGES
+	layer : NodeCameraLayer, stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> void:
 	if !layer: return
 	
@@ -276,9 +279,10 @@ func flag_overwrite_stage(
 
 ## Flags this scope to update a [NodeCameraStaged]'s stage mask.
 ## [br][br]
-## Also see: [method NodeCameraStaged.get_needed_process_stages],
-## [method NodeCameraStaged.get_needed_linger_stages], and
-## [method NodeCameraStaged.get_needed_change_stages].
+## Also see [method NodeCameraStaged.get_needed_process_stages],
+## [method NodeCameraStaged.get_needed_linger_stages],
+## [method NodeCameraStaged.get_needed_change_stages], and
+## [enum NodeCameraUtility.LAYER_STAGES].
 func flag_stage_mask_changed(layer : NodeCameraStaged) -> void:
 	if !layer: return
 	if !has_record(layer):
@@ -312,7 +316,7 @@ func flag_tick_mask_direct_changed(tick : TICK_TYPE) -> void:
 
 func _flag_request(op : DIRTY_FLAGS) -> void:
 	if _dirty_mask == 0:
-		_handle_dirty_layers.call_deferred()
+		_host_scope.defer_method(_handle_dirty_layers)
 	_dirty_mask |= op
 #endregion
 
@@ -418,6 +422,7 @@ func _handle_dirty_layers() -> void:
 		_force_rebuild_flat_lists(rebuild_flags)
 		_flag_parent_tick_mask_changed()
 	
+	_host_scope.flush_change_storage(_stage_change_storage)
 	_clear_dirty_flags()
 func _clear_dirty_flags() -> void:
 	_layer_to_dirty_op.clear()
@@ -429,7 +434,7 @@ func _clear_dirty_flags() -> void:
 func _flag_parent_tick_mask_changed() -> void:
 	if !_container_record:
 		return
-	if _container_record.tick_mask == cal_tick_mask():
+	if _container_record.tick_mask == calc_tick_mask():
 		return
 	_container_record.parent_scope.flag_tick_mask_changed(
 		_container_record.layer
@@ -441,6 +446,8 @@ func _force_rebuild_scope(init_stage : LAYER_STAGES) -> void:
 	# Rebuilds scop and flatlists
 	_construct_scope(init_stage)
 	_force_rebuild_flat_lists(TICK_TYPE.BOTH)
+	
+	_host_scope.flush_change_storage(_stage_change_storage)
 func _force_rebuild_flat_lists(tick_mask : int) -> void:
 	if tick_mask & TICK_TYPE.EFFECTS:
 		_effect_storage.rebuild()
@@ -482,7 +489,9 @@ func _remove_layer(layer : NodeCameraLayer) -> int:
 		record.stage != LAYER_STAGES.HALTED && record is StagedLayerRecord &&
 		get_changed_mask(record) & LAYER_STAGES.HALTED
 	):
-		_host_scope._force_stage_change(layer, LAYER_STAGES.HALTED)
+		_stage_change_storage.add_to_queue(
+			layer, LAYER_STAGES.HALTED
+		)
 	
 	var mask := record.tick_mask
 	_record_by_layer.erase(layer)
@@ -492,7 +501,7 @@ func _add_layer(
 	layer : NodeCameraLayer, init_stage : LAYER_STAGES = LAYER_STAGES_INHERITED
 ) -> int:
 	if _container_record:
-		if !NodeCameraManager.vaild_route(_container_record.layer, layer):
+		if !NodeCameraUtility.vaild_route(_container_record.layer, layer):
 			return TICK_TYPE.NONE
 	elif !(layer.camera_mask & _host_scope.get_mask()):
 		return TICK_TYPE.NONE
@@ -535,8 +544,8 @@ func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	
-	var pause_test := int(pause) << 2
-	if !((record.tick_mask ^ pause_test) & pause_test):
+	var pause_check := int(pause) << 2
+	if !((record.tick_mask ^ pause_check) & pause_check):
 		return TICK_TYPE.NONE
 	
 	record.tick_mask ^= TICK_TYPE.PAUSE
@@ -563,7 +572,7 @@ func _update_tick_mask(record : GroupLayerRecord) -> int:
 		return TICK_TYPE.NONE
 	
 	var priority := record.layer.priority
-	var new_mask : int = record.scope.cal_tick_mask()
+	var new_mask : int = record.scope.calc_tick_mask()
 	var mask_diff := record.tick_mask ^ new_mask
 	
 	if mask_diff & TICK_TYPE.EFFECTS:
@@ -629,7 +638,7 @@ func _list_construct_recusive(
 	var l := p_layers[idx]
 	if idx == 0:
 		return _add_layer(l, stage)
-	if !NodeCameraManager.vaild_route(l, p_layers[idx - 1]):
+	if !NodeCameraUtility.vaild_route(l, p_layers[idx - 1]):
 		return TICK_TYPE.NONE
 	
 	var record := GroupLayerRecord.new()
@@ -721,7 +730,7 @@ func _construct_group_record(
 	scope.settup_layer_storage(layer.get_layer_storage())
 	
 	scope._force_rebuild_scope(init_stage)
-	record.tick_mask = scope.cal_tick_mask()
+	record.tick_mask = scope.calc_tick_mask()
 	if record.tick_mask == TICK_TYPE.NONE:
 		record.free()
 		return null
@@ -746,14 +755,14 @@ func _sort_priority_order(ret : Array[NodeCameraLayer]) -> Array[NodeCameraLayer
 
 
 #region Tick Methods
-## Runs all [LayerRecord]s, classified as 'effects', within this scope.
+## Runs all [LayerRecord] resources, classified as 'effects', within this scope.
 ## [br][br]
 ## Also see [enum TICK_TYPE].
 func run_effects(delta: float, target : NodeCameraState) -> void:
 	for record : LayerRecord in _effect_storage.get_flat_list():
 		record.layer._scope = record.scope
 		record.layer.process_effect(delta, target, record.stage)
-## Runs all [LayerRecord]s, classified as 'transitions', within this scope.
+## Runs all [LayerRecord] resources, classified as 'transitions', within this scope.
 ## [br][br]
 ## Also see [enum TICK_TYPE].
 func run_transitions(
@@ -774,7 +783,7 @@ func get_tick_mask() -> int:
 ## Freshly calculates and returns the tick mask of this scope.
 ## [br][br]
 ## Also see [enum TICK_TYPE].
-func cal_tick_mask() -> int:
+func calc_tick_mask() -> int:
 	var mask := NodeCameraExecutionScope.TICK_TYPE.NONE
 	
 	if has_effects():
@@ -787,69 +796,69 @@ func cal_tick_mask() -> int:
 
 
 #region Accesor Record Stage Methods
-## Gets the mask of stages the layer should have it's process_stage method
-## called (every relevant frame after inital change).
+## Returns the bitmask of the stages the layer should have it's process_stage
+## method called (every relevant frame after inital change).
 ## [br][br]
-## Alsos see [method set_masks].
+## Also see [method set_masks].
 func get_process_mask(record : StagedLayerRecord) -> int:
 	return (record.packed_masks >> 8) & LAYER_STAGES_ALL
-## Gets the mask of stages the layer stays at (unless otherwise requested).
-## All process stages are considered linger stages by default.
+## Returns the bitmask of the stages the layer will linger at (unless otherwise
+## requested). All process stages are considered linger stages by default.
 ## [br][br]
-## Alsos see [method get_process_mask] and [method set_masks].
+## Also see [method get_process_mask] and [method set_masks].
 func get_linger_mask(record : StagedLayerRecord) -> int:
 	return (record.packed_masks >> 4) & LAYER_STAGES_ALL
-## Gets the mask of stages the layer should have it's process_stage method
-## called (once at inital change).
+## Returns the bitmask of the stages the layer should have it's process_stage
+## method called (once at inital change).
 ## [br][br]
-## Alsos see [method set_masks].
+## Also see [method set_masks].
 func get_changed_mask(record : StagedLayerRecord) -> int:
 	return record.packed_masks & LAYER_STAGES_ALL
 #endregion
 
 
 #region Accesor Methods
-## Returns if this scope has any [LayerRecord]s classified as 'effects'.
+## Returns if this scope has any [LayerRecord] resources classified as 'effect'.
 ## [br][br]
 ## Also see [enum TICK_TYPE] and [method has_transitions].
 func has_effects() -> bool:
 	return !_effect_storage.is_empty()
-## Returns if this scope has any [LayerRecord]s classified as 'transitions'.
+## Returns if this scope has any [LayerRecord] resources classified as 'transition'.
 ## [br][br]
 ## Also see [enum TICK_TYPE] and [method has_effects].
 func has_transitions() -> bool:
 	return !_transition_storage.is_empty()
 
-## Returns if this scope has any unpaused [LayerRecord]s classified as
-## 'effects'.
+## Returns if this scope has any unpaused [LayerRecord] resources classified as
+## 'effect'.
 ## [br][br]
 ## Also see [enum TICK_TYPE] and [method has_running_transitions].
 func has_running_effects() -> bool:
 	return !_effect_storage.is_flat_list_empty()
-## Returns if this scope has any unpaused [LayerRecord]s classified as
-## 'transitions'.
+## Returns if this scope has any unpaused [LayerRecord] resources classified as
+## 'transition'.
 ## [br][br]
 ## Also see [enum TICK_TYPE] and [method has_running_effects].
 func has_running_transitions() -> bool:
 	return !_transition_storage.is_flat_list_empty()
 
-## Returns all [LayerRecord], classified as 'effects', in this scope.
+## Returns all [LayerRecord] resources, classified as 'effect', in this scope.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_effect_records() -> Array[LayerRecord]:
 	return _effect_storage.get_flat_list().duplicate()
-## Returns all [LayerRecord], classified as 'transitions', in this scope.
+## Returns all [LayerRecord] resources, classified as 'transition', in this scope.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_transitions_records() -> Array[LayerRecord]:
 	return _transition_storage.get_flat_list().duplicate()
 
-## Returns all [LayerRecord] in this scope.
+## Returns all [LayerRecord] resources in this scope.
 ## [br][br]
 ## [b]NOTE[/b]: Freeing any [LayerRecord] may cause an engine crash.
 func get_records() -> Array[LayerRecord]:
 	return _record_by_layer.values()
-## Returns if [param layer] has a [LayerRecord]s in this scope.
+## Returns if [param layer] has a [LayerRecord] in this scope.
 func has_record(layer : NodeCameraLayer) -> bool:
 	return _record_by_layer.has(layer)
 ## Returns the [LayerRecord], attributed to a [param layer], if in the scope.
@@ -858,7 +867,7 @@ func has_record(layer : NodeCameraLayer) -> bool:
 func get_record(layer : NodeCameraLayer) -> LayerRecord:
 	return _record_by_layer.get(layer, null)
 
-## Returns all [NodeCameraLayer] registered to this scope.
+## Returns all [NodeCameraLayer] nodes registered to this scope.
 func get_registered_layers() -> Array[NodeCameraLayer]:
 	return _layer_storage.get_registered().duplicate()
 #endregion

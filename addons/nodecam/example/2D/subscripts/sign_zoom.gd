@@ -3,6 +3,8 @@ extends Sprite2D
 #region External Variables
 @export var selection : int
 @export var selector : NodeCameraSelector
+
+@export var text : String
 #endregion
 
 
@@ -12,7 +14,18 @@ extends Sprite2D
 
 
 
+#region Virtual Methods
+func _ready() -> void:
+	_label.text = text
+#endregion
+
+
 #region Interaction Methods
+func entered_interaction() -> void:
+	_label.visible = true
+func exited_interaction() -> void:
+	_label.visible = false
+
 func interact() -> void:
 	if !selector:
 		return
@@ -23,10 +36,5 @@ func interact() -> void:
 		return
 	selector.selection = selection
 	%SignTexture.visible = true
-	_label.visible = false
-
-func entered_interaction() -> void:
-	_label.visible = true
-func exited_interaction() -> void:
 	_label.visible = false
 #endregion

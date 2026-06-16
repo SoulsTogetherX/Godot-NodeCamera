@@ -12,9 +12,9 @@
 [ext_resource type="Script" uid="uid://d0offmj7e061w" path="res://addons/nodecam/src/nodes/default/transitions/nct_lerp.gd" id="10_31wxg"]
 [ext_resource type="Script" uid="uid://mlgr1bvxdhab" path="res://addons/nodecam/src/nodes/base/inherited/routables/nodecamera_selector.gd" id="11_rql00"]
 [ext_resource type="Script" uid="uid://b8n7cds782fje" path="res://addons/nodecam/src/nodes/base/inherited/nodecamera_group.gd" id="12_3ccc3"]
-[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds2D.gd" id="13_jkgel"]
+[ext_resource type="Script" uid="uid://soqkn57afvil" path="res://addons/nodecam/src/nodes/default/effects/modifiers/nce_bounds_2D.gd" id="13_jkgel"]
 [ext_resource type="Script" uid="uid://c05scmmmeq0mg" path="res://addons/nodecam/src/nodes/default/transitions/nct_tween.gd" id="14_wb46y"]
-[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/nce_zoom.gd" id="15_1nvym"]
+[ext_resource type="Script" uid="uid://g244xvmo4uo5" path="res://addons/nodecam/src/nodes/default/effects/directors/transform/nce_zoom.gd" id="15_1nvym"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rh7q4"]
 font_color = Color(1, 0.52156866, 0, 1)
@@ -257,13 +257,13 @@ terrain_set_0/terrain_0/color = Color(1, 1, 1, 1)
 sources/0 = SubResource("TileSetAtlasSource_sgsuy")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ory1x"]
-size = Vector2(568, 259)
+size = Vector2(482, 259)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o5q8e"]
-size = Vector2(402, 243)
+size = Vector2(362, 243)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mpndc"]
-size = Vector2(1073, 311)
+size = Vector2(1060, 311)
 
 [node name="Root" type="Node2D" unique_id=17282856]
 
@@ -361,11 +361,11 @@ script = ExtResource("2_o83lo")
 [node name="Label4" type="Label" parent="Control" unique_id=97833716]
 layout_mode = 0
 offset_left = 735.0
-offset_top = -119.0
+offset_top = -127.0
 offset_right = 884.0
-offset_bottom = -18.0
+offset_bottom = -26.0
 text = "Lerp
-Factor - 0.05
+Factor - 0.95
 Threshold - 5.0
 "
 label_settings = SubResource("LabelSettings_rh7q4")
@@ -389,6 +389,7 @@ layer_0/tile_data = PackedInt32Array(524293, 65536, 1, 458757, 65536, 1, 393221,
 [node name="ZoomSignSmall" parent="Floor" unique_id=1676818547 node_paths=PackedStringArray("selector") instance=ExtResource("4_mc5y3")]
 position = Vector2(477, 64)
 selector = NodePath("../../NodeCameraFolder/ZoomSwitcher")
+text = "Read"
 
 [node name="TriggerAreas" type="Node2D" parent="." unique_id=1837395728]
 
@@ -397,7 +398,7 @@ script = ExtResource("5_0hgd4")
 selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/RightRoomArea" unique_id=1750651738]
-position = Vector2(-51, 14.5)
+position = Vector2(-94, 14.5)
 shape = SubResource("RectangleShape2D_ory1x")
 
 [node name="MiddleRoomArea" type="Area2D" parent="TriggerAreas" unique_id=510484087 node_paths=PackedStringArray("selector")]
@@ -406,7 +407,7 @@ selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 index = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/MiddleRoomArea" unique_id=419458187]
-position = Vector2(416, 41.5)
+position = Vector2(396, 41.5)
 shape = SubResource("RectangleShape2D_o5q8e")
 
 [node name="LeftRoomArea" type="Area2D" parent="TriggerAreas" unique_id=1918478350 node_paths=PackedStringArray("selector")]
@@ -415,7 +416,7 @@ selector = NodePath("../../NodeCameraFolder/RoomSwitcher")
 index = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerAreas/LeftRoomArea" unique_id=320485827]
-position = Vector2(1139.5, -38.5)
+position = Vector2(1146, -38.5)
 shape = SubResource("RectangleShape2D_mpndc")
 
 [node name="ExclamationMarks" type="Node2D" parent="." unique_id=1937753027]
@@ -434,6 +435,7 @@ position = Vector2(-169, 54)
 offset = Vector2(-0.45240998, -2.172926)
 ignore_rotation = false
 zoom = Vector2(2, 2)
+process_callback = 0
 limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
@@ -447,14 +449,16 @@ metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="EffectGlue" type="Node" parent="NodeCameraFolder/Global" unique_id=1375531185 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("9_x8fun")
+dimention = 0
 follow_target = NodePath("../../../Player")
+follow_type = 0
 offset = Vector2(0, 0)
 one_shot = false
 priority = 100
-metadata/_custom_type_script = "uid://b5sp1401joes8"
 
 [node name="TransitionLerp" type="Node" parent="NodeCameraFolder/Global" unique_id=1169911556]
 script = ExtResource("10_31wxg")
+scale_factor_to_delta = true
 auto_halt = false
 inital_stage = 1
 priority = 2
@@ -471,7 +475,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=294391842]
 script = ExtResource("13_jkgel")
 limits_path = NodePath("../../../../TriggerAreas/RightRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/RightRoom" unique_id=1654341102]
 script = ExtResource("14_wb46y")
@@ -487,7 +490,6 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=2082263700]
 script = ExtResource("13_jkgel")
 limits_path = NodePath("../../../../TriggerAreas/MiddleRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
 [node name="TweenTransition" type="Node" parent="NodeCameraFolder/RoomSwitcher/MiddleRoom" unique_id=78401273]
 script = ExtResource("14_wb46y")
@@ -504,51 +506,53 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 [node name="Boundary" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=346299771]
 script = ExtResource("13_jkgel")
 limits_path = NodePath("../../../../TriggerAreas/LeftRoomArea/CollisionShape2D")
-metadata/_custom_type_script = "uid://soqkn57afvil"
 
-[node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=465004628]
+[node name="TransitionLerp" type="Node" parent="NodeCameraFolder/RoomSwitcher/LeftRoom" unique_id=1828797251]
 script = ExtResource("10_31wxg")
-threshold = 5.0
+scale_factor_to_delta = true
+threshold = 10.0
+inital_stage = 1
+priority = 2
 metadata/_custom_type_script = "uid://d0offmj7e061w"
 
 [node name="ZoomSwitcher" type="Node" parent="NodeCameraFolder" unique_id=387830168]
 script = ExtResource("11_rql00")
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
-[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=408141874]
+[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1403883607]
 script = ExtResource("12_3ccc3")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1221345039]
+[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=584662923]
 script = ExtResource("15_1nvym")
 zoom = Vector2(2, 2)
 one_shot = true
 metadata/_custom_type_script = "uid://g244xvmo4uo5"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1388197684]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1382704617]
 script = ExtResource("14_wb46y")
 ease_type = 1
-trans_type = 1
-duration = 0.1
+duration = 0.3
 manual_step = false
-_op_mask = 18
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
-[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1504007739]
+[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=178339560]
 script = ExtResource("12_3ccc3")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=1489573747]
+[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=585516007]
 script = ExtResource("15_1nvym")
 zoom = Vector2(4, 4)
 one_shot = true
 metadata/_custom_type_script = "uid://g244xvmo4uo5"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=414836994]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=501650845]
 script = ExtResource("14_wb46y")
 ease_type = 1
-trans_type = 1
-duration = 0.1
+duration = 0.3
 manual_step = false
-_op_mask = 18
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
