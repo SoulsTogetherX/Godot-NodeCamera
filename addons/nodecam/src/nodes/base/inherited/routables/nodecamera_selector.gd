@@ -45,7 +45,7 @@ func _settup_bundle() -> void:
 	var old_selection : NodeCameraLayer = _selected_layer
 	
 	_settup_vaild_layers()
-	selection = mini(selection, _valid_layers.size() - 1)
+	selection = clamp(selection, 0, _valid_layers.size() - 1)
 	
 	_settup_selected_layer()
 	if old_selection != _selected_layer:
@@ -67,7 +67,7 @@ func set_selection(val : int) -> void:
 		selection = val
 		return
 	
-	val = clamp(val, -1, _valid_layers.size() - 1)
+	val = clamp(val, 0, _valid_layers.size() - 1)
 	if val == selection:
 		return
 	selection = val

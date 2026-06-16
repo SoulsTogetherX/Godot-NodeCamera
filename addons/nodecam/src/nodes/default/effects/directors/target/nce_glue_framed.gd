@@ -8,8 +8,6 @@ class_name NodeCameraEffectGlueFramed extends NodeCameraEffect
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
-## [br][br]
-## Also see [enum NodeCameraUtility.DIMENSION].
 var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 	set = set_dimention,
 	get = get_dimention

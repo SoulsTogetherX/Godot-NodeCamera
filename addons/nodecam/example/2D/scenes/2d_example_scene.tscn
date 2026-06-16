@@ -513,38 +513,40 @@ metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 script = ExtResource("10_ucdtv")
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
-[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=408141874]
+[node name="Normal" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=386151384]
 script = ExtResource("4_lficx")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1221345039]
+[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=754809400]
 script = ExtResource("5_rh7q4")
 zoom = Vector2(2, 2)
 one_shot = true
 metadata/_custom_type_script = "uid://g244xvmo4uo5"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1388197684]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Normal" unique_id=1174882554]
 script = ExtResource("14_1m2ar")
 ease_type = 1
-trans_type = 1
-duration = 0.1
-_op_mask = 18
+duration = 0.3
+manual_step = false
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
-[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1504007739]
+[node name="Sign" type="Node" parent="NodeCameraFolder/ZoomSwitcher" unique_id=1469127196]
 script = ExtResource("4_lficx")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=1489573747]
+[node name="EffectZoom" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=270776581]
 script = ExtResource("5_rh7q4")
 zoom = Vector2(4, 4)
 one_shot = true
 metadata/_custom_type_script = "uid://g244xvmo4uo5"
 
-[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=414836994]
+[node name="TweenTransition" type="Node" parent="NodeCameraFolder/ZoomSwitcher/Sign" unique_id=918717567]
 script = ExtResource("14_1m2ar")
 ease_type = 1
-trans_type = 1
-duration = 0.1
-_op_mask = 18
+duration = 0.3
+manual_step = false
+_op_mask = 9
+inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"

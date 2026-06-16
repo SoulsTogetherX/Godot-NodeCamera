@@ -49,7 +49,6 @@ func _settup_camera_states() -> void:
 	# Args record is referenced in both camera states
 	_target_state._vars = {}
 	_current_state._vars = _target_state._vars
-	_current_state.test = true
 	
 	# Overwrite the states with the current camera information
 	_target_state.set_camera(cam)

@@ -6,8 +6,6 @@ class_name NodeCameraEffectGroup extends NodeCameraEffect
 
 #region External Variables
 ## Determines if this node should be used for 2D or 3D purposes.
-## [br][br]
-## Also see [enum NodeCameraUtility.DIMENSION].
 var dimention : NodeCameraUtility.DIMENSION = NodeCameraUtility.DIMENSION.TWO_DIMENSIONAL:
 	set = set_dimention,
 	get = get_dimention
@@ -130,12 +128,12 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_GROUP,
 	})
 	ret.append({
-		"name": "change_size",
+		"name": "fit_camera",
 		"type": TYPE_BOOL,
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	ret.append({
-		"name": "size_padding",
+		"name": "fit_padding",
 		"type": TYPE_FLOAT,
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "0.0,2.0,0.001,or_less,or_greater",
@@ -148,14 +146,14 @@ func _get_property_list() -> Array[Dictionary]:
 		"usage": PROPERTY_USAGE_SUBGROUP,
 	})
 	ret.append({
-		"name": "size_min",
+		"name": "fit_min",
 		"type": TYPE_FLOAT,
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "0.0,100.0,0.001,or_greater",
 		"usage": PROPERTY_USAGE_DEFAULT
 	})
 	ret.append({
-		"name": "size_max",
+		"name": "fit_max",
 		"type": TYPE_FLOAT,
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "0.0,100.0,0.001,or_greater",

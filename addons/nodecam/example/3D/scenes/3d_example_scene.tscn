@@ -200,11 +200,11 @@ metadata/_custom_type_script = "uid://b8n7cds782fje"
 script = ExtResource("7_wg44x")
 metadata/_custom_type_script = "uid://mlgr1bvxdhab"
 
-[node name="ThridPerson" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector" unique_id=2016782265]
+[node name="ThirdPerson" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector" unique_id=2016782265]
 script = ExtResource("8_hnrjk")
 metadata/_custom_type_script = "uid://b8n7cds782fje"
 
-[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThridPerson" unique_id=1977991422 node_paths=PackedStringArray("follow_target")]
+[node name="EffectGlue" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThirdPerson" unique_id=1977991422 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_q6p4q")
 dimention = 1
 follow_target = NodePath("../../../../../../../PlayerGroup/Player/CameraArm/CameraPos")
@@ -212,9 +212,9 @@ follow_type = 0
 offset = Vector3(0, 0, 0)
 one_shot = false
 
-[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThridPerson" unique_id=451275810]
+[node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/ThirdPerson" unique_id=451275810]
 script = ExtResource("9_6yk47")
-_op_mask = 2
+duration = 0.2
 inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
@@ -232,7 +232,7 @@ one_shot = false
 
 [node name="TransitionTween" type="Node" parent="CameraGroup/Nodes/NPCTalk/Normal/PersonSelector/FirstPerson" unique_id=683054609]
 script = ExtResource("9_6yk47")
-_op_mask = 2
+duration = 0.2
 inital_stage = 1
 metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 
@@ -240,7 +240,7 @@ metadata/_custom_type_script = "uid://c05scmmmeq0mg"
 script = ExtResource("3_q6p4q")
 dimention = 1
 follow_target = NodePath("../../../../../PlayerGroup/Player/CameraArm/CameraPos")
-follow_type = 1
+follow_type = 2
 offset = Vector3(0, 0, 0)
 one_shot = false
 
@@ -270,7 +270,7 @@ one_shot = false
 script = ExtResource("3_q6p4q")
 dimention = 1
 follow_target = NodePath("../../../../../Other/NPC")
-follow_type = 2
+follow_type = 3
 offset = Vector3(0, 0, 0)
 one_shot = false
 priority = -1

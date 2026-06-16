@@ -544,8 +544,8 @@ func _set_pause_layer(record : LayerRecord, pause : bool) -> int:
 	if record == null:
 		return TICK_TYPE.NONE
 	
-	var pause_test := int(pause) << 2
-	if !((record.tick_mask ^ pause_test) & pause_test):
+	var pause_check := int(pause) << 2
+	if !((record.tick_mask ^ pause_check) & pause_check):
 		return TICK_TYPE.NONE
 	
 	record.tick_mask ^= TICK_TYPE.PAUSE
