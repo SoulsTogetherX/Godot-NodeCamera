@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://y3x5fmg8ygou"]
 
 [ext_resource type="Script" uid="uid://qyglgh2q180d" path="res://addons/nodecam/example/2D/subscenes/player/player.gd" id="1_1wdfc"]
-[ext_resource type="Texture2D" uid="uid://diw0rntn2xc8y" path="res://gitImages/logo.png" id="2_mw6gp"]
+[ext_resource type="Texture2D" uid="uid://3dl28ojcm8sd" path="res://logo.png" id="2_mw6gp"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mw6gp"]
 radius = 12.5

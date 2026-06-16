@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./gitImages/nodeCameraBanner.png" alt="Project Banner" width="100%" style="max-width:1200px">
+  <img width="100%" style="max-width:1200px" alt="Project Banner" src="https://github.com/user-attachments/assets/305d0979-5b9e-4a0d-a86f-acf6d8a83d82" />
 </p>
 
 <p align="center">
