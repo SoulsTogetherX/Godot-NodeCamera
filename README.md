@@ -20,12 +20,7 @@ Or read the [installation instructions](#installation) here.
 
 ## Overview Video
 
-<p align="center">
-	<a href="(https://www.youtube.com/watch?v=OVq-GQzFglk">
-	  <img width="600" height="412" alt="NodeCamera Intro Video" src="https://github.com/user-attachments/assets/f418f797-3f18-41b8-87c9-2a8d0b23cf37" />
-	</a>
-</p>
-
+[<img src="https://github.com/user-attachments/assets/f418f797-3f18-41b8-87c9-2a8d0b23cf37" alt="NodeCamera Intro Video" width="100%">](https://www.youtube.com/watch?v=OVq-GQzFglk)
 
 ## How To Use
 
