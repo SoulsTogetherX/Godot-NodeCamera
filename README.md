@@ -7,7 +7,7 @@
 	  <img alt="Static Badge" src="https://img.shields.io/badge/Godot-4.5%2B-blue">
   </a>
   <a href="./LICENSE"> 
-    <img alt="Static Badge" src="https://img.shields.io/badge/license-Apache%202.0-green">
+	<img alt="Static Badge" src="https://img.shields.io/badge/license-Apache%202.0-green">
   </a>
 </p>
 
@@ -41,9 +41,9 @@ In this addon, all NodeCamera Nodes are considered **Layers**. There are three p
 
 Technical info:
 
-    Effects are always run before Transitions.
+	Effects are always run before Transitions.
 
-    The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
+	The camera is also directly set to the expected properties defined by **NodeCameraEffect** layers every camera frame, if and only if the property was not edited by a **NodeCameraTransition** in the current camera frame. For example, a transition that only eases the position of a camera will have its offset snap directly to what the **NodeCameraEffect** layers define.
 
 There are also a few another notable layers.
 
@@ -179,7 +179,7 @@ Technical info:
 
     These methods are not called instantly upon stage change. They are instead added to a queue and processed at the start of the next camera frame.
 
-    The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
+	The order they are processed depends on if they are an effect or transition, what stage it is being changed to, and the layer's priority.
 
 &thinsp;
 

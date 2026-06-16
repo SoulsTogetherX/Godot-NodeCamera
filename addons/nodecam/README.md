@@ -7,7 +7,7 @@
 	  <img alt="Static Badge" src="https://img.shields.io/badge/Godot-4.5%2B-blue">
   </a>
   <a href="./LICENSE"> 
-    <img alt="Static Badge" src="https://img.shields.io/badge/license-Apache%202.0-green">
+	<img alt="Static Badge" src="https://img.shields.io/badge/license-Apache%202.0-green">
   </a>
 </p>
 
