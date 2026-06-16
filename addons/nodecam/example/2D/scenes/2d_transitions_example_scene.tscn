@@ -440,6 +440,7 @@ limit_enabled = false
 
 [node name="NodeCameraHost" type="Node" parent="Camera2D" unique_id=1551051136]
 script = ExtResource("8_8ql8c")
+callback_mode = 1
 metadata/_custom_type_script = "uid://d0kobwrqqmnd6"
 
 [node name="NodeCameraFolder" type="Node" parent="." unique_id=1436810013]
